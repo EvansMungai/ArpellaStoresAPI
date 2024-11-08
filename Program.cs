@@ -1,4 +1,7 @@
+using ArpellaStores.Data;
 using ArpellaStores.Helpers;
+using ArpellaStores.Services;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -10,6 +13,9 @@ builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "ARPELLA STORES API", Description = "Building an ecommerce store", Version = "v1" });
 });
+var connectionString = builder.Configuration.GetConnectionString("arpella");
+builder.Services.AddDbContext<ArpellaContext>(options => options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
+builder.Services.AddTransient<IProductManagement, ProductManagement>();
 builder.Services.AddTransient<IRouteResolutionHelper, RouteResolutionHelper>();
 
 var app = builder.Build();
