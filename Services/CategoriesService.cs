@@ -55,7 +55,7 @@ namespace ArpellaStores.Services
                 retrievedCategory.CategoryName = update.CategoryName;
                 try
                 {
-                    _context.Update(retrievedCategory);
+                    _context.Categories.Update(retrievedCategory);
                     await _context.SaveChangesAsync();
                 }
                 catch (Exception ex)

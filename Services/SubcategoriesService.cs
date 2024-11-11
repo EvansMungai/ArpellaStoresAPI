@@ -10,12 +10,17 @@ namespace ArpellaStores.Services
         {
             _context = context;
         }
-        public async Task<List<Subcategory>> GetSubcategories()
+        public async Task<IResult> GetSubcategories()
         {
             var subcategories = _context.Subcategories.ToList();
-            return subcategories;
+            return subcategories == null || subcategories.Count == 0 ? Results.NotFound("No Subcategories Found") : Results.Ok(subcategories);
         }
-        public Subcategory CreateSubcategory(Subcategory subcategory)
+        public async Task<IResult> GetSubcategory(string id)
+        {
+            var retrievedSubcategory = _context.Subcategories.FirstOrDefault(s => s.Id == id);
+            return retrievedSubcategory == null ? Results.NotFound($"Subcategory of ID = {id} was not found") : Results.Ok(retrievedSubcategory);
+        }
+        public async Task<IResult> CreateSubcategory(Subcategory subcategory)
         {
             var newSubcategory = new Subcategory
             {
@@ -23,19 +28,52 @@ namespace ArpellaStores.Services
                 SubcategoryName = subcategory.SubcategoryName,
                 CategoryId = subcategory.CategoryId
             };
-            _context.Add(newSubcategory);
-            _context.SaveChangesAsync();
-            return newSubcategory;
-        }
-        public Subcategory? RemoveSubcategory(string id)
-        {
-            var retrievedSubCategory = _context.Subcategories.FirstOrDefault(c => c.Id == id);
-            if (retrievedSubCategory != null)
+            try
             {
-                _context.Remove(retrievedSubCategory);
-                _context.SaveChangesAsync();
-            };
-            return retrievedSubCategory;
+                _context.Subcategories.Add(newSubcategory);
+                await _context.SaveChangesAsync();
+            } catch (Exception ex) { }
+
+            return Results.Ok(newSubcategory);
+        }
+        public async Task<IResult> UpdateSubcategoryDetails(Subcategory update, string id)
+        {
+            var retrievedCategory = _context.Subcategories.FirstOrDefault(c => c.Id == id);
+            if (retrievedCategory != null)
+            {
+                retrievedCategory.Id = update.Id;
+                retrievedCategory.SubcategoryName = update.SubcategoryName;
+                retrievedCategory.CategoryId = update.CategoryId;
+                try
+                {
+                    _context.Subcategories.Update(retrievedCategory);
+                    await _context.SaveChangesAsync();
+                }
+                catch (Exception ex)
+                {
+
+                }
+                return Results.Ok(retrievedCategory);
+            }
+            else
+            {
+                return Results.NotFound($"Subcategory with ID = {id} was not found");
+            }
+
+        }
+        public async Task<IResult> RemoveSubcategory(string id)
+        {
+            var subcategory = _context.Subcategories.FirstOrDefault(c => c.Id == id);
+            if (subcategory != null)
+            {
+                _context.Subcategories.Remove(subcategory);
+                await _context.SaveChangesAsync();
+                return Results.Ok(subcategory);
+            }
+            else
+            {
+                return Results.NotFound($"Category with CategoryID = {id} was not found");
+            }
         }
     }
 }
