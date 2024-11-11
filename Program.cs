@@ -15,6 +15,8 @@ builder.Services.AddSwaggerGen(c =>
 });
 var connectionString = builder.Configuration.GetConnectionString("arpella");
 builder.Services.AddDbContext<ArpellaContext>(options => options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
+builder.Services.AddTransient<ICategoriesService, CategoriesService>();    
+builder.Services.AddTransient<ISubcategoriesServices, SubcategoriesService>();    
 builder.Services.AddTransient<IProductManagement, ProductManagement>();
 builder.Services.AddTransient<IRouteResolutionHelper, RouteResolutionHelper>();
 
