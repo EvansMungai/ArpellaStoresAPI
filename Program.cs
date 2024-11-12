@@ -19,7 +19,7 @@ builder.Services.Configure<Microsoft.AspNetCore.Http.Json.JsonOptions>(options =
 builder.Services.AddDbContext<ArpellaContext>(options => options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
 builder.Services.AddTransient<ICategoriesService, CategoriesService>();    
 builder.Services.AddTransient<ISubcategoriesServices, SubcategoriesService>();    
-builder.Services.AddTransient<IProductManagement, ProductManagement>();
+builder.Services.AddTransient<IProductsService, ProductsService>();
 builder.Services.AddTransient<IRouteResolutionHelper, RouteResolutionHelper>();
 
 var app = builder.Build();
