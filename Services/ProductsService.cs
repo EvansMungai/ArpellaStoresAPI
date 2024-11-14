@@ -60,6 +60,26 @@ namespace ArpellaStores.Services
             }
 
         }
+        public async Task<IResult> UpdateProductPrice(string id, decimal price)
+        {
+            var retrievedProduct = _context.Products.FirstOrDefault(p => p.Id == id);
+            if (retrievedProduct != null)
+            {
+                retrievedProduct.PriceAfterDiscount = price;
+                try
+                {
+                    _context.Update(retrievedProduct);
+                    await _context.SaveChangesAsync();
+                }
+                catch (Exception ex) { }
+                return Results.Ok(retrievedProduct);
+            }
+            else
+            {
+                return Results.NotFound($"Product with ProductID = {id} was not Found");
+            }
+
+        }
         public async Task<IResult> RemoveProduct(string productId)
         {
             var product = _context.Products.FirstOrDefault(p => p.Id == productId);

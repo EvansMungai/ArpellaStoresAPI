@@ -270,7 +270,12 @@ public partial class ArpellaContext : DbContext
             entity.Property(e => e.Name)
                 .HasMaxLength(50)
                 .HasColumnName("name");
-            entity.Property(e => e.Price).HasColumnName("price");
+            entity.Property(e => e.Price)
+                .HasPrecision(10, 2)
+                .HasColumnName("price");
+            entity.Property(e => e.PriceAfterDiscount)
+                .HasPrecision(10, 2)
+                .HasColumnName("price_after_discount");
 
             entity.HasOne(d => d.CategoryNavigation).WithMany(p => p.Products)
                 .HasForeignKey(d => d.Category)

@@ -6,17 +6,20 @@ public class DiscountService : IDiscountService
 {
     private readonly ArpellaContext _context;
     private readonly IFinalPriceService _finalPriceService;
-    public DiscountService(ArpellaContext context, IFinalPriceService finalPriceService)
+    private readonly IProductsService _productService;
+    public DiscountService(ArpellaContext context, IFinalPriceService finalPriceService, IProductsService productsService)
     {
         _context = context;
         _finalPriceService = finalPriceService;
+        _productService = productsService;
     }
     public async Task<IResult> GetFinalPrice(string productId, string couponCode = null)
     {
         try
         {
-            var FinalPrice = await _finalPriceService.GetFinalPriceAsync(productId, couponCode);
-            return Results.Ok(new {ProductId = productId, FinalPrice = FinalPrice});
+            var finalPrice = await _finalPriceService.GetFinalPriceAsync(productId, couponCode);
+            await this._productService.UpdateProductPrice(productId, finalPrice);
+            return Results.Ok($"Price updated for ProductId = {productId}. Check the Product in the products route to verify changes.");
         } catch (Exception ex)
         {
             return Results.BadRequest(ex.Message);
