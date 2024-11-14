@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using ArpellaStores.Models;
+using EntityFramework.Exceptions.MySQL.Pomelo;
 using Microsoft.EntityFrameworkCore;
 using Pomelo.EntityFrameworkCore.MySql.Scaffolding.Internal;
 
@@ -34,7 +35,7 @@ public partial class ArpellaContext : DbContext
     public virtual DbSet<User> Users { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        => optionsBuilder.UseMySql("name=ConnectionStrings:arpella", Microsoft.EntityFrameworkCore.ServerVersion.Parse("8.2.0-mysql"));
+        => optionsBuilder.UseMySql("name=ConnectionStrings:arpella", Microsoft.EntityFrameworkCore.ServerVersion.Parse("8.2.0-mysql")).UseExceptionProcessor();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
