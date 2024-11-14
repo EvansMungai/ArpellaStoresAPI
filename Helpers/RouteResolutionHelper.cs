@@ -9,12 +9,14 @@ public class RouteResolutionHelper : IRouteResolutionHelper
     private readonly ISubcategoriesServices _subcategoriesServices;
     private readonly IProductsService _productsService;
     private readonly IInventoryService _inventoryService;
-    public RouteResolutionHelper(ICategoriesService categoriesService, ISubcategoriesServices subcategoriesServices, IProductsService productsService, IInventoryService inventoryService)
+    private readonly IDiscountService _discountService;
+    public RouteResolutionHelper(ICategoriesService categoriesService, ISubcategoriesServices subcategoriesServices, IProductsService productsService, IInventoryService inventoryService, IDiscountService discountService)
     {
         _categoriesService = categoriesService;
         _subcategoriesServices = subcategoriesServices;
         _productsService = productsService;
         _inventoryService = inventoryService;
+        _discountService = discountService;
     }
     public void addMappings(WebApplication app)
     {
@@ -47,5 +49,8 @@ public class RouteResolutionHelper : IRouteResolutionHelper
         app.MapPost("/inventories", (Inventory inventory) => this._inventoryService.CreateInventory(inventory)).WithTags("Inventories").Produces(200).Produces(404).Produces<Inventory>();
         app.MapPut("/inventory/{id}", (Inventory inventory, int id) => this._inventoryService.UpdateInventory(inventory, id)).WithTags("Inventories").Produces(200).Produces(404).Produces<Inventory>();
         app.MapDelete("/inventory/{id}", (int id) =>this._inventoryService.RemoveInventory(id)).WithTags("Inventories").Produces(200).Produces(404).Produces<Inventory>();
+
+        // Final Price Route
+        app.MapGet("/final-price", (string productId, string? couponCode) => this._discountService.GetFinalPrice(productId, couponCode)).WithTags("Final Price").Produces(200).Produces(404);
     }
 }
