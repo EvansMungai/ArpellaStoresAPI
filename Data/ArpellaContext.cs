@@ -20,6 +20,12 @@ public partial class ArpellaContext : DbContext
 
     public virtual DbSet<Category> Categories { get; set; }
 
+    public virtual DbSet<Coupon> Coupons { get; set; }
+
+    public virtual DbSet<Discount> Discounts { get; set; }
+
+    public virtual DbSet<Flashsale> Flashsales { get; set; }
+
     public virtual DbSet<Inventory> Inventories { get; set; }
 
     public virtual DbSet<Order> Orders { get; set; }
@@ -35,7 +41,7 @@ public partial class ArpellaContext : DbContext
     public virtual DbSet<User> Users { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        => optionsBuilder.UseMySql("name=ConnectionStrings:arpella", Microsoft.EntityFrameworkCore.ServerVersion.Parse("8.2.0-mysql")).UseExceptionProcessor();
+        => optionsBuilder.UseMySql("name=ConnectionStrings:arpella", Microsoft.EntityFrameworkCore.ServerVersion.Parse("8.2.0-mysql"));
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -55,6 +61,100 @@ public partial class ArpellaContext : DbContext
             entity.Property(e => e.CategoryName)
                 .HasMaxLength(50)
                 .HasColumnName("category_name");
+        });
+
+        modelBuilder.Entity<Coupon>(entity =>
+        {
+            entity.HasKey(e => e.CouponId).HasName("PRIMARY");
+
+            entity.ToTable("coupons");
+
+            entity.HasIndex(e => e.CouponCode, "coupon_code").IsUnique();
+
+            entity.Property(e => e.CouponId).HasColumnName("coupon_id");
+            entity.Property(e => e.CouponCode)
+                .HasMaxLength(50)
+                .HasColumnName("coupon_code");
+            entity.Property(e => e.DiscountType)
+                .HasColumnType("enum('percentage','fixed')")
+                .HasColumnName("discount_type");
+            entity.Property(e => e.DiscountValue)
+                .HasPrecision(10, 2)
+                .HasColumnName("discount_value");
+            entity.Property(e => e.EndDate)
+                .HasColumnType("datetime")
+                .HasColumnName("end_date");
+            entity.Property(e => e.IsActive)
+                .HasDefaultValueSql("'1'")
+                .HasColumnName("is_active");
+            entity.Property(e => e.StartDate)
+                .HasColumnType("datetime")
+                .HasColumnName("start_date");
+            entity.Property(e => e.UsageCount)
+                .HasDefaultValueSql("'0'")
+                .HasColumnName("usage_count");
+            entity.Property(e => e.UsageLimit)
+                .HasDefaultValueSql("'1'")
+                .HasColumnName("usage_limit");
+        });
+
+        modelBuilder.Entity<Discount>(entity =>
+        {
+            entity.HasKey(e => e.DiscountId).HasName("PRIMARY");
+
+            entity.ToTable("discounts");
+
+            entity.HasIndex(e => e.DiscountCode, "discount_code").IsUnique();
+
+            entity.Property(e => e.DiscountId).HasColumnName("discount_id");
+            entity.Property(e => e.DiscountCode)
+                .HasMaxLength(50)
+                .HasColumnName("discount_code");
+            entity.Property(e => e.DiscountType)
+                .HasColumnType("enum('percentage','fixed','flash_sale')")
+                .HasColumnName("discount_type");
+            entity.Property(e => e.DiscountValue)
+                .HasPrecision(10, 2)
+                .HasColumnName("discount_value");
+            entity.Property(e => e.EndDate)
+                .HasColumnType("datetime")
+                .HasColumnName("end_date");
+            entity.Property(e => e.IsActive)
+                .HasDefaultValueSql("'1'")
+                .HasColumnName("is_active");
+            entity.Property(e => e.StartDate)
+                .HasColumnType("datetime")
+                .HasColumnName("start_date");
+        });
+
+        modelBuilder.Entity<Flashsale>(entity =>
+        {
+            entity.HasKey(e => e.FlashSaleId).HasName("PRIMARY");
+
+            entity.ToTable("flashsales");
+
+            entity.HasIndex(e => e.ProductId, "product_id");
+
+            entity.Property(e => e.FlashSaleId).HasColumnName("flash_sale_id");
+            entity.Property(e => e.DiscountValue)
+                .HasPrecision(10, 2)
+                .HasColumnName("discount_value");
+            entity.Property(e => e.EndTime)
+                .HasColumnType("datetime")
+                .HasColumnName("end_time");
+            entity.Property(e => e.IsActive)
+                .HasDefaultValueSql("'1'")
+                .HasColumnName("is_active");
+            entity.Property(e => e.ProductId)
+                .HasMaxLength(30)
+                .HasColumnName("product_id");
+            entity.Property(e => e.StartTime)
+                .HasColumnType("datetime")
+                .HasColumnName("start_time");
+
+            entity.HasOne(d => d.Product).WithMany(p => p.Flashsales)
+                .HasForeignKey(d => d.ProductId)
+                .HasConstraintName("flashsales_ibfk_1");
         });
 
         modelBuilder.Entity<Inventory>(entity =>
