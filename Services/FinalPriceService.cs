@@ -17,19 +17,19 @@ public class FinalPriceService : IFinalPriceService
 
         decimal finalPrice = product.Price;
         // 1. Check for Flash sale
-        Flashsale? flashsale = _context.Flashsales.SingleOrDefault(fs => fs.ProductId == productId && fs.IsActive == true && DateTime.UtcNow >= fs.StartTime && DateTime.UtcNow <= fs.EndTime); 
+        Flashsale? flashsale = _context.Flashsales.SingleOrDefault(fs => fs.ProductId == productId && fs.IsActive == true && DateTime.UtcNow >= fs.StartTime && DateTime.UtcNow <= fs.EndTime);
         if (flashsale != null)
         {
             finalPrice -= flashsale.DiscountValue;
         }
 
-        // 2. Check for coupon code
+        // 2.Check for coupon code
         if (!string.IsNullOrEmpty(couponCode))
         {
             Coupon? coupon = _context.Coupons.SingleOrDefault(c => c.CouponCode == couponCode && c.IsActive == true && DateTime.UtcNow >= c.StartDate && DateTime.UtcNow <= c.EndDate && c.UsageCount < c.UsageLimit);
             if (coupon != null)
             {
-                finalPrice -= ApplyDiscount(finalPrice, coupon);
+                finalPrice = ApplyDiscount(finalPrice, coupon);
                 coupon.UsageCount++;
                 await _context.SaveChangesAsync();
             }
@@ -39,7 +39,7 @@ public class FinalPriceService : IFinalPriceService
     #region Utilities
     private decimal ApplyDiscount(decimal price, Coupon coupon)
     {
-        return coupon.DiscountType switch
+        return coupon.DiscountType.ToLower() switch
         {
             "percentage" => price - (price * coupon.DiscountValue / 100),
             "fixed" => price - coupon.DiscountValue,
