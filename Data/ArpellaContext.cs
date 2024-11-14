@@ -41,7 +41,7 @@ public partial class ArpellaContext : DbContext
     public virtual DbSet<User> Users { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        => optionsBuilder.UseMySql("name=ConnectionStrings:arpella", Microsoft.EntityFrameworkCore.ServerVersion.Parse("8.2.0-mysql"));
+        => optionsBuilder.UseMySql("name=ConnectionStrings:arpella", Microsoft.EntityFrameworkCore.ServerVersion.Parse("8.2.0-mysql")).UseExceptionProcessor();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
