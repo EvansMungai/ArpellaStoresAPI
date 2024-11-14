@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using ArpellaStores.Models;
+using EntityFramework.Exceptions.MySQL.Pomelo;
 using Microsoft.EntityFrameworkCore;
 using Pomelo.EntityFrameworkCore.MySql.Scaffolding.Internal;
 
@@ -19,6 +20,8 @@ public partial class ArpellaContext : DbContext
 
     public virtual DbSet<Category> Categories { get; set; }
 
+    public virtual DbSet<Inventory> Inventories { get; set; }
+
     public virtual DbSet<Order> Orders { get; set; }
 
     public virtual DbSet<Orderitem> Orderitems { get; set; }
@@ -32,7 +35,7 @@ public partial class ArpellaContext : DbContext
     public virtual DbSet<User> Users { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        => optionsBuilder.UseMySql("name=ConnectionStrings:arpella", Microsoft.EntityFrameworkCore.ServerVersion.Parse("8.2.0-mysql"));
+        => optionsBuilder.UseMySql("name=ConnectionStrings:arpella", Microsoft.EntityFrameworkCore.ServerVersion.Parse("8.2.0-mysql")).UseExceptionProcessor();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -52,6 +55,28 @@ public partial class ArpellaContext : DbContext
             entity.Property(e => e.CategoryName)
                 .HasMaxLength(50)
                 .HasColumnName("category_name");
+        });
+
+        modelBuilder.Entity<Inventory>(entity =>
+        {
+            entity.HasKey(e => e.InventoryId).HasName("PRIMARY");
+
+            entity.ToTable("inventory");
+
+            entity.HasIndex(e => e.ProductId, "product_id");
+
+            entity.Property(e => e.InventoryId).HasColumnName("inventory_id");
+            entity.Property(e => e.ProductId)
+                .HasMaxLength(30)
+                .HasColumnName("product_id");
+            entity.Property(e => e.StockQuantity)
+                .HasDefaultValueSql("'0'")
+                .HasColumnName("stock_quantity");
+            entity.Property(e => e.StockThreshold).HasColumnName("stock_threshold");
+
+            entity.HasOne(d => d.Product).WithMany(p => p.Inventories)
+                .HasForeignKey(d => d.ProductId)
+                .HasConstraintName("inventory_ibfk_1");
         });
 
         modelBuilder.Entity<Order>(entity =>

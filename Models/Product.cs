@@ -14,4 +14,6 @@ public partial class Product
     public string? Category { get; set; }
 
     public virtual Category? CategoryNavigation { get; set; }
+
+    public virtual ICollection<Inventory> Inventories { get; set; } = new List<Inventory>();
 }

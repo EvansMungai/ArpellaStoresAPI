@@ -20,6 +20,7 @@ builder.Services.AddDbContext<ArpellaContext>(options => options.UseMySql(connec
 builder.Services.AddTransient<ICategoriesService, CategoriesService>();    
 builder.Services.AddTransient<ISubcategoriesServices, SubcategoriesService>();    
 builder.Services.AddTransient<IProductsService, ProductsService>();
+builder.Services.AddTransient<IInventoryService, InventoryService>();
 builder.Services.AddTransient<IRouteResolutionHelper, RouteResolutionHelper>();
 
 var app = builder.Build();
