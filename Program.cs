@@ -24,6 +24,7 @@ builder.Services.AddTransient<IInventoryService, InventoryService>();
 builder.Services.AddTransient<IFinalPriceService, FinalPriceService>();
 builder.Services.AddTransient<IDiscountService, DiscountService>();
 builder.Services.AddTransient<ICouponService, CouponService>();
+builder.Services.AddTransient<IFlashsaleService, FlashsaleService>();
 builder.Services.AddTransient<IRouteResolutionHelper, RouteResolutionHelper>();
 
 var app = builder.Build();

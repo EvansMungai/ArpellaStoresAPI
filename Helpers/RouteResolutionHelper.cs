@@ -11,7 +11,8 @@ public class RouteResolutionHelper : IRouteResolutionHelper
     private readonly IInventoryService _inventoryService;
     private readonly IDiscountService _discountService;
     private readonly ICouponService _couponService;
-    public RouteResolutionHelper(ICategoriesService categoriesService, ISubcategoriesServices subcategoriesServices, IProductsService productsService, IInventoryService inventoryService, IDiscountService discountService, ICouponService couponService)
+    private readonly IFlashsaleService _flashsaleService;
+    public RouteResolutionHelper(ICategoriesService categoriesService, ISubcategoriesServices subcategoriesServices, IProductsService productsService, IInventoryService inventoryService, IDiscountService discountService, ICouponService couponService, IFlashsaleService flashsaleService)
     {
         _categoriesService = categoriesService;
         _subcategoriesServices = subcategoriesServices;
@@ -19,6 +20,7 @@ public class RouteResolutionHelper : IRouteResolutionHelper
         _inventoryService = inventoryService;
         _discountService = discountService;
         _couponService = couponService;
+        _flashsaleService = flashsaleService;
     }
     public void addMappings(WebApplication app)
     {
@@ -61,5 +63,12 @@ public class RouteResolutionHelper : IRouteResolutionHelper
         app.MapPost("/coupon", (Coupon coupon) => this._couponService.CreateCoupon(coupon)).WithTags("Coupons").Produces(200).Produces(500).Produces<Coupon>();
         app.MapPut("/coupon/{id}", (Coupon coupon, int id) => this._couponService.UpdateCoupon(coupon, id)).WithTags("Coupons").Produces(200).Produces(404).Produces(500).Produces<Coupon>();
         app.MapDelete("/coupon/{id}", (int id) => this._couponService.RemoveCoupon(id)).WithTags("Coupons").Produces(200).Produces(404).Produces(500).Produces<Coupon>();
+
+        // Flashsale Route
+        app.MapGet("/flashsales", () => this._flashsaleService.GetFlashSales()).WithTags("Flash Sales").Produces(200).Produces(404).Produces<List<Flashsale>>();
+        app.MapGet("/flashsale/{id}", (int id) => this._flashsaleService.GetFlashSale(id)).WithTags("Flash Sales").Produces(200).Produces(404).Produces<Flashsale>();
+        app.MapPost("/flashsale", (Flashsale flashsale) => this._flashsaleService.CreateFlashSale(flashsale)).WithTags("Flash Sales").Produces(200).Produces(500).Produces<Flashsale>();
+        app.MapPut("/flashsale/{id}", (Flashsale flashsale, int id) => this._flashsaleService.UpdateFlashSale(flashsale, id)).WithTags("Flash Sales").Produces(200).Produces(404).Produces(500).Produces<Flashsale>();
+        app.MapDelete("/flashsale/{id}", (int id) => this._flashsaleService.RemoveFlashsale(id)).WithTags("Flash Sales").Produces(200).Produces(404).Produces(500).Produces<Flashsale>();
     }
 }
