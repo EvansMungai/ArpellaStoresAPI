@@ -1,21 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-using ArpellaStores.Models;
+﻿using ArpellaStores.Models;
 using EntityFramework.Exceptions.MySQL.Pomelo;
 using Microsoft.EntityFrameworkCore;
-using Pomelo.EntityFrameworkCore.MySql.Scaffolding.Internal;
 
 namespace ArpellaStores.Data;
 
 public partial class ArpellaContext : DbContext
 {
+    private readonly string _connectionString;
     public ArpellaContext()
     {
     }
 
-    public ArpellaContext(DbContextOptions<ArpellaContext> options)
+    public ArpellaContext(DbContextOptions<ArpellaContext> options, IConfiguration configuration)
         : base(options)
     {
+        _connectionString = configuration.GetConnectionString("arpellaDB");
     }
 
     public virtual DbSet<Category> Categories { get; set; }
@@ -41,7 +40,12 @@ public partial class ArpellaContext : DbContext
     public virtual DbSet<User> Users { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        => optionsBuilder.UseMySql("name=ConnectionStrings:arpella", Microsoft.EntityFrameworkCore.ServerVersion.Parse("8.2.0-mysql")).UseExceptionProcessor();
+    { 
+        if (!optionsBuilder.IsConfigured)
+        { optionsBuilder.UseMySql(_connectionString, ServerVersion.AutoDetect(_connectionString));
+        }
+    }
+    //=> optionsBuilder.UseMySql(_connectionString, Microsoft.EntityFrameworkCore.ServerVersion.Parse("8.2.0-mysql")).UseExceptionProcessor();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
