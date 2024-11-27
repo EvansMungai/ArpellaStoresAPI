@@ -1,10 +1,11 @@
 ﻿using ArpellaStores.Models;
-using EntityFramework.Exceptions.MySQL.Pomelo;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace ArpellaStores.Data;
 
-public partial class ArpellaContext : DbContext
+public partial class ArpellaContext : IdentityDbContext<IdentityUser>
 {
     private readonly string _connectionString;
     public ArpellaContext()
@@ -14,7 +15,7 @@ public partial class ArpellaContext : DbContext
     public ArpellaContext(DbContextOptions<ArpellaContext> options, IConfiguration configuration)
         : base(options)
     {
-        _connectionString = configuration.GetConnectionString("arpellaDB");
+        _connectionString = configuration.GetConnectionString("arpella");
     }
 
     public virtual DbSet<Category> Categories { get; set; }
@@ -40,9 +41,10 @@ public partial class ArpellaContext : DbContext
     public virtual DbSet<User> Users { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    { 
+    {
         if (!optionsBuilder.IsConfigured)
-        { optionsBuilder.UseMySql(_connectionString, ServerVersion.AutoDetect(_connectionString));
+        {
+            optionsBuilder.UseMySql(_connectionString, ServerVersion.AutoDetect(_connectionString));
         }
     }
     //=> optionsBuilder.UseMySql(_connectionString, Microsoft.EntityFrameworkCore.ServerVersion.Parse("8.2.0-mysql")).UseExceptionProcessor();
@@ -52,20 +54,25 @@ public partial class ArpellaContext : DbContext
         modelBuilder
             .UseCollation("utf8mb4_0900_ai_ci")
             .HasCharSet("utf8mb4");
+        base.OnModelCreating(modelBuilder);
+        modelBuilder.Entity<IdentityUserLogin<string>>().HasKey(iul => new { iul.LoginProvider, iul.ProviderKey }); 
+        modelBuilder.Entity<IdentityUserRole<string>>().HasKey(iur => new { iur.UserId, iur.RoleId });
+        modelBuilder.Entity<IdentityUserToken<string>>().HasKey(iut => new { iut.UserId, iut.LoginProvider, iut.Name });
+
 
         modelBuilder.Entity<Category>(entity =>
-        {
-            entity.HasKey(e => e.Id).HasName("PRIMARY");
+            {
+                entity.HasKey(e => e.Id).HasName("PRIMARY");
 
-            entity.ToTable("categories");
+                entity.ToTable("categories");
 
-            entity.Property(e => e.Id)
-                .HasMaxLength(30)
-                .HasColumnName("id");
-            entity.Property(e => e.CategoryName)
-                .HasMaxLength(50)
-                .HasColumnName("category_name");
-        });
+                entity.Property(e => e.Id)
+                    .HasMaxLength(30)
+                    .HasColumnName("id");
+                entity.Property(e => e.CategoryName)
+                    .HasMaxLength(50)
+                    .HasColumnName("category_name");
+            });
 
         modelBuilder.Entity<Coupon>(entity =>
         {
