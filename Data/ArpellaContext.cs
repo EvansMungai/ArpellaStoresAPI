@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ArpellaStores.Data;
 
-public partial class ArpellaContext : IdentityDbContext<IdentityUser>
+public partial class ArpellaContext : IdentityDbContext<User>
 {
     private readonly string _connectionString;
     public ArpellaContext()
@@ -316,28 +316,13 @@ public partial class ArpellaContext : IdentityDbContext<IdentityUser>
                 .HasConstraintName("subcategories_ibfk_1");
         });
 
-        modelBuilder.Entity<User>(entity =>
-        {
-            entity.HasKey(e => e.Id).HasName("PRIMARY");
+        //modelBuilder.Entity<User>(entity =>
+        //{
+        //    entity.HasKey(e => e.Id).HasName("PRIMARY");
 
-            entity.ToTable("users");
+        //    entity.ToTable("users");
 
-            entity.Property(e => e.Id)
-                .HasMaxLength(30)
-                .HasColumnName("id");
-            entity.Property(e => e.Password)
-                .HasMaxLength(200)
-                .HasColumnName("password");
-            entity.Property(e => e.Phone)
-                .HasMaxLength(15)
-                .HasColumnName("phone");
-            entity.Property(e => e.Role)
-                .HasMaxLength(20)
-                .HasColumnName("role");
-            entity.Property(e => e.Username)
-                .HasMaxLength(50)
-                .HasColumnName("username");
-        });
+        //});
 
         OnModelCreatingPartial(modelBuilder);
     }

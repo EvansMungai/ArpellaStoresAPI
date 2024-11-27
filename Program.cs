@@ -1,5 +1,6 @@
 using ArpellaStores.Data;
 using ArpellaStores.Helpers;
+using ArpellaStores.Models;
 using ArpellaStores.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -19,10 +20,9 @@ builder.Services.AddSwaggerGen(c =>
 var connectionString = builder.Configuration.GetConnectionString("arpella");
 builder.Services.Configure<Microsoft.AspNetCore.Http.Json.JsonOptions>(options => options.SerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
 builder.Services.AddDbContext<ArpellaContext>(options => options.UseMySql(connectionString, ServerVersion.AutoDetect(builder.Configuration.GetConnectionString("arpella"))));
+builder.Services.AddIdentity<User, IdentityRole>().AddEntityFrameworkStores<ArpellaContext>().AddDefaultTokenProviders();
 builder.Services.AddAuthentication();
 builder.Services.AddAuthorization();
-builder.Services.AddIdentityApiEndpoints<IdentityUser>()
-    .AddEntityFrameworkStores<ArpellaContext>();
 builder.Services.AddTransient<ICategoriesService, CategoriesService>();    
 builder.Services.AddTransient<ISubcategoriesServices, SubcategoriesService>();    
 builder.Services.AddTransient<IProductsService, ProductsService>();
@@ -31,11 +31,11 @@ builder.Services.AddTransient<IFinalPriceService, FinalPriceService>();
 builder.Services.AddTransient<IDiscountService, DiscountService>();
 builder.Services.AddTransient<ICouponService, CouponService>();
 builder.Services.AddTransient<IFlashsaleService, FlashsaleService>();
+builder.Services.AddTransient<IAuthenticationService, AuthenticationService>();
 builder.Services.AddTransient<IRouteResolutionHelper, RouteResolutionHelper>();
 
 
 var app = builder.Build();
-app.MapIdentityApi<IdentityUser>();
 // Configure the HTTP request pipeline.
 app.UseAuthentication();
 app.UseAuthorization();

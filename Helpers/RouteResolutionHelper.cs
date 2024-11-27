@@ -1,5 +1,6 @@
 ﻿using ArpellaStores.Models;
 using ArpellaStores.Services;
+using Microsoft.AspNetCore.Identity;
 
 namespace ArpellaStores.Helpers;
 
@@ -12,7 +13,8 @@ public class RouteResolutionHelper : IRouteResolutionHelper
     private readonly IDiscountService _discountService;
     private readonly ICouponService _couponService;
     private readonly IFlashsaleService _flashsaleService;
-    public RouteResolutionHelper(ICategoriesService categoriesService, ISubcategoriesServices subcategoriesServices, IProductsService productsService, IInventoryService inventoryService, IDiscountService discountService, ICouponService couponService, IFlashsaleService flashsaleService)
+    private readonly IAuthenticationService _authenticationService;
+    public RouteResolutionHelper(ICategoriesService categoriesService, ISubcategoriesServices subcategoriesServices, IProductsService productsService, IInventoryService inventoryService, IDiscountService discountService, ICouponService couponService, IFlashsaleService flashsaleService, IAuthenticationService authenticationService)
     {
         _categoriesService = categoriesService;
         _subcategoriesServices = subcategoriesServices;
@@ -21,10 +23,15 @@ public class RouteResolutionHelper : IRouteResolutionHelper
         _discountService = discountService;
         _couponService = couponService;
         _flashsaleService = flashsaleService;
+        _authenticationService = authenticationService;
     }
     public void addMappings(WebApplication app)
     {
-        app.MapGet("/", () => "Hello World!");
+        app.MapGet("/", () => "Welcome to Arpella Stores Web API!");
+
+        // Authentication Routes
+        app.MapPost("/register", (UserManager<User> userManager, User model) => this._authenticationService.RegisterUser(userManager, model)).WithTags("Authentication");
+        app.MapPost("/Login", (string username, string password)=> this._authenticationService.Login(username,password)).WithTags("Authentication");
 
         // Categories Routes
         app.MapGet("/categories", () => this._categoriesService.GetCategories()).WithTags("Categories").Produces(200).Produces(404).Produces<List<Category>>().RequireAuthorization();
