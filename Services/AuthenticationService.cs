@@ -1,5 +1,6 @@
 ﻿using ArpellaStores.Models;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 
 namespace ArpellaStores.Services;
 
@@ -32,15 +33,33 @@ public class AuthenticationService : IAuthenticationService
             return Results.BadRequest("Error occurred!: " + ex.Message);
         }
     }
-    public async Task<IResult> Login(string userName, string password)
+    public async Task<IResult> Login(SignInManager<User> signInManager, User model)
     {
-        var signInResult = await _signInManager.PasswordSignInAsync(
-            userName: userName!,
-            password: password!,
-            isPersistent: false,
-            lockoutOnFailure: false
-            );
-        return signInResult.Succeeded ? Results.Ok("You are successfully Logged in") : Results.BadRequest("Error occcured");
+        //var signInResult = await _signInManager.PasswordSignInAsync(
+        //    userName: userName!,
+        //    password: password!,
+        //    isPersistent: false,
+        //    lockoutOnFailure: false
+        //    );
+        var user = await _userManager.FindByNameAsync(model.UserName);
+        if(user != null)
+        {
+            var passwordCheck = await _userManager.CheckPasswordAsync(user, model.PasswordHash);
+            if (passwordCheck)
+            {
+                await _signInManager.SignInAsync(user, false);
+                return Results.Ok("You are successfully Logged in");
+            }
+            else
+            {
+                return Results.BadRequest("Invalid login attempt");
+            }
+        }
+        else
+        {
+            return Results.BadRequest("Invalid login attempt");
+        }
+        //return signInResult.Succeeded ? Results.Ok("You are successfully Logged in") : Results.BadRequest("Error occcured");
     }
 
 }

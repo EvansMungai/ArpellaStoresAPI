@@ -31,7 +31,7 @@ public class RouteResolutionHelper : IRouteResolutionHelper
 
         // Authentication Routes
         app.MapPost("/register", (UserManager<User> userManager, User model) => this._authenticationService.RegisterUser(userManager, model)).WithTags("Authentication");
-        app.MapPost("/Login", (string username, string password)=> this._authenticationService.Login(username,password)).WithTags("Authentication");
+        app.MapPost("/login", (SignInManager<User> signInManager, User model)=> this._authenticationService.Login(signInManager, model)).WithTags("Authentication");
 
         // Categories Routes
         app.MapGet("/categories", () => this._categoriesService.GetCategories()).WithTags("Categories").Produces(200).Produces(404).Produces<List<Category>>().RequireAuthorization();
