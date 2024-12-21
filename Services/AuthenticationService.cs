@@ -48,7 +48,8 @@ public class AuthenticationService : IAuthenticationService
             if (passwordCheck)
             {
                 await _signInManager.SignInAsync(user, false);
-                return Results.Ok("You are successfully Logged in");
+                var userDetails = new { user.FirstName, user.LastName, user.PhoneNumber, user.Email };
+                return Results.Ok(userDetails);
             }
             else
             {
@@ -57,7 +58,7 @@ public class AuthenticationService : IAuthenticationService
         }
         else
         {
-            return Results.BadRequest("Invalid login attempt");
+            return Results.BadRequest("User not found");
         }
         //return signInResult.Succeeded ? Results.Ok("You are successfully Logged in") : Results.BadRequest("Error occcured");
     }
