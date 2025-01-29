@@ -1,5 +1,6 @@
 ﻿using ArpellaStores.Models;
 using ArpellaStores.Services;
+using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Identity;
 
 namespace ArpellaStores.Helpers;
@@ -50,7 +51,8 @@ public class RouteResolutionHelper : IRouteResolutionHelper
         // Products Routes
         app.MapGet("/products", () => this._productsService.GetProducts()).WithTags("Products").Produces(200).Produces(404).Produces<List<Product>>().RequireAuthorization();
         app.MapGet("/products/{id}", (string id) => this._productsService.GetProduct(id)).WithTags("Products").Produces(200).Produces(404).Produces<Product>().RequireAuthorization();
-        app.MapPost("/products", (Product product) => this._productsService.CreateProduct(product)).WithTags("Products").Produces(200).Produces(404).Produces<Product>().RequireAuthorization();
+        app.MapPost("/product", (Product product) => this._productsService.CreateProduct(product)).WithTags("Products").Produces(200).Produces(404).Produces<Product>().RequireAuthorization();
+        //app.MapPost("/products", (IFormFile file, IAntiforgery antiforgery, HttpContext context) => this._productsService.CreateProducts(file, antiforgery, context)).WithTags("Products").Produces(200).Produces(404).Produces<Product>().RequireAuthorization();
         app.MapPut("/products/{id}", (Product product, string id) => this._productsService.UpdateProductDetails(product, id)).WithTags("Products").Produces(200).Produces(404).Produces<Product>().RequireAuthorization();
         app.MapDelete("/products/{id}", (string id) => this._productsService.RemoveProduct(id)).WithTags("Products").Produces(200).Produces(404).Produces<Product>().RequireAuthorization();
 
