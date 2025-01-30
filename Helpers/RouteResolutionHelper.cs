@@ -38,8 +38,9 @@ public class RouteResolutionHelper : IRouteResolutionHelper
         
         // Admin Roles
         app.MapGet("/roles", ()=> this._adminService.GetRoles()).WithTags("Admin").Produces(200).Produces(404).Produces<List<Category>>().RequireAuthorization();
-        app.MapGet("/role/{role}", (string role) => this._adminService.EnsureRoleExists(role)).WithTags("Admin").Produces(200).Produces(404).Produces<List<Category>>().RequireAuthorization();
+        app.MapGet("/role/{id}", (string role) => this._adminService.EnsureRoleExists(role)).WithTags("Admin").Produces(200).Produces(404).Produces<List<Category>>().RequireAuthorization();
         app.MapPost("/role", (string role) => this._adminService.CreateRole(role)).WithTags("Admin").Produces(200).Produces(404).Produces<List<Category>>().RequireAuthorization();
+        app.MapPut("/role/{id}", (string roleId, string roleName) => this._adminService.EditRole(roleId, roleName)).WithTags("Admin").Produces(200).Produces(404).Produces<List<Category>>().RequireAuthorization();
         app.MapDelete("/role/{role}", (string role) => this._adminService.RemoveRole(role)).WithTags("Admin").Produces(200).Produces(404).Produces<List<Category>>().RequireAuthorization();
 
         // Categories Routes
