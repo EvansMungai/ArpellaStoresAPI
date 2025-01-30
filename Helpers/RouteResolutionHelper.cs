@@ -14,8 +14,9 @@ public class RouteResolutionHelper : IRouteResolutionHelper
     private readonly IDiscountService _discountService;
     private readonly ICouponService _couponService;
     private readonly IFlashsaleService _flashsaleService;
+    private readonly IAdminService _adminService;
     private readonly IAuthenticationService _authenticationService;
-    public RouteResolutionHelper(ICategoriesService categoriesService, ISubcategoriesServices subcategoriesServices, IProductsService productsService, IInventoryService inventoryService, IDiscountService discountService, ICouponService couponService, IFlashsaleService flashsaleService, IAuthenticationService authenticationService)
+    public RouteResolutionHelper(ICategoriesService categoriesService, ISubcategoriesServices subcategoriesServices, IProductsService productsService, IInventoryService inventoryService, IDiscountService discountService, ICouponService couponService, IFlashsaleService flashsaleService,IAdminService adminService, IAuthenticationService authenticationService)
     {
         _categoriesService = categoriesService;
         _subcategoriesServices = subcategoriesServices;
@@ -24,6 +25,7 @@ public class RouteResolutionHelper : IRouteResolutionHelper
         _discountService = discountService;
         _couponService = couponService;
         _flashsaleService = flashsaleService;
+        _adminService = adminService;
         _authenticationService = authenticationService;
     }
     public void addMappings(WebApplication app)
@@ -33,6 +35,12 @@ public class RouteResolutionHelper : IRouteResolutionHelper
         // Authentication Routes
         app.MapPost("/register", (UserManager<User> userManager, User model) => this._authenticationService.RegisterUser(userManager, model)).WithTags("Authentication");
         app.MapPost("/login", (SignInManager<User> signInManager, User model)=> this._authenticationService.Login(signInManager, model)).WithTags("Authentication");
+        
+        // Admin Roles
+        app.MapGet("/roles", ()=> this._adminService.GetRoles()).WithTags("Admin").Produces(200).Produces(404).Produces<List<Category>>().RequireAuthorization();
+        app.MapGet("/role/{role}", (string role) => this._adminService.EnsureRoleExists(role)).WithTags("Admin").Produces(200).Produces(404).Produces<List<Category>>().RequireAuthorization();
+        app.MapPost("/role", (string role) => this._adminService.CreateRole(role)).WithTags("Admin").Produces(200).Produces(404).Produces<List<Category>>().RequireAuthorization();
+        app.MapDelete("/role/{role}", (string role) => this._adminService.RemoveRole(role)).WithTags("Admin").Produces(200).Produces(404).Produces<List<Category>>().RequireAuthorization();
 
         // Categories Routes
         app.MapGet("/categories", () => this._categoriesService.GetCategories()).WithTags("Categories").Produces(200).Produces(404).Produces<List<Category>>().RequireAuthorization();

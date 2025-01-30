@@ -24,7 +24,10 @@ builder.Services.AddDbContext<ArpellaContext>(options => options.UseMySql(connec
 builder.Services.AddIdentity<User, IdentityRole>().AddEntityFrameworkStores<ArpellaContext>().AddDefaultTokenProviders();
 builder.Services.AddAntiforgery(options => { options.HeaderName = "X-CSRF-TOKEN"; });
 builder.Services.AddAuthentication();
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("AdminPolicy", policy => policy.RequireRole("Admin"));
+});
 builder.Services.AddTransient<ICategoriesService, CategoriesService>();
 builder.Services.AddTransient<ISubcategoriesServices, SubcategoriesService>();
 builder.Services.AddTransient<IProductsService, ProductsService>();
@@ -33,6 +36,7 @@ builder.Services.AddTransient<IFinalPriceService, FinalPriceService>();
 builder.Services.AddTransient<IDiscountService, DiscountService>();
 builder.Services.AddTransient<ICouponService, CouponService>();
 builder.Services.AddTransient<IFlashsaleService, FlashsaleService>();
+builder.Services.AddTransient<IAdminService, AdminService>();
 builder.Services.AddTransient<IAuthenticationService, AuthenticationService>();
 builder.Services.AddTransient<IRouteResolutionHelper, RouteResolutionHelper>();
 
