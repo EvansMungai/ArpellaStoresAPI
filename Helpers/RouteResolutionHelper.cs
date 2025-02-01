@@ -1,5 +1,6 @@
 ﻿using ArpellaStores.Models;
 using ArpellaStores.Services;
+using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Identity;
 
 namespace ArpellaStores.Helpers;
@@ -13,8 +14,9 @@ public class RouteResolutionHelper : IRouteResolutionHelper
     private readonly IDiscountService _discountService;
     private readonly ICouponService _couponService;
     private readonly IFlashsaleService _flashsaleService;
+    private readonly IUserManagementService _userManagementService;
     private readonly IAuthenticationService _authenticationService;
-    public RouteResolutionHelper(ICategoriesService categoriesService, ISubcategoriesServices subcategoriesServices, IProductsService productsService, IInventoryService inventoryService, IDiscountService discountService, ICouponService couponService, IFlashsaleService flashsaleService, IAuthenticationService authenticationService)
+    public RouteResolutionHelper(ICategoriesService categoriesService, ISubcategoriesServices subcategoriesServices, IProductsService productsService, IInventoryService inventoryService, IDiscountService discountService, ICouponService couponService, IFlashsaleService flashsaleService,IUserManagementService userManagementService, IAuthenticationService authenticationService)
     {
         _categoriesService = categoriesService;
         _subcategoriesServices = subcategoriesServices;
@@ -23,6 +25,7 @@ public class RouteResolutionHelper : IRouteResolutionHelper
         _discountService = discountService;
         _couponService = couponService;
         _flashsaleService = flashsaleService;
+        _userManagementService = userManagementService;
         _authenticationService = authenticationService;
     }
     public void addMappings(WebApplication app)
@@ -32,7 +35,19 @@ public class RouteResolutionHelper : IRouteResolutionHelper
         // Authentication Routes
         app.MapPost("/register", (UserManager<User> userManager, User model) => this._authenticationService.RegisterUser(userManager, model)).WithTags("Authentication");
         app.MapPost("/login", (SignInManager<User> signInManager, User model)=> this._authenticationService.Login(signInManager, model)).WithTags("Authentication");
-
+        
+        // Admin 
+        // Roles
+        app.MapGet("/roles", ()=> this._userManagementService.GetRoles()).WithTags("Admin").Produces(200).Produces(404).RequireAuthorization();
+        app.MapGet("/role/{id}", (string role) => this._userManagementService.EnsureRoleExists(role)).WithTags("Admin").Produces(200).Produces(404).RequireAuthorization();
+        app.MapPost("/role", (string role) => this._userManagementService.CreateRole(role)).WithTags("Admin").Produces(200).Produces(404).RequireAuthorization();
+        app.MapPut("/role/{id}", (string roleId, string roleName) => this._userManagementService.EditRole(roleId, roleName)).WithTags("Admin").Produces(200).Produces(404).RequireAuthorization();
+        app.MapDelete("/role/{role}", (string role) => this._userManagementService.RemoveRole(role)).WithTags("Admin").Produces(200).Produces(404).RequireAuthorization();
+        // Users
+        app.MapGet("/users", ()=> this._userManagementService.GetUsers()).WithTags("Admin").Produces(200).Produces(404).Produces<List<User>>().RequireAuthorization();
+        app.MapGet("/user/{id}", (string id)=> this._userManagementService.GetUser(id)).WithTags("Admin").Produces(200).Produces(404).Produces<User>().RequireAuthorization();
+        app.MapDelete("/user/{id}", (string id) => this._userManagementService.RemoveUser(id)).WithTags("Admin").Produces(200).Produces(404).Produces<User>().RequireAuthorization();
+        app.MapPut("/user/{id}", (string id, string role) => this._userManagementService.AssignRoleToUserAsync(id, role)).WithTags("Admin").Produces(200).Produces(404).Produces<User>().RequireAuthorization();
         // Categories Routes
         app.MapGet("/categories", () => this._categoriesService.GetCategories()).WithTags("Categories").Produces(200).Produces(404).Produces<List<Category>>().RequireAuthorization();
         app.MapGet("/categories/{id}", (string id) => this._categoriesService.GetCategory(id)).WithTags("Categories").Produces(200).Produces(404).Produces<Category>().RequireAuthorization();
@@ -50,7 +65,8 @@ public class RouteResolutionHelper : IRouteResolutionHelper
         // Products Routes
         app.MapGet("/products", () => this._productsService.GetProducts()).WithTags("Products").Produces(200).Produces(404).Produces<List<Product>>().RequireAuthorization();
         app.MapGet("/products/{id}", (string id) => this._productsService.GetProduct(id)).WithTags("Products").Produces(200).Produces(404).Produces<Product>().RequireAuthorization();
-        app.MapPost("/products", (Product product) => this._productsService.CreateProduct(product)).WithTags("Products").Produces(200).Produces(404).Produces<Product>().RequireAuthorization();
+        app.MapPost("/product", (Product product) => this._productsService.CreateProduct(product)).WithTags("Products").Produces(200).Produces(404).Produces<Product>().RequireAuthorization();
+        //app.MapPost("/products", (IFormFile file, IAntiforgery antiforgery, HttpContext context) => this._productsService.CreateProducts(file, antiforgery, context)).WithTags("Products").Produces(200).Produces(404).Produces<Product>().RequireAuthorization();
         app.MapPut("/products/{id}", (Product product, string id) => this._productsService.UpdateProductDetails(product, id)).WithTags("Products").Produces(200).Produces(404).Produces<Product>().RequireAuthorization();
         app.MapDelete("/products/{id}", (string id) => this._productsService.RemoveProduct(id)).WithTags("Products").Produces(200).Produces(404).Produces<Product>().RequireAuthorization();
 

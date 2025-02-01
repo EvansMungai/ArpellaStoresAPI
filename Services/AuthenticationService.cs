@@ -1,6 +1,9 @@
 ﻿using ArpellaStores.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata;
+using System.Reflection.Metadata.Ecma335;
 
 namespace ArpellaStores.Services;
 
@@ -8,10 +11,14 @@ public class AuthenticationService : IAuthenticationService
 {
     private readonly UserManager<User> _userManager;
     private readonly SignInManager<User> _signInManager;
-    public AuthenticationService(UserManager<User> userManager, SignInManager<User> signInManager)
+    private readonly RoleManager<IdentityRole> _roleManager;
+    private readonly IUserManagementService _userManagementService;
+    public AuthenticationService(UserManager<User> userManager, SignInManager<User> signInManager, RoleManager<IdentityRole> roleManager, IUserManagementService userManagementService)
     {
         this._userManager = userManager;
         this._signInManager = signInManager;
+        this._roleManager = roleManager;
+        this._userManagementService = userManagementService;
     }
     public async Task<IResult> RegisterUser(UserManager<User> userManager, User model)
     {
@@ -21,12 +28,19 @@ public class AuthenticationService : IAuthenticationService
             LastName = model.LastName,
             PhoneNumber = model.PhoneNumber,
             UserName = model.PhoneNumber,
+            Email = model.Email,
             PasswordHash = model.PasswordHash
         };
         try
         {
             var result = await userManager.CreateAsync(user, user.PasswordHash);
-            return result.Succeeded? Results.Ok("Registration done successfully") : Results.BadRequest(result.Errors);
+            if (result.Succeeded)
+            {
+                var roleAssignmentResult = await _userManagementService.AssignRoleToUserAsync(user.UserName, "Customer");
+                var userDetails = new { user.FirstName, user.LastName, user.PhoneNumber, user.Email };
+                return Results.Ok(userDetails);
+            }
+            return Results.BadRequest(result.Errors);
         }
         catch (Exception ex)
         {
@@ -35,14 +49,8 @@ public class AuthenticationService : IAuthenticationService
     }
     public async Task<IResult> Login(SignInManager<User> signInManager, User model)
     {
-        //var signInResult = await _signInManager.PasswordSignInAsync(
-        //    userName: userName!,
-        //    password: password!,
-        //    isPersistent: false,
-        //    lockoutOnFailure: false
-        //    );
         var user = await _userManager.FindByNameAsync(model.UserName);
-        if(user != null)
+        if (user != null)
         {
             var passwordCheck = await _userManager.CheckPasswordAsync(user, model.PasswordHash);
             if (passwordCheck)
