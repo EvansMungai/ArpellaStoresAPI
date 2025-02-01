@@ -21,13 +21,6 @@ public class UserManagementService : IUserManagementService
     #region Users 
     public async Task<IResult> GetUsers()
     {
-        //List<User> users = await _userManager.Users.ToListAsync();
-        //if (users != null || users.Count != 0)
-        //{
-        //    var userDetails = users.Select(u => new { u.UserName, u.Email, u.PhoneNumber, u.FirstName, u.LastName }).ToList();
-        //    return Results.Ok(userDetails);
-        //}
-        //return Results.NotFound("No users exist");
         var query = from user in _context.Users
                     join userRoles in _context.UserRoles on user.Id equals userRoles.UserId
                     join role in _context.Roles on userRoles.RoleId equals role.Id
@@ -45,8 +38,23 @@ public class UserManagementService : IUserManagementService
     }
     public async Task<IResult> GetUser(string number)
     {
-        User user = _userManager.Users.SingleOrDefault(u => u.PhoneNumber == number);
-        return user == null ? Results.NotFound($"User with Username = {number} was not found") : Results.Ok(user);
+        //User user = _userManager.Users.SingleOrDefault(u => u.PhoneNumber == number);
+        //return user == null ? Results.NotFound($"User with Username = {number} was not found") : Results.Ok(user);
+        var query = from user in _context.Users
+                    join userRoles in _context.UserRoles on user.Id equals userRoles.UserId
+                    join role in _context.Roles on userRoles.RoleId equals role.Id
+                    where user.UserName == number
+                    select new
+                    {
+                        UserName = user.UserName,
+                        Email = user.Email,
+                        PhoneNumber = user.PhoneNumber,
+                        FirstName = user.FirstName,
+                        LastName = user.LastName,
+                        Role = role.Name,
+                    };
+        var result = query.ToList();
+        return result == null ? Results.NotFound($"User with Username = {number} was not found") : Results.Ok(result);
     }
     public async Task<IResult> RemoveUser(string number)
     {
@@ -84,13 +92,28 @@ public class UserManagementService : IUserManagementService
         {
             return Results.NotFound($"User with Username {userId} not found");
         }
+
         if (await _userManager.IsInRoleAsync(user, roleName))
         {
             return Results.BadRequest($"User is already in the role {roleName}");
         }
-        await _userManager.AddToRoleAsync(user, roleName);
-        return Results.Ok($"User with id {userId} has been assigned role = {roleName}");
+
+        var currentRoles = await _userManager.GetRolesAsync(user);
+        var removeResult = await _userManager.RemoveFromRolesAsync(user, currentRoles);
+        if (!removeResult.Succeeded)
+        {
+            return Results.BadRequest("There was an error in removing the user's existing roles");
+        }
+
+        var addResult = await _userManager.AddToRoleAsync(user, roleName);
+        if (!addResult.Succeeded)
+        {
+            return Results.BadRequest("There was an error in assigning the new role to the user");
+        }
+
+        return Results.Ok($"User with Username {userId} has been assigned role = {roleName}");
     }
+
 
 
     public async Task<List<string>> GetRoles()

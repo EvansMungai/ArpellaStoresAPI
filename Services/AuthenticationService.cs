@@ -12,38 +12,35 @@ public class AuthenticationService : IAuthenticationService
     private readonly UserManager<User> _userManager;
     private readonly SignInManager<User> _signInManager;
     private readonly RoleManager<IdentityRole> _roleManager;
-    public AuthenticationService(UserManager<User> userManager, SignInManager<User> signInManager, RoleManager<IdentityRole> roleManager)
+    private readonly IUserManagementService _userManagementService;
+    public AuthenticationService(UserManager<User> userManager, SignInManager<User> signInManager, RoleManager<IdentityRole> roleManager, IUserManagementService userManagementService)
     {
         this._userManager = userManager;
         this._signInManager = signInManager;
         this._roleManager = roleManager;
+        this._userManagementService = userManagementService;
     }
     public async Task<IResult> RegisterUser(UserManager<User> userManager, User model)
     {
-        var existingUser = await _userManager.FindByEmailAsync(model.Email);
-        if(existingUser != null)  return Results.BadRequest("User already exists"); 
         User user = new User
         {
             FirstName = model.FirstName,
             LastName = model.LastName,
             PhoneNumber = model.PhoneNumber,
             UserName = model.PhoneNumber,
-            Email = model.Email
+            Email = model.Email,
+            PasswordHash = model.PasswordHash
         };
         try
         {
-            var result = await userManager.CreateAsync(user, model.PasswordHash);
-            var userDetails = new { user.FirstName, user.LastName, user.PhoneNumber, user.Email };
+            var result = await userManager.CreateAsync(user, user.PasswordHash);
             if (result.Succeeded)
             {
-                await _userManager.AddToRoleAsync(user, "Customer");
-                await _signInManager.SignInAsync(user, isPersistent: false);
+                var roleAssignmentResult = await _userManagementService.AssignRoleToUserAsync(user.UserName, "Customer");
+                var userDetails = new { user.FirstName, user.LastName, user.PhoneNumber, user.Email };
                 return Results.Ok(userDetails);
             }
-            else
-            {
-                return Results.BadRequest(result.Errors);
-            }
+            return Results.BadRequest(result.Errors);
         }
         catch (Exception ex)
         {
@@ -52,12 +49,6 @@ public class AuthenticationService : IAuthenticationService
     }
     public async Task<IResult> Login(SignInManager<User> signInManager, User model)
     {
-        //var signInResult = await _signInManager.PasswordSignInAsync(
-        //    userName: userName!,
-        //    password: password!,
-        //    isPersistent: false,
-        //    lockoutOnFailure: false
-        //    );
         var user = await _userManager.FindByNameAsync(model.UserName);
         if (user != null)
         {
@@ -79,5 +70,5 @@ public class AuthenticationService : IAuthenticationService
         }
         //return signInResult.Succeeded ? Results.Ok("You are successfully Logged in") : Results.BadRequest("Error occcured");
     }
-    
+
 }
