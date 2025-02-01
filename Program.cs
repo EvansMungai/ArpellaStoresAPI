@@ -27,6 +27,10 @@ builder.Services.AddAuthentication();
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("AdminPolicy", policy => policy.RequireRole("Admin"));
+    options.AddPolicy("CustomerPolicy", policy => policy.RequireRole("Customer"));
+    options.AddPolicy("OrderManager", policy => policy.RequireRole("Order Manager", "Admin"));
+    options.AddPolicy("DeliveryGuy", policy => policy.RequireRole("DeliveryGuy", "Admin"));
+    options.AddPolicy("Accountant", policy => policy.RequireRole("Accountant", "Admin"));
 });
 builder.Services.AddTransient<ICategoriesService, CategoriesService>();
 builder.Services.AddTransient<ISubcategoriesServices, SubcategoriesService>();
@@ -36,7 +40,7 @@ builder.Services.AddTransient<IFinalPriceService, FinalPriceService>();
 builder.Services.AddTransient<IDiscountService, DiscountService>();
 builder.Services.AddTransient<ICouponService, CouponService>();
 builder.Services.AddTransient<IFlashsaleService, FlashsaleService>();
-builder.Services.AddTransient<IAdminService, AdminService>();
+builder.Services.AddTransient<IUserManagementService, UserManagementService>();
 builder.Services.AddTransient<IAuthenticationService, AuthenticationService>();
 builder.Services.AddTransient<IRouteResolutionHelper, RouteResolutionHelper>();
 

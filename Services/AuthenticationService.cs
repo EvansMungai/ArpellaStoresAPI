@@ -20,21 +20,24 @@ public class AuthenticationService : IAuthenticationService
     }
     public async Task<IResult> RegisterUser(UserManager<User> userManager, User model)
     {
+        var existingUser = await _userManager.FindByEmailAsync(model.Email);
+        if(existingUser != null)  return Results.BadRequest("User already exists"); 
         User user = new User
         {
             FirstName = model.FirstName,
             LastName = model.LastName,
             PhoneNumber = model.PhoneNumber,
             UserName = model.PhoneNumber,
-            PasswordHash = model.PasswordHash
+            Email = model.Email
         };
         try
         {
-            var result = await userManager.CreateAsync(user, user.PasswordHash);
+            var result = await userManager.CreateAsync(user, model.PasswordHash);
             var userDetails = new { user.FirstName, user.LastName, user.PhoneNumber, user.Email };
             if (result.Succeeded)
             {
                 await _userManager.AddToRoleAsync(user, "Customer");
+                await _signInManager.SignInAsync(user, isPersistent: false);
                 return Results.Ok(userDetails);
             }
             else
