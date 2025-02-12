@@ -1,9 +1,11 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using ArpellaStores.Models;
+using Microsoft.AspNetCore.Identity;
 
 namespace ArpellaStores.Services;
 
 public interface IUserManagementService
 {
+    Task<IResult> RegisterSpecialUsers(UserManager<User> userManager, User model, string role);
     Task<IResult> GetUsers();
     Task<IResult> GetUserDetails(string number);
     Task<IResult> GetUser(string number);

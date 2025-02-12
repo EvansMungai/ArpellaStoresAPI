@@ -1,5 +1,6 @@
 ﻿using ArpellaStores.Models;
 using ArpellaStores.Services;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
 
 namespace ArpellaStores.Helpers;
@@ -48,6 +49,7 @@ public class RouteResolutionHelper : IRouteResolutionHelper
         app.MapGet("/user/{id}", (string id)=> this._userManagementService.GetUser(id)).WithTags("Admin").Produces(200).Produces(404).Produces<User>().RequireAuthorization();
         app.MapDelete("/user/{id}", (string id) => this._userManagementService.RemoveUser(id)).WithTags("Admin").Produces(200).Produces(404).Produces<User>().RequireAuthorization();
         app.MapPut("/userrole/{id}", (string id, string role) => this._userManagementService.AssignRoleToUserAsync(id, role)).WithTags("Admin").Produces(200).Produces(404).Produces<User>().RequireAuthorization();
+        app.MapPost("/control", (UserManager<User> userManager, User model, string role) => this._userManagementService.RegisterSpecialUsers(userManager, model, role)).WithTags("Admin").Produces(200).Produces(404).Produces<User>().RequireAuthorization();
         #endregion
         // Categories Routes
         app.MapGet("/categories", () => this._categoriesService.GetCategories()).WithTags("Categories").Produces(200).Produces(404).Produces<List<Category>>().RequireAuthorization();
