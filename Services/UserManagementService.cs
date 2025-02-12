@@ -19,6 +19,32 @@ public class UserManagementService : IUserManagementService
         this._context = context;
     }
     #region Users 
+    public async Task<IResult> RegisterSpecialUsers(UserManager<User> userManager, User model, string role)
+    {
+        User user = new User
+        {
+            FirstName = model.FirstName,
+            LastName = model.LastName,
+            PhoneNumber = model.PhoneNumber,
+            UserName = model.PhoneNumber,
+            Email = model.Email,
+            PasswordHash = model.PasswordHash
+        };
+        try
+        {
+            var result = await userManager.CreateAsync(user, user.PasswordHash);
+            if (result.Succeeded)
+            {
+                await AssignRoleToUserAsync(user.UserName, role);
+                return await GetUser(user.UserName);
+            }
+            return Results.BadRequest(result.Errors);
+        }
+        catch (Exception ex)
+        {
+            return Results.BadRequest("Error occurred!: " + ex.Message);
+        }
+    }
     public async Task<IResult> GetUsers()
     {
         var query = from user in _context.Users
