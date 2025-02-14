@@ -27,6 +27,7 @@ builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("AdminPolicy", policy => policy.RequireRole("Admin"));
     options.AddPolicy("CustomerPolicy", policy => policy.RequireRole("Customer"));
+    options.AddPolicy("InventoryManagerPolicy", policy => policy.RequireRole("Inventory Manager", "Admin"));
     options.AddPolicy("OrderManager", policy => policy.RequireRole("Order Manager", "Admin"));
     options.AddPolicy("DeliveryGuy", policy => policy.RequireRole("DeliveryGuy", "Admin"));
     options.AddPolicy("Accountant", policy => policy.RequireRole("Accountant", "Admin"));
@@ -65,7 +66,6 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI(c =>
     {
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "ARPELLA STORES API V1");
-        c.InjectJavascript("/swagger-custom.js");
     });
 }
 

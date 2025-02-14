@@ -2,7 +2,6 @@
 using ArpellaStores.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
 
 namespace ArpellaStores.Helpers;
 
