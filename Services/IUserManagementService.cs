@@ -7,6 +7,7 @@ public interface IUserManagementService
 {
     Task<IResult> RegisterSpecialUsers(UserManager<User> userManager, User model, string role);
     Task<IResult> GetUsers();
+    Task<IResult> GetSpecialUsers();
     Task<IResult> GetUserDetails(string number);
     Task<IResult> GetUser(string number);
     Task<IResult> RemoveUser(string number);
