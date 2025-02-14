@@ -62,6 +62,25 @@ public class UserManagementService : IUserManagementService
         var result = query.ToList();
         return Results.Ok(result);
     }
+    public async Task<IResult> GetSpecialUsers()
+    {
+        var excludedRoleId = _context.Roles.Where(role => role.Name == "Customer").Select(role => role.Id).SingleOrDefault();
+        var query = from user in _context.Users
+                    join userRoles in _context.UserRoles on user.Id equals userRoles.UserId
+                    join role in _context.Roles on userRoles.RoleId equals role.Id
+                    where(userRoles.RoleId != excludedRoleId)
+                    select new
+                    {
+                        UserName = user.UserName,
+                        Email = user.Email,
+                        PhoneNumber = user.PhoneNumber,
+                        FirstName = user.FirstName,
+                        LastName = user.LastName,
+                        Role = role.Name,
+                    };
+        var result = query.ToList();
+        return Results.Ok(result);
+    }
     public async Task<IResult> GetUserDetails(string number)
     {
         User user = _userManager.Users.SingleOrDefault(u => u.PhoneNumber == number);
