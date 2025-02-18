@@ -105,6 +105,10 @@ public class AuthenticationService : IAuthenticationService
             return Results.BadRequest("User not found");
         }
     }
-
+    public async Task<IResult> LogOut(SignInManager<User> signInManager)
+    {
+        await _signInManager.SignOutAsync();
+        return Results.Ok("Successfully logged out");
+    }
 
 }

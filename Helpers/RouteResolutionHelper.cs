@@ -34,7 +34,8 @@ public class RouteResolutionHelper : IRouteResolutionHelper
 
         // Authentication Routes
         app.MapPost("/register", (UserManager<User> userManager, User model) => this._authenticationService.RegisterUser(userManager, model)).WithTags("Authentication");
-        app.MapPost("/login", (SignInManager<User> signInManager, User model)=> this._authenticationService.Login(signInManager, model)).WithTags("Authentication");
+        app.MapPost("/login", (SignInManager<User> signInManager, UserManager<User> userManager, User model) => this._authenticationService.Login(signInManager, userManager, model)).WithTags("Authentication");
+        app.MapPost("/logout", (SignInManager<User> signInManager) => this._authenticationService.LogOut(signInManager)).WithTags("Authentication");
 
         #region Admin Routes
         // Roles
