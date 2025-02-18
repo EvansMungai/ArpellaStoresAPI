@@ -51,6 +51,7 @@ public class RouteResolutionHelper : IRouteResolutionHelper
         app.MapGet("/special-users", ()=> this._userManagementService.GetSpecialUsers()).WithTags("Admin").Produces(200).Produces(404).Produces<User>().RequireAuthorization("AdminPolicy");
         app.MapDelete("/user/{id}", (string id) => this._userManagementService.RemoveUser(id)).WithTags("Admin").Produces(200).Produces(404).Produces<User>().RequireAuthorization("AdminPolicy");
         app.MapPut("/userrole/{id}", (string id, string role) => this._userManagementService.AssignRoleToUserAsync(id, role)).WithTags("Admin").Produces(200).Produces(404).Produces<User>().RequireAuthorization();
+        app.MapPut("/userdetails/{id}", (string id, User update) => this._userManagementService.UpdateUserDetails(id, update)).WithTags("Admin").Produces(200).Produces(404).Produces<User>().RequireAuthorization();
         app.MapPost("/control",  (UserManager<User> userManager, UserProfile profile) => this._userManagementService.RegisterSpecialUsers(userManager, profile.User, profile.Role)).WithTags("Admin").Produces(200).Produces(404).Produces<User>();
         #endregion
 

@@ -9,6 +9,7 @@ public interface IUserManagementService
     Task<IResult> GetUsers();
     Task<IResult> GetSpecialUsers();
     Task<IResult> GetUserDetails(string number);
+    Task<IResult> UpdateUserDetails(string number, User update);
     Task<IResult> GetUser(string number);
     Task<IResult> RemoveUser(string number);
     Task<List<string>> GetRoles();

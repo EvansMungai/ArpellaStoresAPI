@@ -68,7 +68,7 @@ public class UserManagementService : IUserManagementService
         var query = from user in _context.Users
                     join userRoles in _context.UserRoles on user.Id equals userRoles.UserId
                     join role in _context.Roles on userRoles.RoleId equals role.Id
-                    where(userRoles.RoleId != excludedRoleId)
+                    where (userRoles.RoleId != excludedRoleId)
                     select new
                     {
                         UserName = user.UserName,
@@ -104,6 +104,23 @@ public class UserManagementService : IUserManagementService
                     };
         var result = query.ToList();
         return result == null ? Results.NotFound($"User with Username = {number} was not found") : Results.Ok(result);
+    }
+    public async Task<IResult> UpdateUserDetails(string number, User model)
+    {
+        User retrievedUser = await _userManager.FindByNameAsync(number);
+        if (retrievedUser == null)
+            return Results.NotFound($"User with Username = {number} was not found");
+        retrievedUser.FirstName = model.FirstName;
+        retrievedUser.LastName = model.LastName;
+        retrievedUser.PhoneNumber = model.PhoneNumber;
+        retrievedUser.UserName = model.PhoneNumber;
+        retrievedUser.Email = model.Email;
+        retrievedUser.PasswordHash = model.PasswordHash;
+        
+        var result = await _userManager.UpdateAsync(retrievedUser);
+        if (!result.Succeeded)
+            return Results.BadRequest(result.Errors);
+        return Results.Ok(retrievedUser);
     }
     public async Task<IResult> RemoveUser(string number)
     {
