@@ -15,9 +15,9 @@ public class InventoryService : IInventoryService
         var inventories = _context.Inventories.ToList();
         return inventories == null || inventories.Count == 0 ? Results.NotFound("No inventories found") : Results.Ok(inventories);
     }
-    public async Task<IResult> GetInventory(int id)
+    public async Task<IResult> GetInventory(string id)
     {
-        Inventory? inventory = _context.Inventories.SingleOrDefault(i => i.InventoryId == id);
+        Inventory? inventory = _context.Inventories.SingleOrDefault(i => i.ProductId == id);
         return inventory == null ? Results.NotFound($"Inventory with InventoryId = {id} was not found") : Results.Ok(inventory);
     }
     public async Task<IResult> CreateInventory(Inventory inventory)
@@ -39,9 +39,9 @@ public class InventoryService : IInventoryService
             return Results.NotFound(ex.Message);
         }
     }
-    public async Task<IResult> UpdateInventory(Inventory update, int id)
+    public async Task<IResult> UpdateInventory(Inventory update, string id)
     {
-        Inventory? retrievedInventory = _context.Inventories.FirstOrDefault(i => i.InventoryId == id);
+        Inventory? retrievedInventory = _context.Inventories.FirstOrDefault(i => i.ProductId == id);
         if (retrievedInventory != null)
         {
             retrievedInventory.ProductId = update.ProductId;
@@ -63,9 +63,9 @@ public class InventoryService : IInventoryService
             return Results.NotFound($"Inventory with InventoryID = {id} was not found");
         }
     }
-    public async Task<IResult> RemoveInventory(int id)
+    public async Task<IResult> RemoveInventory(string id)
     {
-        Inventory? retrievedInventory = _context.Inventories.FirstOrDefault(i => i.InventoryId == id);
+        Inventory? retrievedInventory = _context.Inventories.FirstOrDefault(i => i.ProductId == id);
         if (retrievedInventory != null)
         {
             try
