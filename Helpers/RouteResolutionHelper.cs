@@ -27,6 +27,7 @@ public class RouteResolutionHelper : IRouteResolutionHelper
         _flashsaleService = flashsaleService;
         _userManagementService = userManagementService;
         _authenticationService = authenticationService;
+        
     }
     public void addMappings(WebApplication app)
     {
@@ -46,7 +47,6 @@ public class RouteResolutionHelper : IRouteResolutionHelper
         app.MapDelete("/role/{role}", (string role) => this._userManagementService.RemoveRole(role)).WithTags("Admin").Produces(200).Produces(404);
         // Users
         app.MapGet("/users", ()=> this._userManagementService.GetUsers()).WithTags("Admin").Produces(200).Produces(404).Produces<List<User>>();
-        app.MapGet("/userdetails/{number}", (string number)=> this._userManagementService.GetUserDetails(number)).WithTags("Admin").Produces(200).Produces(404).Produces<List<User>>();
         app.MapGet("/user/{id}", (string id)=> this._userManagementService.GetUser(id)).WithTags("Admin").Produces(200).Produces(404).Produces<User>();
         app.MapGet("/special-users", ()=> this._userManagementService.GetSpecialUsers()).WithTags("Admin").Produces(200).Produces(404).Produces<User>();
         app.MapDelete("/user/{id}", (string id) => this._userManagementService.RemoveUser(id)).WithTags("Admin").Produces(200).Produces(404).Produces<User>();
@@ -77,12 +77,17 @@ public class RouteResolutionHelper : IRouteResolutionHelper
         app.MapPut("/products/{id}", (Product product, string id) => this._productsService.UpdateProductDetails(product, id)).WithTags("Products").Produces(200).Produces(404).Produces<Product>();
         app.MapDelete("/products/{id}", (string id) => this._productsService.RemoveProduct(id)).WithTags("Products").Produces(200).Produces(404).Produces<Product>();
 
+        //Product Images Routes
+        app.MapGet("/product-image-details", () => this._productsService.GetProductImageDetails());
+        app.MapPost("/product-image-details", (HttpRequest request) => this._productsService.CreateProductImagesDetails(request)).WithTags("Product Images");
+        app.MapDelete("/product-image-details/{id}", (int id) => this._productsService.DeleteProductImagesDetails(id)).WithTags("Product Images").Produces(200).Produces(404);
+
         // Inventory Routes
         app.MapGet("/inventories", () => this._inventoryService.GetInventories()).WithTags("Inventories").Produces(200).Produces(404).Produces<List<Inventory>>();
-        app.MapGet("/inventory/{id}", (int id) => this._inventoryService.GetInventory(id)).WithTags("Inventories").Produces(200).Produces(404).Produces<Inventory>();
+        app.MapGet("/inventory/{id}", (string id) => this._inventoryService.GetInventory(id)).WithTags("Inventories").Produces(200).Produces(404).Produces<Inventory>();
         app.MapPost("/inventories", (Inventory inventory) => this._inventoryService.CreateInventory(inventory)).WithTags("Inventories").Produces(200).Produces(404).Produces<Inventory>();
-        app.MapPut("/inventory/{id}", (Inventory inventory, int id) => this._inventoryService.UpdateInventory(inventory, id)).WithTags("Inventories").Produces(200).Produces(404).Produces<Inventory>();
-        app.MapDelete("/inventory/{id}", (int id) => this._inventoryService.RemoveInventory(id)).WithTags("Inventories").Produces(200).Produces(404).Produces<Inventory>();
+        app.MapPut("/inventory/{id}", (Inventory inventory, string id) => this._inventoryService.UpdateInventory(inventory, id)).WithTags("Inventories").Produces(200).Produces(404).Produces<Inventory>();
+        app.MapDelete("/inventory/{id}", (string id) => this._inventoryService.RemoveInventory(id)).WithTags("Inventories").Produces(200).Produces(404).Produces<Inventory>();
 
         // Final Price Route
         app.MapGet("/final-price", (string productId, string? couponCode) => this._discountService.GetFinalPrice(productId, couponCode)).WithTags("Final Price").Produces(200).Produces(404);
