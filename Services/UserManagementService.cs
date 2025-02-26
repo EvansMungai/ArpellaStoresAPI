@@ -81,12 +81,6 @@ public class UserManagementService : IUserManagementService
         var result = query.ToList();
         return Results.Ok(result);
     }
-    public async Task<IResult> GetUserDetails(string number)
-    {
-        User user = _userManager.Users.SingleOrDefault(u => u.PhoneNumber == number);
-        var userDetails = new { user.FirstName, user.LastName, user.PhoneNumber, user.Email };
-        return user == null ? Results.NotFound($"User with phone number = {number} was not found") : Results.Ok(userDetails);
-    }
     public async Task<IResult> GetUser(string number)
     {
         var query = from user in _context.Users
@@ -103,7 +97,7 @@ public class UserManagementService : IUserManagementService
                         Role = role.Name,
                     };
         var result = query.ToList();
-        return result == null ? Results.NotFound($"User with Username = {number} was not found") : Results.Ok(result);
+        return result == null || result.Count == 0 ? Results.NotFound($"User with Username = {number} was not found") : Results.Ok(result);
     }
     public async Task<IResult> UpdateUserDetails(string number, User model)
     {
@@ -135,7 +129,7 @@ public class UserManagementService : IUserManagementService
             var result = await _userManager.DeleteAsync(user);
             if (result.Succeeded)
             {
-                return Results.Ok("User deleted successfully.");
+                return Results.Ok($"User {user} deleted successfully.");
             }
             else
             {
@@ -150,6 +144,7 @@ public class UserManagementService : IUserManagementService
 
     }
     #endregion
+
     #region Roles
     public async Task<IResult> AssignRoleToUserAsync(string userId, string roleName)
     {

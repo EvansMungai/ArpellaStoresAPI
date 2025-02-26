@@ -2,10 +2,7 @@
 using ArpellaStores.Models;
 using CsvHelper;
 using CsvHelper.Configuration;
-using Microsoft.AspNetCore.Antiforgery;
 using OfficeOpenXml;
-using System.ComponentModel;
-using System.Drawing;
 using System.Globalization;
 
 namespace ArpellaStores.Services
@@ -13,9 +10,11 @@ namespace ArpellaStores.Services
     public class ProductsService : IProductsService
     {
         private readonly ArpellaContext _context;
-        public ProductsService(ArpellaContext context)
+        private readonly ICloudinaryService _cloudinaryService;
+        public ProductsService(ArpellaContext context, ICloudinaryService cloudinaryService)
         {
             _context = context;
+            _cloudinaryService = cloudinaryService;
         }
         public async Task<IResult> GetProducts()
         {
@@ -34,7 +33,8 @@ namespace ArpellaStores.Services
                 Id = product.Id,
                 Name = product.Name,
                 Price = product.Price,
-                Category = product.Category
+                Category = product.Category,
+                Subcategory = product.Subcategory
             };
             try
             {
@@ -75,6 +75,7 @@ namespace ArpellaStores.Services
                 retrievedProduct.Name = product.Name;
                 retrievedProduct.Price = product.Price;
                 retrievedProduct.Category = product.Category;
+                retrievedProduct.Subcategory = product.Subcategory;
                 try
                 {
                     _context.Update(retrievedProduct);
@@ -123,6 +124,80 @@ namespace ArpellaStores.Services
                 return Results.NotFound($"Product with ProductID = {productId} was not Found");
             }
         }
+        #region Product Images Functions
+        public async Task<IResult> GetProductImageDetails()
+        {
+            var productImageDetails = _context.Productimages.ToList();
+            return productImageDetails == null || productImageDetails.Count == 0 ? Results.NotFound("No Product Image Details Found") : Results.Ok(productImageDetails);
+        }
+        public async Task<IResult> CreateProductImagesDetails(HttpRequest request)
+        {
+            var form = await request.ReadFormAsync();
+
+            //if (!int.TryParse(form["ProductId"], out int productId))
+            //{
+            //    return Results.BadRequest("Invalid or missing ProductId.");
+            //}
+            var productId = form["ProductId"].ToString();
+            if (string.IsNullOrEmpty(productId))
+                return Results.BadRequest("Invalid or missing ProductId.");
+
+            bool isPrimary = false;
+            if (bool.TryParse(form["IsPrimary"], out bool parsedIsPrimary))
+                isPrimary = parsedIsPrimary;
+
+
+            var file = form.Files.FirstOrDefault();
+            if (file == null)
+                return Results.BadRequest("No image file provided");
+            var imageUrl = await GetProductImageUrl(file);
+
+            var newProductImageDetails = new Productimage
+            {
+                ProductId = productId,
+                ImageUrl = imageUrl,
+                IsPrimary = isPrimary,
+                CreatedAt = DateTime.Now
+            };
+
+            try
+            {
+                _context.Productimages.Add(newProductImageDetails);
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                return Results.BadRequest(ex.Message);
+            }
+
+            return Results.Ok(newProductImageDetails);
+        }
+
+        public async Task<IResult> DeleteProductImagesDetails(int id)
+        {
+            var existingProductImage = await _context.Productimages.FindAsync(id);
+            if (existingProductImage == null)
+            {
+                return Results.NotFound("Product image not found");
+            }
+
+            _context.Productimages.Remove(existingProductImage);
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                return Results.BadRequest(ex.Message);
+            }
+
+            return Results.Ok("Product image details deleted successfully");
+        }
+
+
+        #endregion
+
         #region Utilities
         public List<Product> ParseCsv(Stream fileStream)
         {
@@ -150,6 +225,14 @@ namespace ArpellaStores.Services
             }
             return products;
         }
+        public async Task<string> GetProductImageUrl(IFormFile formFile)
+        {
+            if (formFile == null)
+                throw new ArgumentException("No file uploaded");
+            var url = await _cloudinaryService.UploadImageAsync(formFile);
+            return url;
+        }
+
         #endregion
     }
 }

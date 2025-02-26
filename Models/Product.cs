@@ -7,7 +7,7 @@ public partial class Product
 {
     public string Id { get; set; } = null!;
 
-    public string Name { get; set; }
+    public string? Name { get; set; }
 
     public decimal Price { get; set; }
 
@@ -15,9 +15,23 @@ public partial class Product
 
     public decimal? PriceAfterDiscount { get; set; }
 
+    public DateTime? CreatedAt { get; set; }
+
+    public DateTime? UpdatedAt { get; set; }
+
+    public decimal? TaxRate { get; set; }
+
+    public int? DiscountQuantity { get; set; }
+
+    public string? Subcategory { get; set; }
+
     public virtual Category? CategoryNavigation { get; set; }
 
     public virtual ICollection<Flashsale> Flashsales { get; set; } = new List<Flashsale>();
 
-    public virtual ICollection<Inventory> Inventories { get; set; } = new List<Inventory>();
+    public virtual Inventory IdNavigation { get; set; } = null!;
+
+    public virtual ICollection<Productimage> Productimages { get; set; } = new List<Productimage>();
+
+    public virtual Subcategory? SubcategoryNavigation { get; set; }
 }

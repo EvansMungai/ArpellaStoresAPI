@@ -40,6 +40,7 @@ builder.Services.AddTransient<IFinalPriceService, FinalPriceService>();
 builder.Services.AddTransient<IDiscountService, DiscountService>();
 builder.Services.AddTransient<ICouponService, CouponService>();
 builder.Services.AddTransient<IFlashsaleService, FlashsaleService>();
+builder.Services.AddTransient<ICloudinaryService, CloudinaryService>();
 builder.Services.AddTransient<IUserManagementService, UserManagementService>();
 builder.Services.AddTransient<IAuthenticationService, AuthenticationService>();
 builder.Services.AddTransient<IRouteResolutionHelper, RouteResolutionHelper>();

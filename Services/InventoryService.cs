@@ -12,12 +12,12 @@ public class InventoryService : IInventoryService
     }
     public async Task<IResult> GetInventories()
     {
-        var inventories = _context.Inventories.ToList();
+        var inventories = _context.Inventories.Select(i => new { i.ProductId, i.StockQuantity, i.StockThreshold, i.StockPrice, i.CreatedAt, i.UpdatedAt }).ToList();
         return inventories == null || inventories.Count == 0 ? Results.NotFound("No inventories found") : Results.Ok(inventories);
     }
     public async Task<IResult> GetInventory(string id)
     {
-        Inventory? inventory = _context.Inventories.SingleOrDefault(i => i.ProductId == id);
+        var inventory = _context.Inventories.Where(i => i.ProductId == id).Select(i => new { i.ProductId, i.StockQuantity, i.StockThreshold, i.StockPrice, i.CreatedAt, i.UpdatedAt }).SingleOrDefault();
         return inventory == null ? Results.NotFound($"Inventory with InventoryId = {id} was not found") : Results.Ok(inventory);
     }
     public async Task<IResult> CreateInventory(Inventory inventory)
@@ -47,6 +47,7 @@ public class InventoryService : IInventoryService
             retrievedInventory.ProductId = update.ProductId;
             retrievedInventory.StockQuantity = update.StockQuantity;
             retrievedInventory.StockThreshold = update.StockThreshold;
+            retrievedInventory.UpdatedAt = DateTime.Now;
             try
             {
                 _context.Inventories.Update(retrievedInventory);
@@ -73,7 +74,8 @@ public class InventoryService : IInventoryService
                 _context.Inventories.Remove(retrievedInventory);
                 await _context.SaveChangesAsync();
                 return Results.Ok(retrievedInventory);
-            } catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 return Results.Problem("Exception: " + ex.Message);
             }

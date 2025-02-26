@@ -3,15 +3,15 @@ using System.Collections.Generic;
 
 namespace ArpellaStores.Models;
 
-public partial class Inventory
+public partial class Productimage
 {
-    public string ProductId { get; set; } = null!;
+    public int ImageId { get; set; }
 
-    public int? StockQuantity { get; set; }
+    public string? ProductId { get; set; }
 
-    public int? StockThreshold { get; set; }
+    public string ImageUrl { get; set; } = null!;
 
-    public decimal? StockPrice { get; set; }
+    public bool? IsPrimary { get; set; }
 
     public DateTime? CreatedAt { get; set; }
 
