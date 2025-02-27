@@ -113,7 +113,7 @@ public class RouteResolutionHelper : IRouteResolutionHelper
         app.MapGet("/orders", ()=>  this._orderService.GetOrders()).WithTags("Orders").Produces(200).Produces(404).Produces<List<Order>>();
         app.MapGet("/order/{id}", (string id) => this._orderService.GetOrder(id)).WithTags("Orders").Produces(200).Produces(404).Produces<Order>();
         app.MapPost("/order", (Order order) => this._orderService.CreateOrder(order)).WithTags("Orders").Produces(200).Produces(404).Produces<Order>();
-        app.MapDelete("/order", (string id) => this._orderService.RemoveOrder(id)).WithTags("Orders").Produces(200).Produces(404).Produces<Order>();
+        app.MapDelete("/order/{id}", (string id) => this._orderService.RemoveOrder(id)).WithTags("Orders").Produces(200).Produces(404).Produces<Order>();
         #endregion
     }
 }
