@@ -14,9 +14,10 @@ public class RouteResolutionHelper : IRouteResolutionHelper
     private readonly IDiscountService _discountService;
     private readonly ICouponService _couponService;
     private readonly IFlashsaleService _flashsaleService;
+    private readonly IOrderService _orderService;
     private readonly IUserManagementService _userManagementService;
     private readonly IAuthenticationService _authenticationService;
-    public RouteResolutionHelper(ICategoriesService categoriesService, ISubcategoriesServices subcategoriesServices, IProductsService productsService, IInventoryService inventoryService, IDiscountService discountService, ICouponService couponService, IFlashsaleService flashsaleService,IUserManagementService userManagementService, IAuthenticationService authenticationService)
+    public RouteResolutionHelper(ICategoriesService categoriesService, ISubcategoriesServices subcategoriesServices, IProductsService productsService, IInventoryService inventoryService, IDiscountService discountService, ICouponService couponService, IFlashsaleService flashsaleService, IOrderService orderService ,IUserManagementService userManagementService, IAuthenticationService authenticationService)
     {
         _categoriesService = categoriesService;
         _subcategoriesServices = subcategoriesServices;
@@ -25,6 +26,7 @@ public class RouteResolutionHelper : IRouteResolutionHelper
         _discountService = discountService;
         _couponService = couponService;
         _flashsaleService = flashsaleService;
+        _orderService = orderService;
         _userManagementService = userManagementService;
         _authenticationService = authenticationService;
         
@@ -107,6 +109,11 @@ public class RouteResolutionHelper : IRouteResolutionHelper
         app.MapDelete("/flashsale/{id}", (int id) => this._flashsaleService.RemoveFlashsale(id)).WithTags("Flash Sales").Produces(200).Produces(404).Produces(500).Produces<Flashsale>();
         #endregion
 
-
+        #region Orders Routes
+        app.MapGet("/orders", ()=>  this._orderService.GetOrders()).WithTags("Orders").Produces(200).Produces(404).Produces<List<Order>>();
+        app.MapGet("/order/{id}", (string id) => this._orderService.GetOrder(id)).WithTags("Orders").Produces(200).Produces(404).Produces<Order>();
+        app.MapPost("/order", (Order order) => this._orderService.CreateOrder(order)).WithTags("Orders").Produces(200).Produces(404).Produces<Order>();
+        app.MapDelete("/order", (string id) => this._orderService.RemoveOrder(id)).WithTags("Orders").Produces(200).Produces(404).Produces<Order>();
+        #endregion
     }
 }
