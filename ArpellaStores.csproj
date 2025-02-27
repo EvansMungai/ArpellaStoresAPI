@@ -8,6 +8,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="arpella\**" />
+    <Content Remove="arpella\**" />
+    <EmbeddedResource Remove="arpella\**" />
+    <None Remove="arpella\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CloudinaryDotNet" Version="1.27.4" />
     <PackageReference Include="CsvHelper" Version="33.0.1" />
     <PackageReference Include="EntityFrameworkCore.Exceptions.MySQL.Pomelo" Version="8.1.3" />
     <PackageReference Include="EPPlus" Version="7.5.3" />

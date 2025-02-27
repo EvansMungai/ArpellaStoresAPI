@@ -31,6 +31,8 @@ public partial class Product
 
     public virtual Inventory IdNavigation { get; set; } = null!;
 
+    public virtual ICollection<Orderitem> Orderitems { get; set; } = new List<Orderitem>();
+
     public virtual ICollection<Productimage> Productimages { get; set; } = new List<Productimage>();
 
     public virtual Subcategory? SubcategoryNavigation { get; set; }

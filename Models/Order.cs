@@ -11,7 +11,8 @@ public partial class Order
 
     public string? Status { get; set; }
 
-    public int? Total { get; set; }
+    public decimal? Total { get; set; }
 
     public virtual User? User { get; set; }
+    public virtual ICollection<Orderitem> Orderitems { get; set; } = new List<Orderitem>();
 }

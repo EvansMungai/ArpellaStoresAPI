@@ -1,4 +1,5 @@
 ﻿using ArpellaStores.Models;
+using CloudinaryDotNet.Core;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -56,24 +57,24 @@ public partial class ArpellaContext : IdentityDbContext<User>
             .UseCollation("utf8mb4_0900_ai_ci")
             .HasCharSet("utf8mb4");
         base.OnModelCreating(modelBuilder);
-        modelBuilder.Entity<IdentityUserLogin<string>>().HasKey(iul => new { iul.LoginProvider, iul.ProviderKey }); 
+        modelBuilder.Entity<IdentityUserLogin<string>>().HasKey(iul => new { iul.LoginProvider, iul.ProviderKey });
         modelBuilder.Entity<IdentityUserRole<string>>().HasKey(iur => new { iur.UserId, iur.RoleId });
         modelBuilder.Entity<IdentityUserToken<string>>().HasKey(iut => new { iut.UserId, iut.LoginProvider, iut.Name });
 
 
         modelBuilder.Entity<Category>(entity =>
-            {
-                entity.HasKey(e => e.Id).HasName("PRIMARY");
+        {
+            entity.HasKey(e => e.Id).HasName("PRIMARY");
 
-                entity.ToTable("categories");
+            entity.ToTable("categories");
 
-                entity.Property(e => e.Id)
-                    .HasMaxLength(30)
-                    .HasColumnName("id");
-                entity.Property(e => e.CategoryName)
-                    .HasMaxLength(50)
-                    .HasColumnName("category_name");
-            });
+            entity.Property(e => e.Id)
+                .HasMaxLength(30)
+                .HasColumnName("id");
+            entity.Property(e => e.CategoryName)
+                .HasMaxLength(50)
+                .HasColumnName("category_name");
+        });
 
         modelBuilder.Entity<Coupon>(entity =>
         {
@@ -210,23 +211,26 @@ public partial class ArpellaContext : IdentityDbContext<User>
             entity.Property(e => e.Status)
                 .HasMaxLength(30)
                 .HasColumnName("status");
-            entity.Property(e => e.Total).HasColumnName("total");
+            entity.Property(e => e.Total)
+                .HasPrecision(10, 2)
+                .HasColumnName("total");
             entity.Property(e => e.UserId)
                 .HasMaxLength(30)
                 .HasColumnName("userId");
 
             entity.HasOne(d => d.User).WithMany(p => p.Orders)
+                .HasPrincipalKey(p => p.UserName)
                 .HasForeignKey(d => d.UserId)
                 .HasConstraintName("orders_ibfk_1");
         });
 
         modelBuilder.Entity<Orderitem>(entity =>
         {
-            entity
-                .HasNoKey()
-                .ToTable("orderitems");
+            entity.HasKey(e => new { e.OrderId, e.ProductId })
+                .HasName("PRIMARY")
+                .HasAnnotation("MySql:IndexPrefixLength", new[] { 0, 0 });
 
-            entity.HasIndex(e => e.OrderId, "orderId");
+            entity.ToTable("orderitems");
 
             entity.HasIndex(e => e.ProductId, "productId");
 
@@ -238,12 +242,14 @@ public partial class ArpellaContext : IdentityDbContext<User>
                 .HasColumnName("productId");
             entity.Property(e => e.Quantity).HasColumnName("quantity");
 
-            entity.HasOne(d => d.Order).WithMany()
+            entity.HasOne(d => d.Order).WithMany(p => p.Orderitems)
                 .HasForeignKey(d => d.OrderId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("orderitems_ibfk_1");
 
-            entity.HasOne(d => d.Product).WithMany()
+            entity.HasOne(d => d.Product).WithMany(p => p.Orderitems)
                 .HasForeignKey(d => d.ProductId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("orderitems_ibfk_2");
         });
 
@@ -388,6 +394,21 @@ public partial class ArpellaContext : IdentityDbContext<User>
 
         //    entity.ToTable("users");
 
+        //    entity.Property(e => e.Id)
+        //        .HasMaxLength(30)
+        //        .HasColumnName("id");
+        //    entity.Property(e => e.Password)
+        //        .HasMaxLength(200)
+        //        .HasColumnName("password");
+        //    entity.Property(e => e.Phone)
+        //        .HasMaxLength(15)
+        //        .HasColumnName("phone");
+        //    entity.Property(e => e.Role)
+        //        .HasMaxLength(20)
+        //        .HasColumnName("role");
+        //    entity.Property(e => e.Username)
+        //        .HasMaxLength(50)
+        //        .HasColumnName("username");
         //});
 
         OnModelCreatingPartial(modelBuilder);
