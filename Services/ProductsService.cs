@@ -44,28 +44,27 @@ namespace ArpellaStores.Services
             catch (Exception ex) { }
             return Results.Ok(newProduct);
         }
-        //public async Task<IResult> CreateProducts(IFormFile file, IAntiforgery antiforgery, HttpContext context)
-        //{
-        //    try
-        //    {
-        //        await antiforgery.ValidateRequestAsync(context);
-        //        if (file == null || file.Length == 0) return Results.BadRequest("File is empty");
-        //        var products = file.FileName.EndsWith("csv") ? ParseCsv(file.OpenReadStream()) : ParseExcel(file.OpenReadStream());
-        //        if (products == null || !products.Any())
-        //        {
-        //            return Results.NotFound("No valid data found in the file");
-        //        }
+        public async Task<IResult> CreateProducts(IFormFile file)
+        {
+            try
+            {
+                if (file == null || file.Length == 0) return Results.BadRequest("File is empty");
+                var products = file.FileName.EndsWith("csv") ? ParseCsv(file.OpenReadStream()) : ParseExcel(file.OpenReadStream());
+                if (products == null || !products.Any())
+                {
+                    return Results.NotFound("No valid data found in the file");
+                }
 
-        //        _context.Products.AddRangeAsync(products);
-        //        await _context.SaveChangesAsync();
-        //        return Results.Ok(products);
+                _context.Products.AddRangeAsync(products);
+                await _context.SaveChangesAsync();
+                return Results.Ok(products);
 
-        //    }
-        //    catch (AntiforgeryValidationException ex)
-        //    {
-        //        return Results.BadRequest(ex.Message);
-        //    }
-        //}
+            }
+            catch (Exception ex)
+            {
+                return Results.BadRequest(ex.InnerException.Message);
+            }
+        }
         public async Task<IResult> UpdateProductDetails(Product product, string id)
         {
             var retrievedProduct = _context.Products.FirstOrDefault(p => p.Id == id);
@@ -219,7 +218,11 @@ namespace ArpellaStores.Services
                     Id = worksheet.Cells[row, 1].Text,
                     Name = worksheet.Cells[row, 2].Text,
                     Price = decimal.Parse(worksheet.Cells[row, 3].Text),
-                    Category = worksheet.Cells[row, 4].Text
+                    Category = worksheet.Cells[row, 4].Text,
+                    Subcategory = worksheet.Cells[row, 5].Text,
+                    Barcodes = worksheet.Cells[row, 6].Text,
+                    TaxRate = decimal.Parse(worksheet.Cells[row, 7].Text),
+                    DiscountQuantity = int.Parse(worksheet.Cells[row, 8].Text)
                 };
                 products.Add(product);
             }

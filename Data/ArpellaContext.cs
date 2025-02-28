@@ -289,6 +289,9 @@ public partial class ArpellaContext : IdentityDbContext<User>
             entity.Property(e => e.Id)
                 .HasMaxLength(30)
                 .HasColumnName("id");
+            entity.Property(e => e.Barcodes)
+                .HasMaxLength(255)
+                .HasColumnName("barcodes");
             entity.Property(e => e.Category)
                 .HasMaxLength(30)
                 .HasColumnName("category");

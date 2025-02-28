@@ -13,7 +13,7 @@ namespace ArpellaStores.Services
         Task<IResult> GetProductImageDetails();
         Task<IResult> CreateProductImagesDetails(HttpRequest request);
         Task<IResult> DeleteProductImagesDetails(int id);
-        //Task<IResult> CreateProducts(IFormFile file, IAntiforgery antiforgery, HttpContext context);
+        Task<IResult> CreateProducts(IFormFile file);
         Task<IResult> UpdateProductDetails(Product product, string id);
         Task<IResult> UpdateProductPrice(string id, decimal price);
         Task<IResult> RemoveProduct(string productId);

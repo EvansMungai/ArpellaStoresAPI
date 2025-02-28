@@ -1,5 +1,9 @@
 ﻿using ArpellaStores.Data;
 using ArpellaStores.Models;
+using CsvHelper.Configuration;
+using CsvHelper;
+using OfficeOpenXml;
+using System.Globalization;
 
 namespace ArpellaStores.Services;
 
@@ -37,6 +41,27 @@ public class InventoryService : IInventoryService
         catch (Exception ex)
         {
             return Results.NotFound(ex.Message);
+        }
+    }
+    public async Task<IResult> CreateInventories(IFormFile file)
+    {
+        try
+        {
+            if (file == null || file.Length == 0) return Results.BadRequest("File is empty");
+            var inventory = file.FileName.EndsWith("csv") ? ParseCsv(file.OpenReadStream()) : ParseExcel(file.OpenReadStream());
+            if (inventory == null || !inventory.Any())
+            {
+                return Results.NotFound("No valid data found in the file");
+            }
+
+            _context.Inventories.AddRangeAsync(inventory);
+            await _context.SaveChangesAsync();
+            return Results.Ok(inventory);
+
+        }
+        catch (Exception ex)
+        {
+            return Results.BadRequest(ex.InnerException.Message);
         }
     }
     public async Task<IResult> UpdateInventory(Inventory update, string id)
@@ -83,4 +108,32 @@ public class InventoryService : IInventoryService
         }
         else { return Results.NotFound($"Inventory with id = {id} was not found"); }
     }
+    #region Utilities
+    public List<Inventory> ParseCsv(Stream fileStream)
+    {
+        using var reader = new StreamReader(fileStream);
+        var config = new CsvConfiguration(CultureInfo.InvariantCulture);
+        using var csv = new CsvReader(reader, config);
+        return csv.GetRecords<Inventory>().ToList();
+    }
+    public List<Inventory> ParseExcel(Stream fileStream)
+    {
+        using var package = new ExcelPackage(fileStream);
+        ExcelWorksheet worksheet = package.Workbook.Worksheets.First();
+        var rowcount = worksheet.Dimension.Rows;
+        var inventories = new List<Inventory>();
+        for (var row = 2; row <= rowcount; row++)
+        {
+            var inventory = new Inventory
+            {
+                ProductId= worksheet.Cells[row, 1].Text,
+                StockQuantity = int.Parse(worksheet.Cells[row, 2].Text),
+                StockThreshold = int.Parse(worksheet.Cells[row, 3].Text),
+                StockPrice = decimal.Parse(worksheet.Cells[row, 4].Text)
+            };
+            inventories.Add(inventory);
+        }
+        return inventories;
+    }
+    #endregion
 }
