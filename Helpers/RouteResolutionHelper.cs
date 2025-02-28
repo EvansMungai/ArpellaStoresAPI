@@ -81,7 +81,7 @@ public class RouteResolutionHelper : IRouteResolutionHelper
         app.MapDelete("/products/{id}", (string id) => this._productsService.RemoveProduct(id)).WithTags("Products").Produces(200).Produces(404).Produces<Product>();
 
         //Product Images Routes
-        app.MapGet("/product-image-details", () => this._productsService.GetProductImageDetails());
+        app.MapGet("/product-image-details", () => this._productsService.GetProductImageDetails()).WithTags("Product Images");
         app.MapPost("/product-image-details", (HttpRequest request) => this._productsService.CreateProductImagesDetails(request)).WithTags("Product Images");
         app.MapDelete("/product-image-details/{id}", (int id) => this._productsService.DeleteProductImagesDetails(id)).WithTags("Product Images").Produces(200).Produces(404);
 
