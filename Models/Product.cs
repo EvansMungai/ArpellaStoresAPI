@@ -25,6 +25,8 @@ public partial class Product
 
     public string? Subcategory { get; set; }
 
+    public string? Barcodes { get; set; }
+
     public virtual Category? CategoryNavigation { get; set; }
 
     public virtual ICollection<Flashsale> Flashsales { get; set; } = new List<Flashsale>();

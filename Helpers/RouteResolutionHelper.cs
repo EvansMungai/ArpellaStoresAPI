@@ -75,7 +75,8 @@ public class RouteResolutionHelper : IRouteResolutionHelper
         // Products Routes
         app.MapGet("/products", () => this._productsService.GetProducts()).WithTags("Products").Produces(200).Produces(404).Produces<List<Product>>();
         app.MapGet("/products/{id}", (string id) => this._productsService.GetProduct(id)).WithTags("Products").Produces(200).Produces(404).Produces<Product>();
-        app.MapPost("/products", (Product product) => this._productsService.CreateProduct(product)).WithTags("Products").Produces(200).Produces(404).Produces<Product>();
+        app.MapPost("/product", (Product product) => this._productsService.CreateProduct(product)).WithTags("Products").Produces(200).Produces(404).Produces<Product>();
+        app.MapPost("/products", (IFormFile file) => this._productsService.CreateProducts(file)).WithTags("Products").Produces(200).Produces(404).Produces<Product>().DisableAntiforgery();
         app.MapPut("/products/{id}", (Product product, string id) => this._productsService.UpdateProductDetails(product, id)).WithTags("Products").Produces(200).Produces(404).Produces<Product>();
         app.MapDelete("/products/{id}", (string id) => this._productsService.RemoveProduct(id)).WithTags("Products").Produces(200).Produces(404).Produces<Product>();
 
@@ -87,7 +88,8 @@ public class RouteResolutionHelper : IRouteResolutionHelper
         // Inventory Routes
         app.MapGet("/inventories", () => this._inventoryService.GetInventories()).WithTags("Inventories").Produces(200).Produces(404).Produces<List<Inventory>>();
         app.MapGet("/inventory/{id}", (string id) => this._inventoryService.GetInventory(id)).WithTags("Inventories").Produces(200).Produces(404).Produces<Inventory>();
-        app.MapPost("/inventories", (Inventory inventory) => this._inventoryService.CreateInventory(inventory)).WithTags("Inventories").Produces(200).Produces(404).Produces<Inventory>();
+        app.MapPost("/inventory", (Inventory inventory) => this._inventoryService.CreateInventory(inventory)).WithTags("Inventories").Produces(200).Produces(404).Produces<Inventory>();
+        app.MapPost("/inventories", (IFormFile file) => this._inventoryService.CreateInventories(file)).WithTags("Inventories").Produces(200).Produces(404).Produces<List<Inventory>>().DisableAntiforgery();
         app.MapPut("/inventory/{id}", (Inventory inventory, string id) => this._inventoryService.UpdateInventory(inventory, id)).WithTags("Inventories").Produces(200).Produces(404).Produces<Inventory>();
         app.MapDelete("/inventory/{id}", (string id) => this._inventoryService.RemoveInventory(id)).WithTags("Inventories").Produces(200).Produces(404).Produces<Inventory>();
 
