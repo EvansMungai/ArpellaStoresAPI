@@ -4,6 +4,7 @@ using CsvHelper.Configuration;
 using CsvHelper;
 using OfficeOpenXml;
 using System.Globalization;
+using Microsoft.EntityFrameworkCore;
 
 namespace ArpellaStores.Services;
 
@@ -109,6 +110,24 @@ public class InventoryService : IInventoryService
         else { return Results.NotFound($"Inventory with id = {id} was not found"); }
     }
     #region Utilities
+    public async Task<IResult> CheckInventoryLevels()
+    {
+        var lowStockItems = _context.Inventories.Where(i => i.StockQuantity <= i.StockThreshold).ToList();
+        if (lowStockItems.Count != 0)
+        {
+            return Results.Ok(new
+            {
+                Message = "The following products are below the stock threshold",
+                Items = lowStockItems.Select(item => new
+                {
+                    ProductId = item.ProductId,
+                    StockQuantity = item.StockQuantity,
+                    StockThreshold = item.StockThreshold
+                })
+            });
+        }
+        return Results.Ok("All inventory levels are above the stock threshold");
+    }
     public List<Inventory> ParseCsv(Stream fileStream)
     {
         using var reader = new StreamReader(fileStream);

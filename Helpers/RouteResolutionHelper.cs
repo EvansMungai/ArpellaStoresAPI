@@ -92,6 +92,7 @@ public class RouteResolutionHelper : IRouteResolutionHelper
         app.MapPost("/inventories", (IFormFile file) => this._inventoryService.CreateInventories(file)).WithTags("Inventories").Produces(200).Produces(404).Produces<List<Inventory>>().DisableAntiforgery();
         app.MapPut("/inventory/{id}", (Inventory inventory, string id) => this._inventoryService.UpdateInventory(inventory, id)).WithTags("Inventories").Produces(200).Produces(404).Produces<Inventory>();
         app.MapDelete("/inventory/{id}", (string id) => this._inventoryService.RemoveInventory(id)).WithTags("Inventories").Produces(200).Produces(404).Produces<Inventory>();
+        app.MapGet("/inventorylevels", () => this._inventoryService.CheckInventoryLevels()).WithTags("Inventories").Produces(200).Produces(404).Produces<List<Inventory>>();
 
         // Final Price Route
         app.MapGet("/final-price", (string productId, string? couponCode) => this._discountService.GetFinalPrice(productId, couponCode)).WithTags("Final Price").Produces(200).Produces(404);

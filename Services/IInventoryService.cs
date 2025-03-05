@@ -10,4 +10,5 @@ public interface IInventoryService
     Task<IResult> CreateInventories(IFormFile file);
     Task<IResult> UpdateInventory(Inventory update, string id);
     Task<IResult> RemoveInventory(string id);
+    Task<IResult> CheckInventoryLevels();
 }
