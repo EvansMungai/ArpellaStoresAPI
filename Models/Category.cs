@@ -5,7 +5,7 @@ namespace ArpellaStores.Models;
 
 public partial class Category
 {
-    public string Id { get; set; } = null!;
+    public int Id { get; set; }
 
     public string? CategoryName { get; set; }
 

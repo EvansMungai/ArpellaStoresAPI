@@ -15,7 +15,7 @@ namespace ArpellaStores.Services
             var subcategories = _context.Subcategories.ToList();
             return subcategories == null || subcategories.Count == 0 ? Results.NotFound("No Subcategories Found") : Results.Ok(subcategories);
         }
-        public async Task<IResult> GetSubcategory(string id)
+        public async Task<IResult> GetSubcategory(int id)
         {
             var retrievedSubcategory = _context.Subcategories.FirstOrDefault(s => s.Id == id);
             return retrievedSubcategory == null ? Results.NotFound($"Subcategory of ID = {id} was not found") : Results.Ok(retrievedSubcategory);
@@ -24,7 +24,6 @@ namespace ArpellaStores.Services
         {
             var newSubcategory = new Subcategory
             {
-                Id = subcategory.Id,
                 SubcategoryName = subcategory.SubcategoryName,
                 CategoryId = subcategory.CategoryId
             };
@@ -36,12 +35,11 @@ namespace ArpellaStores.Services
 
             return Results.Ok(newSubcategory);
         }
-        public async Task<IResult> UpdateSubcategoryDetails(Subcategory update, string id)
+        public async Task<IResult> UpdateSubcategoryDetails(Subcategory update, int id)
         {
             var retrievedCategory = _context.Subcategories.FirstOrDefault(c => c.Id == id);
             if (retrievedCategory != null)
             {
-                retrievedCategory.Id = update.Id;
                 retrievedCategory.SubcategoryName = update.SubcategoryName;
                 retrievedCategory.CategoryId = update.CategoryId;
                 try
@@ -61,7 +59,7 @@ namespace ArpellaStores.Services
             }
 
         }
-        public async Task<IResult> RemoveSubcategory(string id)
+        public async Task<IResult> RemoveSubcategory(int id)
         {
             var subcategory = _context.Subcategories.FirstOrDefault(c => c.Id == id);
             if (subcategory != null)

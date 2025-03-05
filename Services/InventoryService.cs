@@ -4,6 +4,7 @@ using CsvHelper.Configuration;
 using CsvHelper;
 using OfficeOpenXml;
 using System.Globalization;
+using Microsoft.EntityFrameworkCore;
 
 namespace ArpellaStores.Services;
 
@@ -30,7 +31,8 @@ public class InventoryService : IInventoryService
         {
             ProductId = inventory.ProductId,
             StockQuantity = inventory.StockQuantity,
-            StockThreshold = inventory.StockThreshold
+            StockThreshold = inventory.StockThreshold,
+            StockPrice = inventory.StockPrice
         };
         try
         {
@@ -69,7 +71,6 @@ public class InventoryService : IInventoryService
         Inventory? retrievedInventory = _context.Inventories.FirstOrDefault(i => i.ProductId == id);
         if (retrievedInventory != null)
         {
-            retrievedInventory.ProductId = update.ProductId;
             retrievedInventory.StockQuantity = update.StockQuantity;
             retrievedInventory.StockThreshold = update.StockThreshold;
             retrievedInventory.UpdatedAt = DateTime.Now;
@@ -109,6 +110,24 @@ public class InventoryService : IInventoryService
         else { return Results.NotFound($"Inventory with id = {id} was not found"); }
     }
     #region Utilities
+    public async Task<IResult> CheckInventoryLevels()
+    {
+        var lowStockItems = _context.Inventories.Where(i => i.StockQuantity <= i.StockThreshold).ToList();
+        if (lowStockItems.Count != 0)
+        {
+            return Results.Ok(new
+            {
+                Message = "The following products are below the stock threshold",
+                Items = lowStockItems.Select(item => new
+                {
+                    ProductId = item.ProductId,
+                    StockQuantity = item.StockQuantity,
+                    StockThreshold = item.StockThreshold
+                })
+            });
+        }
+        return Results.Ok("All inventory levels are above the stock threshold");
+    }
     public List<Inventory> ParseCsv(Stream fileStream)
     {
         using var reader = new StreamReader(fileStream);
@@ -126,7 +145,7 @@ public class InventoryService : IInventoryService
         {
             var inventory = new Inventory
             {
-                ProductId= worksheet.Cells[row, 1].Text,
+                ProductId = worksheet.Cells[row, 1].Text,
                 StockQuantity = int.Parse(worksheet.Cells[row, 2].Text),
                 StockThreshold = int.Parse(worksheet.Cells[row, 3].Text),
                 StockPrice = decimal.Parse(worksheet.Cells[row, 4].Text)

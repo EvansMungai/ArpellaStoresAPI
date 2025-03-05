@@ -88,7 +88,11 @@ public class OrderService : IOrderService
                     ProductId = item.ProductId,
                     Quantity = item.Quantity
                 };
+                var inventory = await _context.Inventories.FirstOrDefaultAsync(i => i.ProductId == orderItem.ProductId);
+                if (inventory == null || inventory.StockQuantity < orderItem.Quantity)
+                    return Results.BadRequest($"Insufficient stock for product {orderItem.ProductId}");
                 _context.Orderitems.Add(orderItem);
+                inventory.StockQuantity -= orderItem.Quantity;
             }
 
             await _context.SaveChangesAsync();
