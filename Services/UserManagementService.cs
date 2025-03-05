@@ -28,7 +28,8 @@ public class UserManagementService : IUserManagementService
             PhoneNumber = model.PhoneNumber,
             UserName = model.PhoneNumber,
             Email = model.Email,
-            PasswordHash = model.PasswordHash
+            PasswordHash = model.PasswordHash,
+            LastLoginTime = DateTime.Now
         };
         try
         {

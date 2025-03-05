@@ -69,7 +69,7 @@ public partial class ArpellaContext : IdentityDbContext<User>
             entity.ToTable("categories");
 
             entity.Property(e => e.Id)
-                .HasMaxLength(30)
+                .ValueGeneratedNever()
                 .HasColumnName("id");
             entity.Property(e => e.CategoryName)
                 .HasMaxLength(50)
@@ -146,7 +146,7 @@ public partial class ArpellaContext : IdentityDbContext<User>
 
             entity.ToTable("flashsales");
 
-            entity.HasIndex(e => e.ProductId, "product_id");
+            entity.HasIndex(e => e.ProductId, "flashsales_ibfk_1");
 
             entity.Property(e => e.FlashSaleId).HasColumnName("flash_sale_id");
             entity.Property(e => e.DiscountValue)
@@ -207,7 +207,7 @@ public partial class ArpellaContext : IdentityDbContext<User>
 
             entity.Property(e => e.OrderId)
                 .HasMaxLength(30)
-                .HasColumnName("orderId");
+                .HasColumnName("orderid");
             entity.Property(e => e.Status)
                 .HasMaxLength(30)
                 .HasColumnName("status");
@@ -232,25 +232,25 @@ public partial class ArpellaContext : IdentityDbContext<User>
 
             entity.ToTable("orderitems");
 
-            entity.HasIndex(e => e.ProductId, "productId");
+            entity.HasIndex(e => e.ProductId, "orderitems_ibfk_1");
 
             entity.Property(e => e.OrderId)
                 .HasMaxLength(30)
-                .HasColumnName("orderId");
+                .HasColumnName("orderid");
             entity.Property(e => e.ProductId)
                 .HasMaxLength(30)
-                .HasColumnName("productId");
+                .HasColumnName("productid");
             entity.Property(e => e.Quantity).HasColumnName("quantity");
 
             entity.HasOne(d => d.Order).WithMany(p => p.Orderitems)
                 .HasForeignKey(d => d.OrderId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("orderitems_ibfk_1");
+                .HasConstraintName("orderitems_ibfk_2");
 
             entity.HasOne(d => d.Product).WithMany(p => p.Orderitems)
                 .HasForeignKey(d => d.ProductId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("orderitems_ibfk_2");
+                .HasConstraintName("orderitems_ibfk_1");
         });
 
         modelBuilder.Entity<Payment>(entity =>
@@ -259,11 +259,11 @@ public partial class ArpellaContext : IdentityDbContext<User>
                 .HasNoKey()
                 .ToTable("payments");
 
-            entity.HasIndex(e => e.OrderId, "orderId");
+            entity.HasIndex(e => e.OrderId, "orderid");
 
             entity.Property(e => e.OrderId)
                 .HasMaxLength(30)
-                .HasColumnName("orderId");
+                .HasColumnName("orderid");
             entity.Property(e => e.Status)
                 .HasMaxLength(30)
                 .HasColumnName("status");
@@ -282,9 +282,9 @@ public partial class ArpellaContext : IdentityDbContext<User>
 
             entity.ToTable("products");
 
-            entity.HasIndex(e => e.Category, "category");
+            entity.HasIndex(e => e.Category, "products_ibfk_1");
 
-            entity.HasIndex(e => e.Subcategory, "subcategory");
+            entity.HasIndex(e => e.Subcategory, "products_ibfk_3");
 
             entity.Property(e => e.Id)
                 .HasMaxLength(30)
@@ -292,9 +292,7 @@ public partial class ArpellaContext : IdentityDbContext<User>
             entity.Property(e => e.Barcodes)
                 .HasMaxLength(255)
                 .HasColumnName("barcodes");
-            entity.Property(e => e.Category)
-                .HasMaxLength(30)
-                .HasColumnName("category");
+            entity.Property(e => e.Category).HasColumnName("category");
             entity.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")
                 .HasColumnType("timestamp")
@@ -309,9 +307,7 @@ public partial class ArpellaContext : IdentityDbContext<User>
             entity.Property(e => e.PriceAfterDiscount)
                 .HasPrecision(10, 2)
                 .HasColumnName("price_after_discount");
-            entity.Property(e => e.Subcategory)
-                .HasMaxLength(30)
-                .HasColumnName("subcategory");
+            entity.Property(e => e.Subcategory).HasColumnName("subcategory");
             entity.Property(e => e.TaxRate)
                 .HasPrecision(10, 2)
                 .HasColumnName("tax_rate");
@@ -328,11 +324,10 @@ public partial class ArpellaContext : IdentityDbContext<User>
             entity.HasOne(d => d.IdNavigation).WithOne(p => p.Product)
                 .HasForeignKey<Product>(d => d.Id)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("products_ibfk_2");
-
+                .HasConstraintName("products_ibfk_5");
             entity.HasOne(d => d.SubcategoryNavigation).WithMany(p => p.Products)
                 .HasForeignKey(d => d.Subcategory)
-                .HasConstraintName("products_ibfk_3");
+                .HasConstraintName("products_ibfk_6");
         });
 
         modelBuilder.Entity<Productimage>(entity =>
@@ -341,7 +336,7 @@ public partial class ArpellaContext : IdentityDbContext<User>
 
             entity.ToTable("productimages");
 
-            entity.HasIndex(e => e.ProductId, "product_id");
+            entity.HasIndex(e => e.ProductId, "productimages_ibfk_1");
 
             entity.Property(e => e.ImageId).HasColumnName("image_id");
             entity.Property(e => e.CreatedAt)
@@ -374,14 +369,7 @@ public partial class ArpellaContext : IdentityDbContext<User>
 
             entity.ToTable("subcategories");
 
-            entity.HasIndex(e => e.CategoryId, "category_id");
-
-            entity.Property(e => e.Id)
-                .HasMaxLength(30)
-                .HasColumnName("id");
-            entity.Property(e => e.CategoryId)
-                .HasMaxLength(30)
-                .HasColumnName("category_id");
+            entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.SubcategoryName)
                 .HasMaxLength(50)
                 .HasColumnName("subcategoryName");

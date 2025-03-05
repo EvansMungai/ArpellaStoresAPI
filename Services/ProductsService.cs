@@ -34,15 +34,21 @@ namespace ArpellaStores.Services
                 Name = product.Name,
                 Price = product.Price,
                 Category = product.Category,
-                Subcategory = product.Subcategory
+                Subcategory = product.Subcategory,
+                TaxRate = product.TaxRate,
+                DiscountQuantity = product.DiscountQuantity,
+                Barcodes = product.Barcodes
             };
             try
             {
                 _context.Products.Add(newProduct);
                 await _context.SaveChangesAsync();
+                return Results.Ok(newProduct);
             }
-            catch (Exception ex) { }
-            return Results.Ok(newProduct);
+            catch (Exception ex)
+            {
+                return Results.NotFound(ex.InnerException.Message);
+            }
         }
         public async Task<IResult> CreateProducts(IFormFile file)
         {
@@ -75,6 +81,9 @@ namespace ArpellaStores.Services
                 retrievedProduct.Price = product.Price;
                 retrievedProduct.Category = product.Category;
                 retrievedProduct.Subcategory = product.Subcategory;
+                retrievedProduct.TaxRate = product.TaxRate;
+                retrievedProduct.DiscountQuantity = product.DiscountQuantity;
+                retrievedProduct.Barcodes = product.Barcodes;
                 try
                 {
                     _context.Update(retrievedProduct);
@@ -114,9 +123,17 @@ namespace ArpellaStores.Services
             var product = _context.Products.FirstOrDefault(p => p.Id == productId);
             if (product != null)
             {
-                _context.Remove(product);
-                await _context.SaveChangesAsync();
-                return Results.Ok(product);
+                try
+                {
+                    _context.Products.Remove(product);
+                    await _context.SaveChangesAsync();
+                    return Results.Ok(product);
+                }
+                catch(Exception ex)
+                {
+                    return Results.BadRequest(ex.InnerException.Message);
+                }
+
             }
             else
             {
@@ -218,8 +235,8 @@ namespace ArpellaStores.Services
                     Id = worksheet.Cells[row, 1].Text,
                     Name = worksheet.Cells[row, 2].Text,
                     Price = decimal.Parse(worksheet.Cells[row, 3].Text),
-                    Category = worksheet.Cells[row, 4].Text,
-                    Subcategory = worksheet.Cells[row, 5].Text,
+                    Category = int.Parse(worksheet.Cells[row, 4].Text),
+                    Subcategory = int.Parse(worksheet.Cells[row, 5].Text),
                     Barcodes = worksheet.Cells[row, 6].Text,
                     TaxRate = decimal.Parse(worksheet.Cells[row, 7].Text),
                     DiscountQuantity = int.Parse(worksheet.Cells[row, 8].Text)

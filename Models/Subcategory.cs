@@ -5,11 +5,11 @@ namespace ArpellaStores.Models;
 
 public partial class Subcategory
 {
-    public string Id { get; set; } = null!;
+    public int Id { get; set; } 
 
     public string? SubcategoryName { get; set; }
 
-    public string? CategoryId { get; set; }
+    public int? CategoryId { get; set; }
 
     public virtual Category? Category { get; set; }
 

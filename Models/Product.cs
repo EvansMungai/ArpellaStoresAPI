@@ -11,7 +11,7 @@ public partial class Product
 
     public decimal Price { get; set; }
 
-    public string? Category { get; set; }
+    public int? Category { get; set; }
 
     public decimal? PriceAfterDiscount { get; set; }
 
@@ -23,7 +23,7 @@ public partial class Product
 
     public int? DiscountQuantity { get; set; }
 
-    public string? Subcategory { get; set; }
+    public int Subcategory { get; set; }
 
     public string? Barcodes { get; set; }
 

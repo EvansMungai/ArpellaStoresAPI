@@ -5,9 +5,9 @@ namespace ArpellaStores.Services
     public interface ISubcategoriesServices
     {
         Task<IResult> GetSubcategories();
-        Task<IResult> GetSubcategory(string id);
+        Task<IResult> GetSubcategory(int id);
         Task<IResult> CreateSubcategory(Subcategory subcategory);
-        Task<IResult> UpdateSubcategoryDetails(Subcategory update, string id);
-        Task<IResult> RemoveSubcategory(string id);
+        Task<IResult> UpdateSubcategoryDetails(Subcategory update, int id);
+        Task<IResult> RemoveSubcategory(int id);
     }
 }

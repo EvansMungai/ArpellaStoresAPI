@@ -30,7 +30,8 @@ public class InventoryService : IInventoryService
         {
             ProductId = inventory.ProductId,
             StockQuantity = inventory.StockQuantity,
-            StockThreshold = inventory.StockThreshold
+            StockThreshold = inventory.StockThreshold,
+            StockPrice = inventory.StockPrice
         };
         try
         {
@@ -69,7 +70,6 @@ public class InventoryService : IInventoryService
         Inventory? retrievedInventory = _context.Inventories.FirstOrDefault(i => i.ProductId == id);
         if (retrievedInventory != null)
         {
-            retrievedInventory.ProductId = update.ProductId;
             retrievedInventory.StockQuantity = update.StockQuantity;
             retrievedInventory.StockThreshold = update.StockThreshold;
             retrievedInventory.UpdatedAt = DateTime.Now;
@@ -126,7 +126,7 @@ public class InventoryService : IInventoryService
         {
             var inventory = new Inventory
             {
-                ProductId= worksheet.Cells[row, 1].Text,
+                ProductId = worksheet.Cells[row, 1].Text,
                 StockQuantity = int.Parse(worksheet.Cells[row, 2].Text),
                 StockThreshold = int.Parse(worksheet.Cells[row, 3].Text),
                 StockPrice = decimal.Parse(worksheet.Cells[row, 4].Text)
