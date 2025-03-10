@@ -13,7 +13,7 @@ public class DiscountService : IDiscountService
         _finalPriceService = finalPriceService;
         _productService = productsService;
     }
-    public async Task<IResult> GetFinalPrice(string productId, string couponCode = null)
+    public async Task<IResult> GetFinalPrice(int productId, string couponCode = null)
     {
         try
         {

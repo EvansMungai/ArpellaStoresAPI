@@ -10,7 +10,7 @@ public class FinalPriceService : IFinalPriceService
     {
         _context = context;
     }
-    public async Task<decimal> GetFinalPriceAsync(string productId, string couponCode = null)
+    public async Task<decimal> GetFinalPriceAsync(int productId, string couponCode = null)
     {
         Product? product = _context.Products.SingleOrDefault(p => p.Id == productId);
         if (product == null) throw new Exception("Product not Found");
