@@ -11,6 +11,7 @@ namespace ArpellaStores.Services
         Task<IResult> CreateProduct(Product product);
         Task<string> GetProductImageUrl(IFormFile formFile);
         Task<IResult> GetProductImageDetails();
+        Task<IResult> GetProductImageUrl(string productId);
         Task<IResult> CreateProductImagesDetails(HttpRequest request);
         Task<IResult> DeleteProductImagesDetails(int id);
         Task<IResult> CreateProducts(IFormFile file);

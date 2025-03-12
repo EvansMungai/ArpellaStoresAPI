@@ -33,6 +33,7 @@ namespace ArpellaStores.Services
                 InventoryId = product.InventoryId,
                 Name = product.Name,
                 Price = product.Price,
+                PriceAfterDiscount = product.PriceAfterDiscount,
                 Category = product.Category,
                 Subcategory = product.Subcategory,
                 TaxRate = product.TaxRate,
@@ -147,17 +148,22 @@ namespace ArpellaStores.Services
             var productImageDetails = _context.Productimages.ToList();
             return productImageDetails == null || productImageDetails.Count == 0 ? Results.NotFound("No Product Image Details Found") : Results.Ok(productImageDetails);
         }
+        public async Task<IResult> GetProductImageUrl(string productId)
+        {
+            var imageUrl = _context.Productimages.SingleOrDefault(i => i.ProductId == productId);
+            return imageUrl == null ? Results.NotFound($"No image with productId = {productId} was found") : Results.Ok(imageUrl);
+        }
         public async Task<IResult> CreateProductImagesDetails(HttpRequest request)
         {
             var form = await request.ReadFormAsync();
 
-            if (!int.TryParse(form["ProductId"], out int productId))
-            {
-                return Results.BadRequest("Invalid or missing ProductId.");
-            }
-            //var productId = form["ProductId"].ToString();
-            //if (string.IsNullOrEmpty(productId))
+            //if (!int.TryParse(form["ProductId"], out int productId))
+            //{
             //    return Results.BadRequest("Invalid or missing ProductId.");
+            //}
+            var productId = form["ProductId"].ToString();
+            if (string.IsNullOrEmpty(productId))
+                return Results.BadRequest("Invalid or missing ProductId.");
 
             bool isPrimary = false;
             if (bool.TryParse(form["IsPrimary"], out bool parsedIsPrimary))
@@ -241,7 +247,8 @@ namespace ArpellaStores.Services
                     Barcodes = worksheet.Cells[row, 6].Text,
                     TaxRate = decimal.Parse(worksheet.Cells[row, 7].Text),
                     DiscountQuantity = int.Parse(worksheet.Cells[row, 8].Text),
-                    PurchaseCap = int.Parse(worksheet.Cells[row, 9].Text)
+                    PurchaseCap = int.Parse(worksheet.Cells[row, 9].Text),
+                    PriceAfterDiscount = decimal.Parse(worksheet.Cells[row, 10].Text)
                 };
                 products.Add(product);
             }

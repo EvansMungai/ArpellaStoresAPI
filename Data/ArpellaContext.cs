@@ -352,16 +352,21 @@ public partial class ArpellaContext : IdentityDbContext<User>
             entity.Property(e => e.IsPrimary)
                 .HasDefaultValueSql("'0'")
                 .HasColumnName("is_primary");
-            entity.Property(e => e.ProductId).HasColumnName("product_id");
+            entity.Property(e => e.ProductId)
+                .HasMaxLength(30)
+                .HasColumnName("product_id");
             entity.Property(e => e.UpdatedAt)
                 .ValueGeneratedOnAddOrUpdate()
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")
                 .HasColumnType("timestamp")
                 .HasColumnName("updated_at");
-
-            entity.HasOne(d => d.Product).WithMany(p => p.Productimages)
-                .HasForeignKey(d => d.ProductId)
+            entity.HasOne(d => d.Product) 
+                .WithMany(p => p.Productimages) 
+                .HasForeignKey(d => d.ProductId) 
+                .HasPrincipalKey(p => p.InventoryId) 
+                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("productimages_ibfk_1");
+
         });
 
         modelBuilder.Entity<Subcategory>(entity =>
