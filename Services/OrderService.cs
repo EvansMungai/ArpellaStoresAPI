@@ -28,7 +28,7 @@ public class OrderService : IOrderService
                 oi.Quantity,
                 Product = new
                 {
-                    oi.Product.Id, // Add other product details as needed
+                    oi.Product.Id,
                     oi.Product.Name,
                     oi.Product.Price
                 }
@@ -72,7 +72,7 @@ public class OrderService : IOrderService
         {
             OrderId = GenerateOrderId(),
             UserId = orderDetails.UserId,
-            Status = orderDetails.Status,
+            Status = "Pending",
             Total = CalculateTotalCost(orderDetails),
         };
 
@@ -88,7 +88,7 @@ public class OrderService : IOrderService
                     ProductId = item.ProductId,
                     Quantity = item.Quantity
                 };
-                var inventory = await _context.Inventories.FirstOrDefaultAsync(i => i.ProductId == orderItem.ProductId);
+                var inventory = await _context.Inventories.FirstOrDefaultAsync(i => i.InventoryId == orderItem.ProductId);
                 if (inventory == null || inventory.StockQuantity < orderItem.Quantity)
                     return Results.BadRequest($"Insufficient stock for product {orderItem.ProductId}");
                 _context.Orderitems.Add(orderItem);

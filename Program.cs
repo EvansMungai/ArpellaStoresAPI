@@ -20,7 +20,7 @@ builder.Services.AddSwaggerGen(c =>
 
 var connectionString = builder.Configuration.GetConnectionString("arpellaDB");
 builder.Services.Configure<Microsoft.AspNetCore.Http.Json.JsonOptions>(options => options.SerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
-builder.Services.AddDbContext<ArpellaContext>(options => options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
+builder.Services.AddDbContext<ArpellaContext>(options => options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)).EnableSensitiveDataLogging());
 builder.Services.AddIdentity<User, IdentityRole>().AddEntityFrameworkStores<ArpellaContext>().AddDefaultTokenProviders();
 builder.Services.AddAuthentication();
 builder.Services.AddAuthorization(options =>
@@ -32,19 +32,20 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("DeliveryGuy", policy => policy.RequireRole("DeliveryGuy", "Admin"));
     options.AddPolicy("Accountant", policy => policy.RequireRole("Accountant", "Admin"));
 });
-builder.Services.AddTransient<ICategoriesService, CategoriesService>();
-builder.Services.AddTransient<ISubcategoriesServices, SubcategoriesService>();
-builder.Services.AddTransient<IProductsService, ProductsService>();
-builder.Services.AddTransient<IInventoryService, InventoryService>();
-builder.Services.AddTransient<IFinalPriceService, FinalPriceService>();
-builder.Services.AddTransient<IDiscountService, DiscountService>();
-builder.Services.AddTransient<ICouponService, CouponService>();
-builder.Services.AddTransient<IFlashsaleService, FlashsaleService>();
-builder.Services.AddTransient<IOrderService, OrderService>();
-builder.Services.AddTransient<ICloudinaryService, CloudinaryService>();
-builder.Services.AddTransient<IUserManagementService, UserManagementService>();
-builder.Services.AddTransient<IAuthenticationService, AuthenticationService>();
-builder.Services.AddTransient<IRouteResolutionHelper, RouteResolutionHelper>();
+builder.Services.AddScoped<ICategoriesService, CategoriesService>();
+builder.Services.AddScoped<ISubcategoriesServices, SubcategoriesService>();
+builder.Services.AddScoped<IProductsService, ProductsService>();
+builder.Services.AddScoped<IInventoryService, InventoryService>();
+builder.Services.AddScoped<IFinalPriceService, FinalPriceService>();
+builder.Services.AddScoped<IDiscountService, DiscountService>();
+builder.Services.AddScoped<ICouponService, CouponService>();
+builder.Services.AddScoped<IFlashsaleService, FlashsaleService>();
+builder.Services.AddScoped<ISupplierService, SupplierService>();
+builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
+builder.Services.AddScoped<IUserManagementService, UserManagementService>();
+builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
+builder.Services.AddScoped<IRouteResolutionHelper, RouteResolutionHelper>();
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(builder =>

@@ -2,5 +2,5 @@
 
 public interface IDiscountService
 {
-    Task<IResult> GetFinalPrice(string productId, string couponCode = null);
+    Task<IResult> GetFinalPrice(int productId, string couponCode = null);
 }

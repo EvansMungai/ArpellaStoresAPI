@@ -5,13 +5,15 @@ namespace ArpellaStores.Models;
 
 public partial class Product
 {
-    public string Id { get; set; } = null!;
+    public int Id { get; set; }
+    public string InventoryId { get; set; } = null!;
 
     public string? Name { get; set; }
 
     public decimal Price { get; set; }
 
     public int? Category { get; set; }
+    public int? PurchaseCap { get; set; }
 
     public decimal? PriceAfterDiscount { get; set; }
 

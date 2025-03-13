@@ -1,10 +1,9 @@
 ﻿using ArpellaStores.Data;
 using ArpellaStores.Models;
-using CsvHelper.Configuration;
 using CsvHelper;
+using CsvHelper.Configuration;
 using OfficeOpenXml;
 using System.Globalization;
-using Microsoft.EntityFrameworkCore;
 
 namespace ArpellaStores.Services;
 
@@ -17,16 +16,20 @@ public class InventoryService : IInventoryService
     }
     public async Task<IResult> GetInventories()
     {
-        var inventories = _context.Inventories.Select(i => new { i.ProductId, i.StockQuantity, i.StockThreshold, i.StockPrice, i.CreatedAt, i.UpdatedAt }).ToList();
+        var inventories = _context.Inventories.Select(i => new { i.InventoryId, i.ProductId, i.StockQuantity, i.StockThreshold, i.StockPrice, i.CreatedAt, i.UpdatedAt }).ToList();
         return inventories == null || inventories.Count == 0 ? Results.NotFound("No inventories found") : Results.Ok(inventories);
     }
-    public async Task<IResult> GetInventory(string id)
+    public async Task<IResult> GetInventory(int id)
     {
-        var inventory = _context.Inventories.Where(i => i.ProductId == id).Select(i => new { i.ProductId, i.StockQuantity, i.StockThreshold, i.StockPrice, i.CreatedAt, i.UpdatedAt }).SingleOrDefault();
+        var inventory = _context.Inventories.Where(i => i.InventoryId == id).Select(i => new { i.InventoryId, i.ProductId, i.StockQuantity, i.StockThreshold, i.StockPrice, i.CreatedAt, i.UpdatedAt }).SingleOrDefault();
         return inventory == null ? Results.NotFound($"Inventory with InventoryId = {id} was not found") : Results.Ok(inventory);
     }
     public async Task<IResult> CreateInventory(Inventory inventory)
     {
+        var existing = _context.Inventories.FirstOrDefault(i => i.ProductId == inventory.ProductId);
+        if (existing != null)
+            return Results.Conflict($"An inventory with ProductID = {inventory.ProductId} already exists.");
+
         var newInventory = new Inventory
         {
             ProductId = inventory.ProductId,
@@ -66,9 +69,9 @@ public class InventoryService : IInventoryService
             return Results.BadRequest(ex.InnerException.Message);
         }
     }
-    public async Task<IResult> UpdateInventory(Inventory update, string id)
+    public async Task<IResult> UpdateInventory(Inventory update, int id)
     {
-        Inventory? retrievedInventory = _context.Inventories.FirstOrDefault(i => i.ProductId == id);
+        Inventory? retrievedInventory = _context.Inventories.FirstOrDefault(i => i.InventoryId == id);
         if (retrievedInventory != null)
         {
             retrievedInventory.StockQuantity = update.StockQuantity;
@@ -90,9 +93,9 @@ public class InventoryService : IInventoryService
             return Results.NotFound($"Inventory with InventoryID = {id} was not found");
         }
     }
-    public async Task<IResult> RemoveInventory(string id)
+    public async Task<IResult> RemoveInventory(int id)
     {
-        Inventory? retrievedInventory = _context.Inventories.FirstOrDefault(i => i.ProductId == id);
+        Inventory? retrievedInventory = _context.Inventories.FirstOrDefault(i => i.InventoryId == id);
         if (retrievedInventory != null)
         {
             try

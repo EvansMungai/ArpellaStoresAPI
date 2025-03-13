@@ -7,7 +7,7 @@ public partial class Flashsale
 {
     public int FlashSaleId { get; set; }
 
-    public string? ProductId { get; set; }
+    public int? ProductId { get; set; }
 
     public decimal DiscountValue { get; set; }
 
