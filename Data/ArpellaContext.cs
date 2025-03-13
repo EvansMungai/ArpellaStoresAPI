@@ -38,6 +38,7 @@ public partial class ArpellaContext : IdentityDbContext<User>
     public virtual DbSet<Productimage> Productimages { get; set; }
 
     public virtual DbSet<Subcategory> Subcategories { get; set; }
+    public virtual DbSet<Supplier> Suppliers { get; set; }
 
     public virtual DbSet<User> Users { get; set; }
 
@@ -173,6 +174,8 @@ public partial class ArpellaContext : IdentityDbContext<User>
 
             entity.HasIndex(e => e.ProductId, "product_id");
 
+            entity.HasIndex(e => e.SupplierId, "supplierId");
+
             entity.Property(e => e.InventoryId).HasColumnName("inventoryId");
             entity.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")
@@ -188,11 +191,16 @@ public partial class ArpellaContext : IdentityDbContext<User>
                 .HasDefaultValueSql("'0'")
                 .HasColumnName("stock_quantity");
             entity.Property(e => e.StockThreshold).HasColumnName("stock_threshold");
+            entity.Property(e => e.SupplierId).HasColumnName("supplierId");
             entity.Property(e => e.UpdatedAt)
                 .ValueGeneratedOnAddOrUpdate()
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")
                 .HasColumnType("timestamp")
                 .HasColumnName("updatedAt");
+
+            entity.HasOne(d => d.Supplier).WithMany(p => p.Inventories)
+                .HasForeignKey(d => d.SupplierId)
+                .HasConstraintName("inventory_ibfk_1");
         });
 
         modelBuilder.Entity<Order>(entity =>
@@ -323,7 +331,7 @@ public partial class ArpellaContext : IdentityDbContext<User>
 
             entity.HasOne(p => p.IdNavigation)
                   .WithMany(i => i.Products)
-                  .HasForeignKey(p => p.InventoryId) 
+                  .HasForeignKey(p => p.InventoryId)
                   .HasPrincipalKey(i => i.ProductId)
                   .OnDelete(DeleteBehavior.ClientSetNull)
                   .HasConstraintName("products_ibfk_5");
@@ -360,10 +368,10 @@ public partial class ArpellaContext : IdentityDbContext<User>
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")
                 .HasColumnType("timestamp")
                 .HasColumnName("updated_at");
-            entity.HasOne(d => d.Product) 
-                .WithMany(p => p.Productimages) 
-                .HasForeignKey(d => d.ProductId) 
-                .HasPrincipalKey(p => p.InventoryId) 
+            entity.HasOne(d => d.Product)
+                .WithMany(p => p.Productimages)
+                .HasForeignKey(d => d.ProductId)
+                .HasPrincipalKey(p => p.InventoryId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("productimages_ibfk_1");
 
@@ -386,6 +394,21 @@ public partial class ArpellaContext : IdentityDbContext<User>
             entity.HasOne(d => d.Category).WithMany(p => p.Subcategories)
                 .HasForeignKey(d => d.CategoryId)
                 .HasConstraintName("subcategories_ibfk_1");
+        });
+
+        modelBuilder.Entity<Supplier>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PRIMARY");
+
+            entity.ToTable("suppliers");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.KraPin)
+                .HasMaxLength(30)
+                .HasColumnName("kraPin");
+            entity.Property(e => e.SupplierName)
+                .HasMaxLength(50)
+                .HasColumnName("supplierName");
         });
 
         //modelBuilder.Entity<User>(entity =>

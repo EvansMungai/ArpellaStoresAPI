@@ -17,5 +17,9 @@ public partial class Inventory
     public DateTime? CreatedAt { get; set; }
 
     public DateTime? UpdatedAt { get; set; }
+
+    public int? SupplierId { get; set; }
+
+    public virtual Supplier? Supplier { get; set; }
     public ICollection<Product> Products { get; set; }
 }

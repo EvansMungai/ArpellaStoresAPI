@@ -40,6 +40,7 @@ builder.Services.AddScoped<IFinalPriceService, FinalPriceService>();
 builder.Services.AddScoped<IDiscountService, DiscountService>();
 builder.Services.AddScoped<ICouponService, CouponService>();
 builder.Services.AddScoped<IFlashsaleService, FlashsaleService>();
+builder.Services.AddScoped<ISupplierService, SupplierService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
 builder.Services.AddScoped<IUserManagementService, UserManagementService>();
