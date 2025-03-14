@@ -1,6 +1,7 @@
 ﻿using ArpellaStores.Data;
 using ArpellaStores.Models;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Caching.Memory;
 //using Microsoft.AspNetCore.Mvc;
 
 namespace ArpellaStores.Services;
@@ -12,14 +13,15 @@ public class AuthenticationService : IAuthenticationService
     private readonly RoleManager<IdentityRole> _roleManager;
     private readonly IUserManagementService _userManagementService;
     private readonly ArpellaContext _context;
-    private readonly Dictionary<string, (string Otp, DateTime ExpiryTime)> otpStore = new Dictionary<string, (string Otp, DateTime ExpiryTime)>();
-    public AuthenticationService(UserManager<User> userManager, SignInManager<User> signInManager, RoleManager<IdentityRole> roleManager, IUserManagementService userManagementService, ArpellaContext context)
+    private readonly IMemoryCache _cache;
+    public AuthenticationService(UserManager<User> userManager, SignInManager<User> signInManager, RoleManager<IdentityRole> roleManager, IUserManagementService userManagementService, ArpellaContext context, IMemoryCache cache)
     {
         this._userManager = userManager;
         this._signInManager = signInManager;
         this._roleManager = roleManager;
         this._userManagementService = userManagementService;
         this._context = context;
+        this._cache = cache;
     }
     public async Task<IResult> RegisterUser(UserManager<User> userManager, User model)
     {
@@ -116,26 +118,31 @@ public class AuthenticationService : IAuthenticationService
         var random = new Random();
         var otp = random.Next(100000, 999999).ToString();
         var expiryTime = DateTime.Now.AddMinutes(5);
-        otpStore[username] = (otp, expiryTime);
+        _cache.Set(username, (Otp: otp, ExpiryTime: expiryTime), TimeSpan.FromMinutes(5));
+        Console.WriteLine($"Stored OTP: {otp}, Expiry Time: {expiryTime} for Username: {username}");
         return Results.Ok(otp);
     }
-    public bool VerifyOTP(string username, string otp)
+    public bool VerifyOTP(string username, string otp, out string message)
     {
-        if (otpStore.TryGetValue(username, out var otpEntry))
+        if (_cache.TryGetValue(username, out (string Otp, DateTime ExpiryTime) storedOtpEntry))
         {
-            if (otpEntry.ExpiryTime > DateTime.Now)
+            if (storedOtpEntry.Otp == otp)
             {
-                return otpEntry.Otp == otp ? true : throw new Exception("Invalid OTP");
+                message = "OTP is valid";
+                return true;
             }
             else
             {
-                throw new Exception("OTP has expired");
+                message = "Invalid OTP";
+                return false;
             }
         }
         else
         {
-            throw new Exception($"No OTP found for the {username}");
+            message = "No OTP found or it has expired";
+            return false;
         }
     }
+
     #endregion
 }

@@ -41,7 +41,16 @@ public class RouteResolutionHelper : IRouteResolutionHelper
         app.MapPost("/login", (SignInManager<User> signInManager, UserManager<User> userManager, User model) => this._authenticationService.Login(signInManager, userManager, model)).WithTags("Authentication");
         app.MapPost("/logout", (SignInManager<User> signInManager) => this._authenticationService.LogOut(signInManager)).WithTags("Authentication");
         app.MapGet("/send-otp", (string username) => this._authenticationService.GetOTP(username)).WithTags("Authentication");
-        app.MapPost("/verify-otp", (string username, string otp) => this._authenticationService.VerifyOTP(username, otp)).WithTags("Authentication");
+        app.MapPost("/verify-otp", (string username, string otp) =>
+        {
+            string message;
+            bool isValid = this._authenticationService.VerifyOTP(username, otp, out message); return new
+            {
+                Success = isValid,
+                Message = message
+            };
+            ;
+        }).WithTags("Authentication");
 
         #region Admin Routes
         // Roles
