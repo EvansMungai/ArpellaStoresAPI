@@ -1,7 +1,6 @@
 ﻿using ArpellaStores.Data;
 using ArpellaStores.Models;
 using Microsoft.AspNetCore.Identity;
-using System.Runtime.Intrinsics.X86;
 //using Microsoft.AspNetCore.Mvc;
 
 namespace ArpellaStores.Services;
@@ -13,6 +12,7 @@ public class AuthenticationService : IAuthenticationService
     private readonly RoleManager<IdentityRole> _roleManager;
     private readonly IUserManagementService _userManagementService;
     private readonly ArpellaContext _context;
+    private readonly Dictionary<string, (string Otp, DateTime ExpiryTime)> otpStore = new Dictionary<string, (string Otp, DateTime ExpiryTime)>();
     public AuthenticationService(UserManager<User> userManager, SignInManager<User> signInManager, RoleManager<IdentityRole> roleManager, IUserManagementService userManagementService, ArpellaContext context)
     {
         this._userManager = userManager;
@@ -110,5 +110,32 @@ public class AuthenticationService : IAuthenticationService
         await _signInManager.SignOutAsync();
         return Results.Ok("Successfully logged out");
     }
-
+    #region Utilities
+    public async Task<IResult> GetOTP(string username)
+    {
+        var random = new Random();
+        var otp = random.Next(100000, 999999).ToString();
+        var expiryTime = DateTime.Now.AddMinutes(5);
+        otpStore[username] = (otp, expiryTime);
+        return Results.Ok(otp);
+    }
+    public bool VerifyOTP(string username, string otp)
+    {
+        if (otpStore.TryGetValue(username, out var otpEntry))
+        {
+            if (otpEntry.ExpiryTime > DateTime.Now)
+            {
+                return otpEntry.Otp == otp ? true : throw new Exception("Invalid OTP");
+            }
+            else
+            {
+                throw new Exception("OTP has expired");
+            }
+        }
+        else
+        {
+            throw new Exception($"No OTP found for the {username}");
+        }
+    }
+    #endregion
 }
