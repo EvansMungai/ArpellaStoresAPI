@@ -22,6 +22,10 @@ var connectionString = builder.Configuration.GetConnectionString("arpellaDB");
 builder.Services.Configure<Microsoft.AspNetCore.Http.Json.JsonOptions>(options => options.SerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
 builder.Services.AddDbContext<ArpellaContext>(options => options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)).EnableSensitiveDataLogging());
 builder.Services.AddIdentity<User, IdentityRole>().AddEntityFrameworkStores<ArpellaContext>().AddDefaultTokenProviders();
+builder.Services.AddHttpClient("mpesa", c =>
+{
+    c.BaseAddress = new Uri("https://sandbox.safaricom.co.ke");
+});
 builder.Services.AddAuthentication();
 builder.Services.AddAuthorization(options =>
 {
@@ -43,6 +47,7 @@ builder.Services.AddScoped<ICouponService, CouponService>();
 builder.Services.AddScoped<IFlashsaleService, FlashsaleService>();
 builder.Services.AddScoped<ISupplierService, SupplierService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.AddScoped<IMpesaService, MpesaService>();
 builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
 builder.Services.AddScoped<IUserManagementService, UserManagementService>();
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();

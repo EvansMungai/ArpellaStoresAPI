@@ -17,7 +17,8 @@ public class RouteResolutionHelper : IRouteResolutionHelper
     private readonly ISupplierService _supplierService;
     private readonly IUserManagementService _userManagementService;
     private readonly IAuthenticationService _authenticationService;
-    public RouteResolutionHelper(ICategoriesService categoriesService, ISubcategoriesServices subcategoriesServices, IProductsService productsService, IInventoryService inventoryService, IDiscountService discountService, ICouponService couponService, IFlashsaleService flashsaleService, IOrderService orderService, ISupplierService supplierService, IUserManagementService userManagementService, IAuthenticationService authenticationService)
+    private readonly IMpesaService _mpesaService;
+    public RouteResolutionHelper(ICategoriesService categoriesService, ISubcategoriesServices subcategoriesServices, IProductsService productsService, IInventoryService inventoryService, IDiscountService discountService, ICouponService couponService, IFlashsaleService flashsaleService, IOrderService orderService, ISupplierService supplierService, IUserManagementService userManagementService, IAuthenticationService authenticationService, IMpesaService mpesaService)
     {
         _categoriesService = categoriesService;
         _subcategoriesServices = subcategoriesServices;
@@ -30,11 +31,13 @@ public class RouteResolutionHelper : IRouteResolutionHelper
         _supplierService = supplierService;
         _userManagementService = userManagementService;
         _authenticationService = authenticationService;
+        _mpesaService = mpesaService;
 
     }
     public void addMappings(WebApplication app)
     {
         app.MapGet("/", () => "Welcome to Arpella Stores Web API!");
+        app.MapGet("/mpesa", () => this._mpesaService.GetToken()).WithTags("Mpesa");
 
         // Authentication Routes
         app.MapPost("/register", (UserManager<User> userManager, User model) => this._authenticationService.RegisterUser(userManager, model)).WithTags("Authentication");
