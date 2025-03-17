@@ -32,6 +32,7 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("DeliveryGuy", policy => policy.RequireRole("DeliveryGuy", "Admin"));
     options.AddPolicy("Accountant", policy => policy.RequireRole("Accountant", "Admin"));
 });
+builder.Services.AddMemoryCache();
 builder.Services.AddScoped<ICategoriesService, CategoriesService>();
 builder.Services.AddScoped<ISubcategoriesServices, SubcategoriesService>();
 builder.Services.AddScoped<IProductsService, ProductsService>();
