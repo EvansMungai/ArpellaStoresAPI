@@ -37,7 +37,11 @@ public class RouteResolutionHelper : IRouteResolutionHelper
     public void addMappings(WebApplication app)
     {
         app.MapGet("/", () => "Welcome to Arpella Stores Web API!");
+
+        // Mpesa Routes
         app.MapGet("/mpesa", () => this._mpesaService.GetToken()).WithTags("Mpesa");
+        app.MapPost("/registerurls", () => this._mpesaService.RegisterUrls()).WithTags("Mpesa");
+        app.MapPost("/pay", (MpesaExpress mpesa) => this._mpesaService.SendPaymentPrompt(mpesa)).WithTags("Mpesa");
 
         // Authentication Routes
         app.MapPost("/register", (UserManager<User> userManager, User model) => this._authenticationService.RegisterUser(userManager, model)).WithTags("Authentication");
