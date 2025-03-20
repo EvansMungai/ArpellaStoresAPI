@@ -181,6 +181,9 @@ public partial class ArpellaContext : IdentityDbContext<User>
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")
                 .HasColumnType("timestamp")
                 .HasColumnName("createdAt");
+            entity.Property(e => e.InvoiceNumber)
+                .HasMaxLength(30)
+                .HasColumnName("invoiceNumber");
             entity.Property(e => e.ProductId)
                 .HasMaxLength(30)
                 .HasColumnName("product_id");
