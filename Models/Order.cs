@@ -5,7 +5,7 @@ namespace ArpellaStores.Models;
 
 public partial class Order
 {
-    public string OrderId { get; set; } = null!;
+    public string Orderid { get; set; } = null!;
 
     public string? UserId { get; set; }
 
@@ -13,6 +13,15 @@ public partial class Order
 
     public decimal? Total { get; set; }
 
-    public virtual User? User { get; set; }
+    public string? BuyerPin { get; set; }
+
+    public decimal? Latitude { get; set; }
+
+    public decimal? Longitude { get; set; }
+
+    public virtual ICollection<Deliverytracking> Deliverytrackings { get; set; } = new List<Deliverytracking>();
+
     public virtual ICollection<Orderitem> Orderitems { get; set; } = new List<Orderitem>();
+
+    public virtual User? User { get; set; }
 }

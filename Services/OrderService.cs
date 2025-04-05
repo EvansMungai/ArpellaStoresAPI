@@ -17,7 +17,7 @@ public class OrderService : IOrderService
     {
         var orders = _context.Orders.Include(o => o.Orderitems).ThenInclude(oi => oi.Product).Select(o => new
         {
-            o.OrderId,
+            o.Orderid,
             o.UserId,
             o.Status,
             o.Total,
@@ -43,10 +43,10 @@ public class OrderService : IOrderService
         var order = _context.Orders
     .Include(o => o.Orderitems)
         .ThenInclude(oi => oi.Product)
-    .Where(o => o.OrderId == id)
+    .Where(o => o.Orderid == id)
     .Select(o => new
     {
-        o.OrderId,
+        o.Orderid,
         o.UserId,
         o.Status,
         o.Total,
@@ -70,10 +70,13 @@ public class OrderService : IOrderService
     {
         var order = new Order
         {
-            OrderId = GenerateOrderId(),
+            Orderid = GenerateOrderId(),
             UserId = orderDetails.UserId,
             Status = "Pending",
             Total = CalculateTotalCost(orderDetails),
+            Latitude = orderDetails.Latitude,
+            Longitude = orderDetails.Longitude,
+            BuyerPin = orderDetails.BuyerPin,
         };
 
         try
@@ -84,15 +87,35 @@ public class OrderService : IOrderService
             {
                 var orderItem = new Orderitem
                 {
-                    OrderId = order.OrderId,
+                    OrderId = order.Orderid,
                     ProductId = item.ProductId,
                     Quantity = item.Quantity
                 };
-                var inventory = await _context.Inventories.FirstOrDefaultAsync(i => i.InventoryId == orderItem.ProductId);
-                if (inventory == null || inventory.StockQuantity < orderItem.Quantity)
-                    return Results.BadRequest($"Insufficient stock for product {orderItem.ProductId}");
+                var productWithInventory = await _context.Products
+                        .Where(p => p.Id == orderItem.ProductId)
+                        .Join(_context.Inventories,
+                              product => product.InventoryId,
+                              inventory => inventory.ProductId,
+                              (product, inventory) => new
+                              {
+                                  Product = product,
+                                  Inventory = inventory
+                              })
+                        .FirstOrDefaultAsync();
+                if (productWithInventory == null)
+                {
+                    return Results.BadRequest($"Product with ID {orderItem.ProductId} not found in the inventory.");
+                }
+
+                if (productWithInventory.Inventory.StockQuantity < orderItem.Quantity)
+                {
+                    return Results.BadRequest($"Insufficient stock for product '{productWithInventory.Product.Name}'. Only {productWithInventory.Inventory.StockQuantity} left in stock.");
+                }
+                
+                productWithInventory.Inventory.StockQuantity -= orderItem.Quantity;
+
                 _context.Orderitems.Add(orderItem);
-                inventory.StockQuantity -= orderItem.Quantity;
+                _context.Inventories.Update(productWithInventory.Inventory);
             }
 
             await _context.SaveChangesAsync();
@@ -100,14 +123,14 @@ public class OrderService : IOrderService
         }
         catch (Exception ex)
         {
-            return Results.BadRequest(ex.InnerException.Message);
+            return Results.BadRequest(ex.Message);
         }
     }
 
     public async Task<IResult> RemoveOrder(string id)
     {
 
-        var order = await _context.Orders.Include(o => o.Orderitems).SingleOrDefaultAsync(o => o.OrderId == id);
+        var order = await _context.Orders.Include(o => o.Orderitems).SingleOrDefaultAsync(o => o.Orderid == id);
 
         if (order == null)
         {

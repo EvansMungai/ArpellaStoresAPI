@@ -61,7 +61,7 @@ public class AuthenticationService : IAuthenticationService
         }
         catch (Exception ex)
         {
-            return Results.BadRequest("Error occurred!: " + ex.Message);
+            return Results.BadRequest("Error occurred!: " + ex.InnerException?.Message);
         }
     }
     public async Task<IResult> Login(SignInManager<User> signInManager, UserManager<User> userManager, User model)
@@ -99,7 +99,7 @@ public class AuthenticationService : IAuthenticationService
             }
             else
             {
-                return Results.BadRequest("Invalid login attempt");
+                return Results.BadRequest("Incorrect Password.");
             }
         }
         else
@@ -119,8 +119,7 @@ public class AuthenticationService : IAuthenticationService
         var otp = random.Next(100000, 999999).ToString();
         var expiryTime = DateTime.Now.AddMinutes(5);
         _cache.Set(username, (Otp: otp, ExpiryTime: expiryTime), TimeSpan.FromMinutes(5));
-        Console.WriteLine($"Stored OTP: {otp}, Expiry Time: {expiryTime} for Username: {username}");
-        return Results.Ok(otp);
+        return Results.Ok($"Stored OTP for Username:{username} is {otp}. The OTP expires in 5 minutes.");
     }
     public bool VerifyOTP(string username, string otp, out string message)
     {

@@ -36,10 +36,10 @@ namespace ArpellaStores.Services
                 PriceAfterDiscount = product.PriceAfterDiscount,
                 Category = product.Category,
                 Subcategory = product.Subcategory,
-                TaxRate = product.TaxRate,
                 DiscountQuantity = product.DiscountQuantity,
                 Barcodes = product.Barcodes,
-                PurchaseCap = product.PurchaseCap
+                PurchaseCap = product.PurchaseCap,
+                TaxCode = product.TaxCode
             };
             try
             {
@@ -49,7 +49,7 @@ namespace ArpellaStores.Services
             }
             catch (Exception ex)
             {
-                return Results.NotFound(ex.InnerException.Message);
+                return Results.NotFound(ex.InnerException?.Message ?? ex.Message);
             }
         }
         public async Task<IResult> CreateProducts(IFormFile file)
@@ -70,7 +70,7 @@ namespace ArpellaStores.Services
             }
             catch (Exception ex)
             {
-                return Results.BadRequest(ex.InnerException.Message);
+                return Results.BadRequest(ex.InnerException?.Message ?? ex.Message);
             }
         }
         public async Task<IResult> UpdateProductDetails(Product product, int id)
@@ -83,9 +83,10 @@ namespace ArpellaStores.Services
                 retrievedProduct.Price = product.Price;
                 retrievedProduct.Category = product.Category;
                 retrievedProduct.Subcategory = product.Subcategory;
-                retrievedProduct.TaxRate = product.TaxRate;
                 retrievedProduct.DiscountQuantity = product.DiscountQuantity;
                 retrievedProduct.Barcodes = product.Barcodes;
+                retrievedProduct.PurchaseCap = product.PurchaseCap;
+                retrievedProduct.PriceAfterDiscount = product.PriceAfterDiscount;
                 try
                 {
                     _context.Update(retrievedProduct);
@@ -133,7 +134,7 @@ namespace ArpellaStores.Services
                 }
                 catch(Exception ex)
                 {
-                    return Results.BadRequest(ex.InnerException.Message);
+                    return Results.BadRequest(ex.InnerException?.Message ?? ex.Message);
                 }
 
             }
@@ -245,9 +246,9 @@ namespace ArpellaStores.Services
                     Category = int.Parse(worksheet.Cells[row, 4].Text),
                     Subcategory = int.Parse(worksheet.Cells[row, 5].Text),
                     Barcodes = worksheet.Cells[row, 6].Text,
-                    TaxRate = decimal.Parse(worksheet.Cells[row, 7].Text),
-                    DiscountQuantity = int.Parse(worksheet.Cells[row, 8].Text),
-                    PurchaseCap = int.Parse(worksheet.Cells[row, 9].Text),
+                    DiscountQuantity = int.Parse(worksheet.Cells[row, 7].Text),
+                    PurchaseCap = int.Parse(worksheet.Cells[row, 8].Text),
+                    TaxCode = worksheet.Cells[row, 9].Text,
                     PriceAfterDiscount = decimal.Parse(worksheet.Cells[row, 10].Text)
                 };
                 products.Add(product);

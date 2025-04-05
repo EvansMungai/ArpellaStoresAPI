@@ -10,4 +10,5 @@ public partial class User : IdentityUser
     public string LastName { get; set; }
     public DateTime LastLoginTime { get; set; }
     public virtual ICollection<Order> Orders { get; set; } = new List<Order>();
+    public virtual ICollection<Deliverytracking> Deliverytrackings { get; set; } = new List<Deliverytracking>();
 }

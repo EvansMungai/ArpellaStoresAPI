@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace ArpellaStores.Models;
+﻿namespace ArpellaStores.Models;
 
 public partial class Product
 {
@@ -21,23 +18,22 @@ public partial class Product
 
     public DateTime? UpdatedAt { get; set; }
 
-    public decimal? TaxRate { get; set; }
-
     public int? DiscountQuantity { get; set; }
 
-    public int Subcategory { get; set; }
+    public int? Subcategory { get; set; }
 
     public string? Barcodes { get; set; }
+
+    public string? TaxCode { get; set; }
 
     public virtual Category? CategoryNavigation { get; set; }
 
     public virtual ICollection<Flashsale> Flashsales { get; set; } = new List<Flashsale>();
 
-    public virtual Inventory IdNavigation { get; set; } = null!;
-
     public virtual ICollection<Orderitem> Orderitems { get; set; } = new List<Orderitem>();
 
-    public virtual ICollection<Productimage> Productimages { get; set; } = new List<Productimage>();
-
     public virtual Subcategory? SubcategoryNavigation { get; set; }
+
+    public virtual ICollection<Productimage> Productimages { get; set; } = new List<Productimage>();
+    public Inventory IdNavigation { get; set; }
 }

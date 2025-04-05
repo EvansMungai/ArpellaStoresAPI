@@ -12,12 +12,12 @@ namespace ArpellaStores.Services
         }
         public async Task<IResult> GetSubcategories()
         {
-            var subcategories = _context.Subcategories.ToList();
+            var subcategories = _context.Subcategories.Select(s => new {s.Id, s.SubcategoryName, s.CategoryId}).ToList();
             return subcategories == null || subcategories.Count == 0 ? Results.NotFound("No Subcategories Found") : Results.Ok(subcategories);
         }
         public async Task<IResult> GetSubcategory(int id)
         {
-            var retrievedSubcategory = _context.Subcategories.FirstOrDefault(s => s.Id == id);
+            var retrievedSubcategory = _context.Subcategories.Select(s => new {s.Id, s.SubcategoryName, s.CategoryId}).FirstOrDefault(s => s.Id == id);
             return retrievedSubcategory == null ? Results.NotFound($"Subcategory of ID = {id} was not found") : Results.Ok(retrievedSubcategory);
         }
         public async Task<IResult> CreateSubcategory(Subcategory subcategory)
@@ -31,7 +31,7 @@ namespace ArpellaStores.Services
             {
                 _context.Subcategories.Add(newSubcategory);
                 await _context.SaveChangesAsync();
-            } catch (Exception ex) { }
+            } catch (Exception ex) { return Results.BadRequest(ex.InnerException?.Message); }
 
             return Results.Ok(newSubcategory);
         }
@@ -49,7 +49,7 @@ namespace ArpellaStores.Services
                 }
                 catch (Exception ex)
                 {
-
+                    return Results.BadRequest(ex.InnerException?.Message);
                 }
                 return Results.Ok(retrievedCategory);
             }
