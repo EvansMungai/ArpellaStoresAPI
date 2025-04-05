@@ -15,10 +15,12 @@ public class RouteResolutionHelper : IRouteResolutionHelper
     private readonly IFlashsaleService _flashsaleService;
     private readonly IOrderService _orderService;
     private readonly ISupplierService _supplierService;
+    private readonly IDeliveryTrackingService _deliveryTrackingService;
+    private readonly IGoodsInformationService _goodsInformationService;
     private readonly IUserManagementService _userManagementService;
     private readonly IAuthenticationService _authenticationService;
     private readonly IMpesaService _mpesaService;
-    public RouteResolutionHelper(ICategoriesService categoriesService, ISubcategoriesServices subcategoriesServices, IProductsService productsService, IInventoryService inventoryService, IDiscountService discountService, ICouponService couponService, IFlashsaleService flashsaleService, IOrderService orderService, ISupplierService supplierService, IUserManagementService userManagementService, IAuthenticationService authenticationService, IMpesaService mpesaService)
+    public RouteResolutionHelper(ICategoriesService categoriesService, ISubcategoriesServices subcategoriesServices, IProductsService productsService, IInventoryService inventoryService, IDiscountService discountService, ICouponService couponService, IFlashsaleService flashsaleService, IOrderService orderService, ISupplierService supplierService, IGoodsInformationService goodsInformationService, IDeliveryTrackingService deliveryTrackingService, IUserManagementService userManagementService, IAuthenticationService authenticationService, IMpesaService mpesaService)
     {
         _categoriesService = categoriesService;
         _subcategoriesServices = subcategoriesServices;
@@ -28,6 +30,8 @@ public class RouteResolutionHelper : IRouteResolutionHelper
         _couponService = couponService;
         _flashsaleService = flashsaleService;
         _orderService = orderService;
+        _goodsInformationService = goodsInformationService;
+        _deliveryTrackingService = deliveryTrackingService;
         _supplierService = supplierService;
         _userManagementService = userManagementService;
         _authenticationService = authenticationService;
@@ -62,9 +66,9 @@ public class RouteResolutionHelper : IRouteResolutionHelper
         #region Admin Routes
         // Roles
         app.MapGet("/roles", () => this._userManagementService.GetRoles()).WithTags("Admin").Produces(200).Produces(404);
-        app.MapGet("/role/{id}", (string role) => this._userManagementService.EnsureRoleExists(role)).WithTags("Admin").Produces(200).Produces(404);
+        app.MapGet("/role/{id}", (string id) => this._userManagementService.EnsureRoleExists(id)).WithTags("Admin").Produces(200).Produces(404);
         app.MapPost("/role", (string role) => this._userManagementService.CreateRole(role)).WithTags("Admin").Produces(200).Produces(404);
-        app.MapPut("/role/{id}", (string roleId, string roleName) => this._userManagementService.EditRole(roleId, roleName)).WithTags("Admin").Produces(200).Produces(404);
+        app.MapPut("/role/{id}", (string id, string roleName) => this._userManagementService.EditRole(id, roleName)).WithTags("Admin").Produces(200).Produces(404);
         app.MapDelete("/role/{role}", (string role) => this._userManagementService.RemoveRole(role)).WithTags("Admin").Produces(200).Produces(404);
         // Users
         app.MapGet("/users", () => this._userManagementService.GetUsers()).WithTags("Admin").Produces(200).Produces(404).Produces<List<User>>();
@@ -137,6 +141,13 @@ public class RouteResolutionHelper : IRouteResolutionHelper
         app.MapPost("/supplier", (Supplier supplier) => this._supplierService.CreateSupplier(supplier)).WithTags("Suppliers").Produces<Supplier>();
         app.MapPut("/supplier/{id}", (Supplier supplier, int id) => this._supplierService.EditSupplierDetails(supplier, id)).WithTags("Suppliers").Produces<Supplier>();
         app.MapDelete("/supplier/{id}", (int id) => this._supplierService.RemoveSupplier(id)).WithTags("Suppliers").Produces(200).Produces(404).Produces<Supplier>();
+
+        // Goods Information Routes
+        app.MapGet("/goodsinfo", () => this._goodsInformationService.GetGoodsInformation()).WithTags("Goods Info").Produces(200).Produces(404).Produces<List<Goodsinfo>>();
+        app.MapGet("/goodsinfo/{itemCode}", (string itemCode) => this._goodsInformationService.GetGoodInformation(itemCode)).WithTags("Goods Info").Produces(200).Produces(404).Produces<Goodsinfo>();
+        app.MapPost("/goodsinfo", (Goodsinfo goodsinfo) => this._goodsInformationService.CreateGoodsInformation(goodsinfo)).WithTags("Goods Info").Produces<Goodsinfo>();
+        app.MapPut("/goodsinfo/{itemCode}", (Goodsinfo goodsinfo, string itemCode) => this._goodsInformationService.UpdateGoodsInfo(goodsinfo, itemCode)).WithTags("Goods Info").Produces<Goodsinfo>();
+        app.MapDelete("/goodsinfo/{itemCode}", (string itemCode) => this._goodsInformationService.RemoveGoodsInfo(itemCode)).WithTags("Goods Info").Produces(200).Produces(404).Produces<Goodsinfo>();
         #endregion
 
         #region Orders Routes
@@ -144,6 +155,11 @@ public class RouteResolutionHelper : IRouteResolutionHelper
         app.MapGet("/order/{id}", (string id) => this._orderService.GetOrder(id)).WithTags("Orders").Produces(200).Produces(404).Produces<Order>();
         app.MapPost("/order", (Order order) => this._orderService.CreateOrder(order)).WithTags("Orders").Produces(200).Produces(404).Produces<Order>();
         app.MapDelete("/order/{id}", (string id) => this._orderService.RemoveOrder(id)).WithTags("Orders").Produces(200).Produces(404).Produces<Order>();
+
+        // Delivery Routes
+        app.MapPost("/deliverytracking/{orderid}", (Deliverytracking delivery) => this._deliveryTrackingService.CreateDelivery(delivery)).WithTags("Order Delivery").Produces(200).Produces(404).Produces<Deliverytracking>();
+        app.MapPut("deliverytracking/{orderid}/status", (string status, string orderid)=> this._deliveryTrackingService.UpdateDeliveryStatus(status, orderid)).WithTags("Order Delivery").Produces(200).Produces(404).Produces<Deliverytracking>();
+        app.MapGet("/deliverytracking/{orderid}", (string orderid)=> this._deliveryTrackingService.GetDeliveryStatus(orderid)).WithTags("Order Delivery").Produces(200).Produces(404).Produces<Deliverytracking>();
         #endregion
     }
 }

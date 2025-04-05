@@ -1,8 +1,6 @@
 ﻿using ArpellaStores.Models;
 using Newtonsoft.Json;
 using System.Text;
-using System.Text.Json;
-using System.Text.Json.Nodes;
 
 namespace ArpellaStores.Services;
 
@@ -53,11 +51,11 @@ public class MpesaService : IMpesaService
     }
     public async Task<string> SendPaymentPrompt(MpesaExpress mpesa)
     {
-        mpesa.Timestamp= DateTime.Now.ToString("yyyyMMddHHmmss");
+        mpesa.Timestamp = DateTime.Now.ToString("yyyyMMddHHmmss");
         var client = _clientFactory.CreateClient("mpesa");
         var _url = "/mpesa/stkpush/v1/processrequest";
         var token = await GetToken();
-        var password= GeneratePassword(mpesa.BusinessShortCode, mpesa.Password, mpesa.Timestamp);
+        var password = GeneratePassword(mpesa.BusinessShortCode, mpesa.Password, mpesa.Timestamp);
 
         var requestBody = new
         {

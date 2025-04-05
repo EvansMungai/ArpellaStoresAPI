@@ -1,4 +1,5 @@
 ﻿using ArpellaStores.Models;
+using ArpellaStores.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -21,10 +22,12 @@ public partial class ArpellaContext : IdentityDbContext<User>
     public virtual DbSet<Category> Categories { get; set; }
 
     public virtual DbSet<Coupon> Coupons { get; set; }
+    public virtual DbSet<Deliverytracking> Deliverytrackings { get; set; }
 
     public virtual DbSet<Discount> Discounts { get; set; }
 
     public virtual DbSet<Flashsale> Flashsales { get; set; }
+    public virtual DbSet<Goodsinfo> Goodsinfos { get; set; }
 
     public virtual DbSet<Inventory> Inventories { get; set; }
 
@@ -108,6 +111,46 @@ public partial class ArpellaContext : IdentityDbContext<User>
                 .HasDefaultValueSql("'1'")
                 .HasColumnName("usage_limit");
         });
+        modelBuilder.Entity<Deliverytracking>(entity =>
+        {
+            entity.HasKey(e => e.DeliveryId).HasName("PRIMARY");
+
+            entity.ToTable("deliverytracking");
+
+            entity.HasIndex(e => e.OrderId, "orderId");
+
+            entity.HasIndex(e => e.Username, "username");
+
+            entity.Property(e => e.DeliveryId).HasColumnName("deliveryId");
+            entity.Property(e => e.DeliveryAgent)
+                .HasMaxLength(30)
+                .HasColumnName("deliveryAgent");
+            entity.Property(e => e.LastUpdated)
+                .ValueGeneratedOnAddOrUpdate()
+                .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                .HasColumnType("timestamp")
+                .HasColumnName("lastUpdated");
+            entity.Property(e => e.OrderId)
+                .HasMaxLength(30)
+                .HasColumnName("orderId");
+            entity.Property(e => e.Status)
+                .HasColumnType("enum('Pending','In Transit','Delivered','Cancelled')")
+                .HasColumnName("status");
+            entity.Property(e => e.Username)
+                .HasMaxLength(30)
+                .HasColumnName("username");
+
+            entity.HasOne(d => d.Order).WithMany(p => p.Deliverytrackings)
+                .HasForeignKey(d => d.OrderId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("deliverytracking_ibfk_1");
+
+            entity.HasOne(d => d.UsernameNavigation).WithMany(p => p.Deliverytrackings)
+                .HasPrincipalKey(p => p.UserName)
+                .HasForeignKey(d => d.Username)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("deliverytracking_ibfk_2");
+        });
 
         modelBuilder.Entity<Discount>(entity =>
         {
@@ -165,6 +208,25 @@ public partial class ArpellaContext : IdentityDbContext<User>
                 .HasForeignKey(d => d.ProductId)
                 .HasConstraintName("flashsales_ibfk_1");
         });
+        modelBuilder.Entity<Goodsinfo>(entity =>
+        {
+            entity.HasKey(e => e.ItemCode).HasName("PRIMARY");
+
+            entity.ToTable("goodsinfo");
+
+            entity.Property(e => e.ItemCode)
+                .HasMaxLength(30)
+                .HasColumnName("itemCode");
+            entity.Property(e => e.ItemDescription)
+                .HasMaxLength(30)
+                .HasColumnName("itemDescription");
+            entity.Property(e => e.TaxRate)
+                .HasPrecision(10, 2)
+                .HasColumnName("taxRate");
+            entity.Property(e => e.UnitMeasure)
+                .HasMaxLength(30)
+                .HasColumnName("unitMeasure");
+        });
 
         modelBuilder.Entity<Inventory>(entity =>
         {
@@ -208,15 +270,24 @@ public partial class ArpellaContext : IdentityDbContext<User>
 
         modelBuilder.Entity<Order>(entity =>
         {
-            entity.HasKey(e => e.OrderId).HasName("PRIMARY");
+            entity.HasKey(e => e.Orderid).HasName("PRIMARY");
 
             entity.ToTable("orders");
 
             entity.HasIndex(e => e.UserId, "userId");
 
-            entity.Property(e => e.OrderId)
+            entity.Property(e => e.Orderid)
                 .HasMaxLength(30)
                 .HasColumnName("orderid");
+            entity.Property(e => e.BuyerPin)
+                .HasMaxLength(30)
+                .HasColumnName("buyerPin");
+            entity.Property(e => e.Latitude)
+                .HasPrecision(9, 6)
+                .HasColumnName("latitude");
+            entity.Property(e => e.Longitude)
+                .HasPrecision(9, 6)
+                .HasColumnName("longitude");
             entity.Property(e => e.Status)
                 .HasMaxLength(30)
                 .HasColumnName("status");
@@ -262,13 +333,14 @@ public partial class ArpellaContext : IdentityDbContext<User>
 
         modelBuilder.Entity<Payment>(entity =>
         {
-            entity
-                .HasNoKey()
-                .ToTable("payments");
+            entity.HasKey(e => e.PaymentId).HasName("PRIMARY");
 
-            entity.HasIndex(e => e.OrderId, "orderid");
+            entity.ToTable("payments");
 
-            entity.Property(e => e.OrderId)
+            entity.HasIndex(e => e.Orderid, "orderid");
+
+            entity.Property(e => e.PaymentId).HasColumnName("paymentId");
+            entity.Property(e => e.Orderid)
                 .HasMaxLength(30)
                 .HasColumnName("orderid");
             entity.Property(e => e.Status)
@@ -279,7 +351,7 @@ public partial class ArpellaContext : IdentityDbContext<User>
                 .HasColumnName("transactionId");
 
             entity.HasOne(d => d.Order).WithMany()
-                .HasForeignKey(d => d.OrderId)
+                .HasForeignKey(d => d.Orderid)
                 .HasConstraintName("payments_ibfk_1");
         });
 
@@ -294,6 +366,8 @@ public partial class ArpellaContext : IdentityDbContext<User>
             entity.HasIndex(e => e.Category, "products_ibfk_1");
 
             entity.HasIndex(e => e.Subcategory, "subcategory");
+
+            entity.HasIndex(e => e.TaxCode, "taxCode");
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Barcodes)
@@ -319,9 +393,9 @@ public partial class ArpellaContext : IdentityDbContext<User>
                 .HasColumnName("price_after_discount");
             entity.Property(e => e.PurchaseCap).HasColumnName("purchaseCap");
             entity.Property(e => e.Subcategory).HasColumnName("subcategory");
-            entity.Property(e => e.TaxRate)
-                .HasPrecision(10, 2)
-                .HasColumnName("tax_rate");
+            entity.Property(e => e.TaxCode)
+                .HasMaxLength(30)
+                .HasColumnName("taxCode");
             entity.Property(e => e.UpdatedAt)
                 .ValueGeneratedOnAddOrUpdate()
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")

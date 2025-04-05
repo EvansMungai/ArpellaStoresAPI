@@ -33,7 +33,6 @@ namespace ArpellaStores.Services
         {
             var newCategory = new Category
             {
-                Id = category.Id,
                 CategoryName = category.CategoryName
             };
             try
@@ -43,7 +42,7 @@ namespace ArpellaStores.Services
             }
             catch (Exception ex)
             {
-                return Results.BadRequest(ex.InnerException.Message);
+                return Results.BadRequest(ex.InnerException?.Message);
             }
             return Results.Ok(newCategory);
         }
@@ -61,7 +60,7 @@ namespace ArpellaStores.Services
                 }
                 catch (Exception ex)
                 {
-                    return Results.BadRequest(ex.InnerException.Message);
+                    return Results.BadRequest(ex.InnerException?.Message);
                 }
                 return Results.Ok(retrievedCategory);
             }
