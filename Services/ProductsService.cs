@@ -92,7 +92,7 @@ namespace ArpellaStores.Services
                     _context.Update(retrievedProduct);
                     await _context.SaveChangesAsync();
                 }
-                catch (Exception ex) { }
+                catch (Exception ex) { return Results.BadRequest(ex.InnerException?.Message ?? ex.Message); }
                 return Results.Ok(retrievedProduct);
             }
             else
@@ -112,7 +112,7 @@ namespace ArpellaStores.Services
                     _context.Update(retrievedProduct);
                     await _context.SaveChangesAsync();
                 }
-                catch (Exception ex) { }
+                catch (Exception ex) { return Results.BadRequest(ex.InnerException?.Message ?? ex.Message); }
                 return Results.Ok(retrievedProduct);
             }
             else
@@ -132,7 +132,7 @@ namespace ArpellaStores.Services
                     await _context.SaveChangesAsync();
                     return Results.Ok(product);
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     return Results.BadRequest(ex.InnerException?.Message ?? ex.Message);
                 }
@@ -152,7 +152,7 @@ namespace ArpellaStores.Services
         public async Task<IResult> GetProductImageUrl(string productId)
         {
             var imageUrl = _context.Productimages.SingleOrDefault(i => i.ProductId == productId);
-            return imageUrl == null ? Results.NotFound($"No image with productId = {productId} was found") : Results.Ok(imageUrl);
+            return imageUrl == null ? Results.NotFound($"No image with productId = {productId} was found") : Results.Ok(imageUrl.ImageUrl);
         }
         public async Task<IResult> CreateProductImagesDetails(HttpRequest request)
         {
@@ -174,7 +174,7 @@ namespace ArpellaStores.Services
             var file = form.Files.FirstOrDefault();
             if (file == null)
                 return Results.BadRequest("No image file provided");
-            var imageUrl = await GetProductImageUrl(file);
+            var imageUrl = await GetImageUrl(file);
 
             var newProductImageDetails = new Productimage
             {
@@ -191,7 +191,7 @@ namespace ArpellaStores.Services
             }
             catch (Exception ex)
             {
-                return Results.BadRequest(ex.Message);
+                return Results.BadRequest(ex.InnerException?.Message ?? ex.Message);
             }
 
             return Results.Ok(newProductImageDetails);
@@ -205,15 +205,14 @@ namespace ArpellaStores.Services
                 return Results.NotFound("Product image not found");
             }
 
-            _context.Productimages.Remove(existingProductImage);
-
             try
             {
+                _context.Productimages.Remove(existingProductImage);
                 await _context.SaveChangesAsync();
             }
             catch (Exception ex)
             {
-                return Results.BadRequest(ex.Message);
+                return Results.BadRequest(ex.InnerException?.Message ?? ex.Message);
             }
 
             return Results.Ok("Product image details deleted successfully");
@@ -255,7 +254,7 @@ namespace ArpellaStores.Services
             }
             return products;
         }
-        public async Task<string> GetProductImageUrl(IFormFile formFile)
+        public async Task<string> GetImageUrl(IFormFile formFile)
         {
             if (formFile == null)
                 throw new ArgumentException("No file uploaded");

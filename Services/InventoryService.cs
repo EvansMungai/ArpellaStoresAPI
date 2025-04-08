@@ -19,10 +19,10 @@ public class InventoryService : IInventoryService
         var inventories = _context.Inventories.Select(i => new { i.InventoryId, i.ProductId, i.StockQuantity, i.StockThreshold, i.StockPrice, i.InvoiceNumber, i.SupplierId, i.CreatedAt, i.UpdatedAt }).ToList();
         return inventories == null || inventories.Count == 0 ? Results.NotFound("No inventories found") : Results.Ok(inventories);
     }
-    public async Task<IResult> GetInventory(int id)
+    public async Task<IResult> GetInventory(string id)
     {
-        var inventory = _context.Inventories.Where(i => i.InventoryId == id).Select(i => new { i.InventoryId, i.ProductId, i.StockQuantity, i.StockThreshold, i.StockPrice, i.InvoiceNumber, i.SupplierId, i.CreatedAt, i.UpdatedAt}).SingleOrDefault();
-        return inventory == null ? Results.NotFound($"Inventory with InventoryId = {id} was not found") : Results.Ok(inventory);
+        var inventory = _context.Inventories.Where(i => i.ProductId == id).Select(i => new { i.InventoryId, i.ProductId, i.StockQuantity, i.StockThreshold, i.StockPrice, i.InvoiceNumber, i.SupplierId, i.CreatedAt, i.UpdatedAt}).SingleOrDefault();
+        return inventory == null ? Results.NotFound($"Inventory with ProductId = {id} was not found") : Results.Ok(inventory);
     }
     public async Task<IResult> CreateInventory(Inventory inventory)
     {
@@ -47,7 +47,7 @@ public class InventoryService : IInventoryService
         }
         catch (Exception ex)
         {
-            return Results.NotFound(ex.Message);
+            return Results.NotFound(ex.InnerException?.Message ?? ex.Message);
         }
     }
     public async Task<IResult> CreateInventories(IFormFile file)
@@ -68,12 +68,12 @@ public class InventoryService : IInventoryService
         }
         catch (Exception ex)
         {
-            return Results.BadRequest(ex.InnerException.Message);
+            return Results.BadRequest(ex.InnerException?.Message ?? ex.Message);
         }
     }
-    public async Task<IResult> UpdateInventory(Inventory update, int id)
+    public async Task<IResult> UpdateInventory(Inventory update, string id)
     {
-        Inventory? retrievedInventory = _context.Inventories.FirstOrDefault(i => i.InventoryId == id);
+        Inventory? retrievedInventory = _context.Inventories.FirstOrDefault(i => i.ProductId == id);
         if (retrievedInventory != null)
         {
             retrievedInventory.StockQuantity = update.StockQuantity;
@@ -89,17 +89,17 @@ public class InventoryService : IInventoryService
             }
             catch (Exception ex)
             {
-                return Results.NotFound(ex.Message);
+                return Results.NotFound(ex.InnerException?.Message ?? ex.Message);
             }
         }
         else
         {
-            return Results.NotFound($"Inventory with InventoryID = {id} was not found");
+            return Results.NotFound($"Inventory with ProductID = {id} was not found");
         }
     }
-    public async Task<IResult> RemoveInventory(int id)
+    public async Task<IResult> RemoveInventory(string id)
     {
-        Inventory? retrievedInventory = _context.Inventories.FirstOrDefault(i => i.InventoryId == id);
+        Inventory? retrievedInventory = _context.Inventories.FirstOrDefault(i => i.ProductId == id);
         if (retrievedInventory != null)
         {
             try
@@ -110,7 +110,7 @@ public class InventoryService : IInventoryService
             }
             catch (Exception ex)
             {
-                return Results.Problem("Exception: " + ex.Message);
+                return Results.Problem("Exception: " + ex.InnerException?.Message ?? ex.Message);
             }
 
         }

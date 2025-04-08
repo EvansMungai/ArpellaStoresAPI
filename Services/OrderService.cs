@@ -123,7 +123,7 @@ public class OrderService : IOrderService
         }
         catch (Exception ex)
         {
-            return Results.BadRequest(ex.Message);
+            return Results.BadRequest(ex.InnerException?.Message ?? ex.Message);
         }
     }
 
@@ -147,7 +147,7 @@ public class OrderService : IOrderService
         }
         catch (Exception ex)
         {
-            return Results.BadRequest(ex.InnerException.Message);
+            return Results.BadRequest(ex.InnerException?.Message ?? ex.Message);
         }
     }
 

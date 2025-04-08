@@ -43,7 +43,7 @@ public class UserManagementService : IUserManagementService
         }
         catch (Exception ex)
         {
-            return Results.BadRequest("Error occurred!: " + ex.Message);
+            return Results.BadRequest("Error occurred!: " + ex.InnerException?.Message ?? ex.Message);
         }
     }
     public async Task<IResult> GetUsers()
@@ -139,7 +139,7 @@ public class UserManagementService : IUserManagementService
         }
         catch (Exception ex)
         {
-            return Results.BadRequest("Exception: " + ex.Message);
+            return Results.BadRequest("Exception: " + ex.InnerException?.Message);
         }
 
 
