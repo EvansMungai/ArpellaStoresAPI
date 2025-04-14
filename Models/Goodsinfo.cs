@@ -12,4 +12,6 @@ public partial class Goodsinfo
     public string? UnitMeasure { get; set; }
 
     public decimal? TaxRate { get; set; }
+
+    public int Id { get; set; }
 }

@@ -72,6 +72,7 @@ public class OrderService : IOrderService
         {
             Orderid = GenerateOrderId(),
             UserId = orderDetails.UserId,
+            PhoneNumber = orderDetails.PhoneNumber,
             Status = "Pending",
             Total = CalculateTotalCost(orderDetails),
             Latitude = orderDetails.Latitude,

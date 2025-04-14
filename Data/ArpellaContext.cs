@@ -1,5 +1,4 @@
 ﻿using ArpellaStores.Models;
-using ArpellaStores.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -210,10 +209,13 @@ public partial class ArpellaContext : IdentityDbContext<User>
         });
         modelBuilder.Entity<Goodsinfo>(entity =>
         {
-            entity.HasKey(e => e.ItemCode).HasName("PRIMARY");
+            entity.HasKey(e => e.Id).HasName("PRIMARY");
 
             entity.ToTable("goodsinfo");
 
+            entity.Property(e => e.Id)
+                .ValueGeneratedNever()
+                .HasColumnName("id");
             entity.Property(e => e.ItemCode)
                 .HasMaxLength(30)
                 .HasColumnName("itemCode");
@@ -279,6 +281,9 @@ public partial class ArpellaContext : IdentityDbContext<User>
             entity.Property(e => e.Orderid)
                 .HasMaxLength(30)
                 .HasColumnName("orderid");
+            entity.Property(e => e.PhoneNumber)
+                .HasMaxLength(30)
+                .HasColumnName("phoneNumber");
             entity.Property(e => e.BuyerPin)
                 .HasMaxLength(30)
                 .HasColumnName("buyerPin");
@@ -361,7 +366,7 @@ public partial class ArpellaContext : IdentityDbContext<User>
 
             entity.ToTable("products");
 
-            entity.HasIndex(e => e.InventoryId, "inventoryId");
+            entity.HasIndex(e => e.InventoryId, "AK_products_inventoryId").IsUnique();
 
             entity.HasIndex(e => e.Category, "products_ibfk_1");
 
@@ -405,13 +410,6 @@ public partial class ArpellaContext : IdentityDbContext<User>
             entity.HasOne(d => d.CategoryNavigation).WithMany(p => p.Products)
                 .HasForeignKey(d => d.Category)
                 .HasConstraintName("products_ibfk_1");
-
-            entity.HasOne(p => p.IdNavigation)
-                  .WithMany(i => i.Products)
-                  .HasForeignKey(p => p.InventoryId)
-                  .HasPrincipalKey(i => i.ProductId)
-                  .OnDelete(DeleteBehavior.ClientSetNull)
-                  .HasConstraintName("products_ibfk_5");
 
             entity.HasOne(d => d.SubcategoryNavigation).WithMany(p => p.Products)
                 .HasForeignKey(d => d.Subcategory)
