@@ -12,4 +12,5 @@ public partial class Supplier
     public string? KraPin { get; set; }
 
     public virtual ICollection<Inventory> Inventories { get; set; } = new List<Inventory>();
+    public virtual ICollection<Invoice> Invoices { get; set; }
 }

@@ -21,6 +21,5 @@ public partial class Inventory
     public int? SupplierId { get; set; }
 
     public virtual Supplier? Supplier { get; set; }
-    public string InvoiceNumber { get; set; }
     public ICollection<Product> Products { get; set; }
 }

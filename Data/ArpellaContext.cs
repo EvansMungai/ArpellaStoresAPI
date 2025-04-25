@@ -27,18 +27,14 @@ public partial class ArpellaContext : IdentityDbContext<User>
 
     public virtual DbSet<Flashsale> Flashsales { get; set; }
     public virtual DbSet<Goodsinfo> Goodsinfos { get; set; }
-
     public virtual DbSet<Inventory> Inventories { get; set; }
-
+    public virtual DbSet<Invoice> Invoices { get; set; }
     public virtual DbSet<Order> Orders { get; set; }
-
     public virtual DbSet<Orderitem> Orderitems { get; set; }
-
     public virtual DbSet<Payment> Payments { get; set; }
-
     public virtual DbSet<Product> Products { get; set; }
     public virtual DbSet<Productimage> Productimages { get; set; }
-
+    public virtual DbSet<Restocklog> Restocklogs { get; set; }
     public virtual DbSet<Subcategory> Subcategories { get; set; }
     public virtual DbSet<Supplier> Suppliers { get; set; }
 
@@ -245,9 +241,6 @@ public partial class ArpellaContext : IdentityDbContext<User>
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")
                 .HasColumnType("timestamp")
                 .HasColumnName("createdAt");
-            entity.Property(e => e.InvoiceNumber)
-                .HasMaxLength(30)
-                .HasColumnName("invoiceNumber");
             entity.Property(e => e.ProductId)
                 .HasMaxLength(30)
                 .HasColumnName("product_id");
@@ -268,6 +261,36 @@ public partial class ArpellaContext : IdentityDbContext<User>
             entity.HasOne(d => d.Supplier).WithMany(p => p.Inventories)
                 .HasForeignKey(d => d.SupplierId)
                 .HasConstraintName("inventory_ibfk_1");
+        });
+
+        modelBuilder.Entity<Invoice>(entity =>
+        {
+            entity.HasKey(e => e.InvoiceId).HasName("PRIMARY");
+
+            entity.ToTable("invoices");
+
+            entity.HasIndex(e => e.SupplierId, "supplierId");
+
+            entity.Property(e => e.InvoiceId)
+                .HasMaxLength(30)
+                .HasColumnName("invoiceId");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                .HasColumnType("timestamp")
+                .HasColumnName("createdAt");
+            entity.Property(e => e.SupplierId).HasColumnName("supplierId");
+            entity.Property(e => e.TotalAmount)
+                .HasPrecision(10, 2)
+                .HasColumnName("totalAmount");
+            entity.Property(e => e.UpdatedAt)
+                .ValueGeneratedOnAddOrUpdate()
+                .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                .HasColumnType("timestamp")
+                .HasColumnName("updatedAt");
+
+            entity.HasOne(d => d.Supplier).WithMany(p => p.Invoices)
+                .HasForeignKey(d => d.SupplierId)
+                .HasConstraintName("invoices_ibfk_1");
         });
 
         modelBuilder.Entity<Order>(entity =>
@@ -414,6 +437,11 @@ public partial class ArpellaContext : IdentityDbContext<User>
             entity.HasOne(d => d.SubcategoryNavigation).WithMany(p => p.Products)
                 .HasForeignKey(d => d.Subcategory)
                 .HasConstraintName("products_ibfk_6");
+            entity.HasOne(d => d.IdNavigation)
+                  .WithMany(p => p.Products)
+                  .HasForeignKey(d => d.InventoryId)
+                  .HasPrincipalKey(p => p.ProductId)
+                  .HasConstraintName("products_ibfk_7");
         });
 
         modelBuilder.Entity<Productimage>(entity =>
@@ -450,6 +478,27 @@ public partial class ArpellaContext : IdentityDbContext<User>
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("productimages_ibfk_1");
 
+        });
+
+        modelBuilder.Entity<Restocklog>(entity =>
+        {
+            entity.HasKey(e => e.LogId).HasName("PRIMARY");
+
+            entity.ToTable("restocklog");
+
+            entity.Property(e => e.LogId).HasColumnName("logId");
+            entity.Property(e => e.InvoiceNumber)
+                .HasMaxLength(30)
+                .HasColumnName("invoiceNumber");
+            entity.Property(e => e.ProductId)
+                .HasMaxLength(30)
+                .HasColumnName("productId");
+            entity.Property(e => e.RestockDate)
+                .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                .HasColumnType("timestamp")
+                .HasColumnName("restockDate");
+            entity.Property(e => e.RestockQuantity).HasColumnName("restockQuantity");
+            entity.Property(e => e.SupplierId).HasColumnName("supplierId");
         });
 
         modelBuilder.Entity<Subcategory>(entity =>

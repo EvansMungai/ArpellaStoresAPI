@@ -47,6 +47,7 @@ builder.Services.AddScoped<ICouponService, CouponService>();
 builder.Services.AddScoped<IFlashsaleService, FlashsaleService>();
 builder.Services.AddScoped<IGoodsInformationService, GoodsInformationService>();
 builder.Services.AddScoped<ISupplierService, SupplierService>();
+builder.Services.AddScoped<IInvoiceService, InvoiceService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IMpesaService, MpesaService>();
 builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();

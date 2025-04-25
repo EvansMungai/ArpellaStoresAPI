@@ -13,6 +13,7 @@ public class RouteResolutionHelper : IRouteResolutionHelper
     private readonly IDiscountService _discountService;
     private readonly ICouponService _couponService;
     private readonly IFlashsaleService _flashsaleService;
+    private readonly IInvoiceService _invoiceService;
     private readonly IOrderService _orderService;
     private readonly ISupplierService _supplierService;
     private readonly IDeliveryTrackingService _deliveryTrackingService;
@@ -20,7 +21,7 @@ public class RouteResolutionHelper : IRouteResolutionHelper
     private readonly IUserManagementService _userManagementService;
     private readonly IAuthenticationService _authenticationService;
     private readonly IMpesaService _mpesaService;
-    public RouteResolutionHelper(ICategoriesService categoriesService, ISubcategoriesServices subcategoriesServices, IProductsService productsService, IInventoryService inventoryService, IDiscountService discountService, ICouponService couponService, IFlashsaleService flashsaleService, IOrderService orderService, ISupplierService supplierService, IGoodsInformationService goodsInformationService, IDeliveryTrackingService deliveryTrackingService, IUserManagementService userManagementService, IAuthenticationService authenticationService, IMpesaService mpesaService)
+    public RouteResolutionHelper(ICategoriesService categoriesService, ISubcategoriesServices subcategoriesServices, IProductsService productsService, IInventoryService inventoryService, IDiscountService discountService, ICouponService couponService, IFlashsaleService flashsaleService, IInvoiceService invoiceService, IOrderService orderService, ISupplierService supplierService, IGoodsInformationService goodsInformationService, IDeliveryTrackingService deliveryTrackingService, IUserManagementService userManagementService, IAuthenticationService authenticationService, IMpesaService mpesaService)
     {
         _categoriesService = categoriesService;
         _subcategoriesServices = subcategoriesServices;
@@ -29,6 +30,7 @@ public class RouteResolutionHelper : IRouteResolutionHelper
         _discountService = discountService;
         _couponService = couponService;
         _flashsaleService = flashsaleService;
+        _invoiceService = invoiceService;
         _orderService = orderService;
         _goodsInformationService = goodsInformationService;
         _deliveryTrackingService = deliveryTrackingService;
@@ -148,6 +150,13 @@ public class RouteResolutionHelper : IRouteResolutionHelper
         app.MapPost("/goodsinfo", (Goodsinfo goodsinfo) => this._goodsInformationService.CreateGoodsInformation(goodsinfo)).WithTags("Goods Info").Produces<Goodsinfo>();
         app.MapPut("/goodsinfo/{itemCode}", (Goodsinfo goodsinfo, string itemCode) => this._goodsInformationService.UpdateGoodsInfo(goodsinfo, itemCode)).WithTags("Goods Info").Produces<Goodsinfo>();
         app.MapDelete("/goodsinfo/{itemCode}", (string itemCode) => this._goodsInformationService.RemoveGoodsInfo(itemCode)).WithTags("Goods Info").Produces(200).Produces(404).Produces<Goodsinfo>();
+
+        // Invoice Routes
+        app.MapGet("/invoices", () => this._invoiceService.GetInvoices()).WithTags("Invoices").Produces(200).Produces(404).Produces<List<Invoice>>();
+        app.MapGet("/invoice/{id}", (string id) => this._invoiceService.GetInvoice(id)).WithTags("Invoices").Produces(200).Produces(404).Produces<Invoice>();
+        app.MapPost("/invoice", (Invoice invoice) => this._invoiceService.CreateInvoice(invoice)).WithTags("Invoices").Produces(200).Produces(500).Produces<Invoice>();
+        app.MapPut("/invoice/{id}", (Invoice invoice, string id) => this._invoiceService.UpdateInvoceDetails(invoice, id)).WithTags("Invoices").Produces(200).Produces(404).Produces(500).Produces<Invoice>();
+        app.MapDelete("/invoice/{id}", (string id) => this._invoiceService.RemoveInvoice(id)).WithTags("Invoices").Produces(200).Produces(404).Produces(500).Produces<Invoice>();
         #endregion
 
         #region Orders Routes

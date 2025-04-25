@@ -16,12 +16,12 @@ public class InventoryService : IInventoryService
     }
     public async Task<IResult> GetInventories()
     {
-        var inventories = _context.Inventories.Select(i => new { i.InventoryId, i.ProductId, i.StockQuantity, i.StockThreshold, i.StockPrice, i.InvoiceNumber, i.SupplierId, i.CreatedAt, i.UpdatedAt }).ToList();
+        var inventories = _context.Inventories.Select(i => new { i.InventoryId, i.ProductId, i.StockQuantity, i.StockThreshold, i.StockPrice,  i.SupplierId, i.CreatedAt, i.UpdatedAt }).ToList();
         return inventories == null || inventories.Count == 0 ? Results.NotFound("No inventories found") : Results.Ok(inventories);
     }
     public async Task<IResult> GetInventory(string id)
     {
-        var inventory = _context.Inventories.Where(i => i.ProductId == id).Select(i => new { i.InventoryId, i.ProductId, i.StockQuantity, i.StockThreshold, i.StockPrice, i.InvoiceNumber, i.SupplierId, i.CreatedAt, i.UpdatedAt}).SingleOrDefault();
+        var inventory = _context.Inventories.Where(i => i.ProductId == id).Select(i => new { i.InventoryId, i.ProductId, i.StockQuantity, i.StockThreshold, i.StockPrice, i.SupplierId, i.CreatedAt, i.UpdatedAt}).SingleOrDefault();
         return inventory == null ? Results.NotFound($"Inventory with ProductId = {id} was not found") : Results.Ok(inventory);
     }
     public async Task<IResult> CreateInventory(Inventory inventory)
@@ -36,7 +36,6 @@ public class InventoryService : IInventoryService
             StockQuantity = inventory.StockQuantity,
             StockThreshold = inventory.StockThreshold,
             StockPrice = inventory.StockPrice,
-            InvoiceNumber = inventory.InvoiceNumber,
             SupplierId = inventory.SupplierId
         };
         try
@@ -79,7 +78,6 @@ public class InventoryService : IInventoryService
             retrievedInventory.StockQuantity = update.StockQuantity;
             retrievedInventory.StockThreshold = update.StockThreshold;
             retrievedInventory.UpdatedAt = DateTime.Now;
-            retrievedInventory.InvoiceNumber = update.InvoiceNumber;
             retrievedInventory.SupplierId = update.SupplierId;
             try
             {
@@ -156,8 +154,7 @@ public class InventoryService : IInventoryService
                 StockQuantity = int.Parse(worksheet.Cells[row, 2].Text),
                 StockThreshold = int.Parse(worksheet.Cells[row, 3].Text),
                 StockPrice = decimal.Parse(worksheet.Cells[row, 4].Text),
-                InvoiceNumber = worksheet.Cells[row, 5].Text,
-                SupplierId = int.Parse(worksheet.Cells[row, 6].Text)
+                SupplierId = int.Parse(worksheet.Cells[row, 5].Text)
             };
             inventories.Add(inventory);
         }
