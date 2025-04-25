@@ -157,6 +157,10 @@ public class RouteResolutionHelper : IRouteResolutionHelper
         app.MapPost("/invoice", (Invoice invoice) => this._invoiceService.CreateInvoice(invoice)).WithTags("Invoices").Produces(200).Produces(500).Produces<Invoice>();
         app.MapPut("/invoice/{id}", (Invoice invoice, string id) => this._invoiceService.UpdateInvoceDetails(invoice, id)).WithTags("Invoices").Produces(200).Produces(404).Produces(500).Produces<Invoice>();
         app.MapDelete("/invoice/{id}", (string id) => this._invoiceService.RemoveInvoice(id)).WithTags("Invoices").Produces(200).Produces(404).Produces(500).Produces<Invoice>();
+        
+        // Restock Logs Routes
+        app.MapGet("/restock-logs", () => this._inventoryService.GetRestockLogs()).WithTags("Restock Logs").Produces(200).Produces(404).Produces<List<Restocklog>>();
+        app.MapPost("/restock-inventory", (Restocklog restock) => this._inventoryService.RestockInventory(restock)).WithTags("Restock Logs").Produces(200).Produces(500).Produces<Restocklog>();
         #endregion
 
         #region Orders Routes

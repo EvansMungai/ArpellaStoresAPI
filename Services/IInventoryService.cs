@@ -11,4 +11,6 @@ public interface IInventoryService
     Task<IResult> UpdateInventory(Inventory update, string id);
     Task<IResult> RemoveInventory(string id);
     Task<IResult> CheckInventoryLevels();
+    Task<IResult> RestockInventory(Restocklog restocklog);
+    Task<IResult> GetRestockLogs();
 }

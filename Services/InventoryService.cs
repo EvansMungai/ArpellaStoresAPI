@@ -161,4 +161,35 @@ public class InventoryService : IInventoryService
         return inventories;
     }
     #endregion
+
+    #region Restock Inventory
+    public async Task<IResult> RestockInventory(Restocklog restocklog)
+    {
+        var newRestockLog = new Restocklog
+        {
+            LogId = restocklog.LogId,
+            ProductId = restocklog.ProductId,
+            RestockQuantity = restocklog.RestockQuantity,
+            SupplierId = restocklog.SupplierId,
+            InvoiceNumber = restocklog.InvoiceNumber
+        };
+        try
+        {
+            Inventory? inventory  = _context.Inventories.FirstOrDefault(i => i.ProductId == restocklog.ProductId);
+            if (inventory == null)
+            {
+                return Results.BadRequest($"Inventory with productid ={restocklog.ProductId} was not found");
+            }
+            inventory.StockQuantity += restocklog.RestockQuantity;
+            _context.Restocklogs.Add(newRestockLog);
+            _context.SaveChangesAsync();
+            return Results.Ok(newRestockLog);
+        } catch (Exception ex) { return Results.BadRequest(ex.InnerException?.Message ?? ex.Message); }
+    }
+    public async Task<IResult> GetRestockLogs()
+    {
+        var restockLogs = _context.Restocklogs.Select(l => new {l.LogId, l.ProductId, l.RestockQuantity, l.RestockDate, l.SupplierId, l.InvoiceNumber}).ToList();
+        return restockLogs == null || restockLogs.Count == 0 ? Results.NotFound("No Restock logs were found") : Results.Ok(restockLogs);
+    }
+    #endregion
 }
