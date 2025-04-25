@@ -486,6 +486,10 @@ public partial class ArpellaContext : IdentityDbContext<User>
 
             entity.ToTable("restocklog");
 
+            entity.HasIndex(e => e.InvoiceNumber, "invoiceNumber");
+
+            entity.HasIndex(e => e.SupplierId, "supplierId");
+
             entity.Property(e => e.LogId).HasColumnName("logId");
             entity.Property(e => e.InvoiceNumber)
                 .HasMaxLength(30)
@@ -499,6 +503,14 @@ public partial class ArpellaContext : IdentityDbContext<User>
                 .HasColumnName("restockDate");
             entity.Property(e => e.RestockQuantity).HasColumnName("restockQuantity");
             entity.Property(e => e.SupplierId).HasColumnName("supplierId");
+
+            entity.HasOne(d => d.InvoiceNumberNavigation).WithMany(p => p.Restocklogs)
+                .HasForeignKey(d => d.InvoiceNumber)
+                .HasConstraintName("restocklog_ibfk_1");
+
+            entity.HasOne(d => d.Supplier).WithMany(p => p.Restocklogs)
+                .HasForeignKey(d => d.SupplierId)
+                .HasConstraintName("restocklog_ibfk_2");
         });
 
         modelBuilder.Entity<Subcategory>(entity =>

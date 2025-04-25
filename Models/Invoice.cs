@@ -16,4 +16,5 @@ public partial class Invoice
     public DateTime? UpdatedAt { get; set; }
 
     public virtual Supplier? Supplier { get; set; }
+    public virtual ICollection<Restocklog> Restocklogs { get; set; } = new List<Restocklog>();
 }
