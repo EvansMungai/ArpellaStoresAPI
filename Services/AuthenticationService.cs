@@ -61,7 +61,7 @@ public class AuthenticationService : IAuthenticationService
         }
         catch (Exception ex)
         {
-            return Results.BadRequest("Error occurred!: " + ex.InnerException?.Message);
+            return Results.BadRequest("Error occurred!: " + ex.InnerException?.Message ?? ex.Message);
         }
     }
     public async Task<IResult> Login(SignInManager<User> signInManager, UserManager<User> userManager, User model)

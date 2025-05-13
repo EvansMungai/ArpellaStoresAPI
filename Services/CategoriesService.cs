@@ -42,7 +42,7 @@ namespace ArpellaStores.Services
             }
             catch (Exception ex)
             {
-                return Results.BadRequest(ex.InnerException?.Message);
+                return Results.BadRequest(ex.InnerException?.Message ?? ex.Message);
             }
             return Results.Ok(newCategory);
         }
@@ -60,7 +60,7 @@ namespace ArpellaStores.Services
                 }
                 catch (Exception ex)
                 {
-                    return Results.BadRequest(ex.InnerException?.Message);
+                    return Results.BadRequest(ex.InnerException?.Message ?? ex.Message);
                 }
                 return Results.Ok(retrievedCategory);
             }
