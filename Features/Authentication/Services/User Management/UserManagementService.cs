@@ -1,4 +1,5 @@
 ﻿using ArpellaStores.Data;
+using ArpellaStores.Features.Authentication.Services.Authentication;
 using ArpellaStores.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;

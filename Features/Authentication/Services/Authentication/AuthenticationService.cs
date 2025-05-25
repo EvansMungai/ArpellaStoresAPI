@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Caching.Memory;
 //using Microsoft.AspNetCore.Mvc;
 
-namespace ArpellaStores.Services;
+namespace ArpellaStores.Features.Authentication.Services.Authentication;
 
 public class AuthenticationService : IAuthenticationService
 {
@@ -16,12 +16,12 @@ public class AuthenticationService : IAuthenticationService
     private readonly IMemoryCache _cache;
     public AuthenticationService(UserManager<User> userManager, SignInManager<User> signInManager, RoleManager<IdentityRole> roleManager, IUserManagementService userManagementService, ArpellaContext context, IMemoryCache cache)
     {
-        this._userManager = userManager;
-        this._signInManager = signInManager;
-        this._roleManager = roleManager;
-        this._userManagementService = userManagementService;
-        this._context = context;
-        this._cache = cache;
+        _userManager = userManager;
+        _signInManager = signInManager;
+        _roleManager = roleManager;
+        _userManagementService = userManagementService;
+        _context = context;
+        _cache = cache;
     }
     public async Task<IResult> RegisterUser(UserManager<User> userManager, User model)
     {
@@ -44,14 +44,14 @@ public class AuthenticationService : IAuthenticationService
                 var query = from user in _context.Users
                             join userRoles in _context.UserRoles on user.Id equals userRoles.UserId
                             join role in _context.Roles on userRoles.RoleId equals role.Id
-                            where (user.UserName == user1.UserName)
+                            where user.UserName == user1.UserName
                             select new
                             {
-                                UserName = user.UserName,
-                                Email = user.Email,
-                                PhoneNumber = user.PhoneNumber,
-                                FirstName = user.FirstName,
-                                LastName = user.LastName,
+                                user.UserName,
+                                user.Email,
+                                user.PhoneNumber,
+                                user.FirstName,
+                                user.LastName,
                                 Role = role.Name,
                             };
                 var userDetails = query.ToList();
@@ -84,14 +84,14 @@ public class AuthenticationService : IAuthenticationService
                 var query = from user in _context.Users
                             join userRoles in _context.UserRoles on user.Id equals userRoles.UserId
                             join role in _context.Roles on userRoles.RoleId equals role.Id
-                            where (user.UserName == retrievedUser.UserName)
+                            where user.UserName == retrievedUser.UserName
                             select new
                             {
-                                UserName = user.UserName,
-                                Email = user.Email,
-                                PhoneNumber = user.PhoneNumber,
-                                FirstName = user.FirstName,
-                                LastName = user.LastName,
+                                user.UserName,
+                                user.Email,
+                                user.PhoneNumber,
+                                user.FirstName,
+                                user.LastName,
                                 Role = role.Name,
                             };
                 var userDetails = query.ToList();
