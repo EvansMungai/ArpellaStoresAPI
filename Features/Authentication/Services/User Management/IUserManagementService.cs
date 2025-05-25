@@ -1,7 +1,7 @@
 ﻿using ArpellaStores.Models;
 using Microsoft.AspNetCore.Identity;
 
-namespace ArpellaStores.Services;
+namespace ArpellaStores.Features.Authentication.Services.Authentication;
 
 public interface IUserManagementService
 {
