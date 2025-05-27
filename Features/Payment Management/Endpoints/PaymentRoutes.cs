@@ -1,5 +1,5 @@
 ﻿using ArpellaStores.Extensions;
-using ArpellaStores.Models;
+using ArpellaStores.Features.Payment_Management.Models;
 using ArpellaStores.Services;
 
 namespace ArpellaStores.Features.Payment_Management.Endpoints;
@@ -20,6 +20,6 @@ public class PaymentRoutes : IRouteRegistrar
         var app = webApplication.MapGroup("").WithTags("Mpesa");
         app.MapGet("/mpesa", () => this._mpesaService.GetToken());
         app.MapPost("/registerurls", () => this._mpesaService.RegisterUrls());
-        app.MapPost("/pay", (MpesaExpress mpesa) => this._mpesaService.SendPaymentPrompt(mpesa));
+        app.MapPost("/pay", (MpesaExpressRequest mpesa) => this._mpesaService.SendPaymentPrompt(mpesa));
     }
 }

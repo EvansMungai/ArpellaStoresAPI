@@ -1,4 +1,5 @@
 ﻿using ArpellaStores.Data;
+using ArpellaStores.Features.Payment_Management.Models;
 using ArpellaStores.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -46,7 +47,7 @@ public static class ServiceRegistration
             });
             //options.AddPolicy("clientOrigin", builder => builder.WithOrigins("https://localhost:3000").AllowAnyHeader().AllowAnyMethod());
         });
-
+        serviceCollection.Configure<MpesaSettings>(configuration.GetSection("MpesaConfig"));
 
         // Register application services
         serviceCollection.RegisterFeatureServices();

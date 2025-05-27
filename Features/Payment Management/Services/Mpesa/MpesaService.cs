@@ -1,5 +1,8 @@
-﻿using ArpellaStores.Models;
+﻿using ArpellaStores.Features.Payment_Management.Models;
+using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
+using System.Net.Http.Headers;
 using System.Text;
 
 namespace ArpellaStores.Services;
@@ -7,24 +10,33 @@ namespace ArpellaStores.Services;
 public class MpesaService : IMpesaService
 {
     private readonly IHttpClientFactory _clientFactory;
-    public MpesaService(IHttpClientFactory clientFactory)
+    private readonly IMemoryCache _cache;
+    private readonly MpesaSettings _mpesa;
+    private const string TokenCachedKey = "MpesaAccessToken";
+    public MpesaService(IHttpClientFactory clientFactory, IMemoryCache memoryCache, IOptions<MpesaSettings> mpesaConfig)
     {
         _clientFactory = clientFactory;
+        _cache = memoryCache;
+        _mpesa = mpesaConfig.Value;
     }
 
     public async Task<string> GetToken()
     {
-        var client = _clientFactory.CreateClient("mpesa");
-        var authString = "k8EZfIlFxPDAA8nXfQFZRiTKeSCMWExcIpWC1QnTIYnelQGu:GdNyI5JHC2jpiV7481K9B3VPkuDy2NeSPtpI6dGmUZJsGOyGE61kAJ63JJ8hPlx3";
-        var encodedString = Convert.ToBase64String(System.Text.ASCIIEncoding.ASCII.GetBytes(authString));
-        var _url = "/oauth/v1/generate?grant_type=client_credentials";
-        var request = new HttpRequestMessage(HttpMethod.Get, _url);
-        request.Headers.Add("Authorization", $"Basic {encodedString}");
-        var response = await client.SendAsync(request);
-        var mpesaResponse = await response.Content.ReadAsStringAsync();
-        Token tokenObject = JsonConvert.DeserializeObject<Token>(mpesaResponse);
+        string url = "https://api.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials";
+        if (_cache.TryGetValue(TokenCachedKey, out string cachedToken)) return cachedToken;
 
-        return tokenObject.access_token;
+        using (var client = _clientFactory.CreateClient()) {
+            var byteArray = Encoding.ASCII.GetBytes($"{_mpesa.ConsumerKey}:{_mpesa.ConsumerSecret}");
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(byteArray));
+
+            var response = await client.GetAsync(url);
+            var responseString = await response.Content.ReadAsStringAsync();
+            string accessToken = JsonConvert.DeserializeObject<MpesaTokenResponse>(responseString)?.access_token;
+
+            if (accessToken != null) _cache.Set(TokenCachedKey, accessToken, TimeSpan.FromMinutes(58));
+
+            return accessToken;
+        }
     }
     public async Task<string> RegisterUrls()
     {
@@ -49,41 +61,42 @@ public class MpesaService : IMpesaService
 
         return await response.Content.ReadAsStringAsync();
     }
-    public async Task<string> SendPaymentPrompt(MpesaExpress mpesa)
+    public async Task<string> SendPaymentPrompt(MpesaExpressRequest mpesa)
     {
-        mpesa.Timestamp = DateTime.Now.ToString("yyyyMMddHHmmss");
-        var client = _clientFactory.CreateClient("mpesa");
-        var _url = "/mpesa/stkpush/v1/processrequest";
-        var token = await GetToken();
-        var password = GeneratePassword(mpesa.BusinessShortCode, mpesa.Password, mpesa.Timestamp);
+        string accessToken = await GetToken();
+        string url = "https://api.safaricom.co.ke/mpesa/stkpush/v1/processrequest";
+        var timestamp = DateTime.Now.ToString("yyyyMMddHHmmss");
+        var password = GeneratePassword(_mpesa.ShortCode, timestamp, _mpesa.Passkey);
 
-        var requestBody = new
+        var requestBody = new MpesaExpressRequest
         {
-            BusinessShortCode = mpesa.BusinessShortCode,
+            BusinessShortCode = _mpesa.ShortCode,
             Password = password,
-            Timestamp = mpesa.Timestamp,
-            TransactionType = mpesa.TransactionType,
-            Amount = mpesa.Amount,
-            PartyA = mpesa.PartyA,
-            PartyB = mpesa.PartyB,
+            Timestamp = timestamp,
+            TransactionType = "CustomerBuyGoodsOnline",
+            Amount = 1,
+            PartyA = mpesa.PhoneNumber,
+            PartyB = _mpesa.ShortCode,
             PhoneNumber = mpesa.PhoneNumber,
-            AccountReference = mpesa.AccountReference,
-            CallbackUrl = mpesa.CallbackUrl,
-            TransactionDescription = mpesa.TransactionDesc,
+            CallbackUrl = "https://164.68.99.188:8080/api/mpesa",
+            AccountReference = "Arpella Store",
+            TransactionDesc = "Test Payment"
         };
-        var jsonString = JsonConvert.SerializeObject(requestBody);
-        var jsonReadyBody = new StringContent(jsonString, Encoding.UTF8, "application/json");
-        var request = new HttpRequestMessage(HttpMethod.Post, _url)
+
+        using (var client = _clientFactory.CreateClient())
         {
-            Content = jsonReadyBody
-        };
-        request.Headers.Add("Authorization", $"Bearer {token}");
-        HttpResponseMessage response = await client.SendAsync(request);
-        string responseContent = await response.Content.ReadAsStringAsync();
-        return responseContent;
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+            var json = JsonConvert.SerializeObject(requestBody);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+            var response = await client.PostAsync(url, content);
+
+            var responseString = await response.Content.ReadAsStringAsync();
+            return responseString;
+        }
+
     }
     #region Utilities
-    public string GeneratePassword(int businessShortCode, string passkey, string timestamp)
+    public string GeneratePassword(string businessShortCode, string passkey, string timestamp)
     {
         string dataToEncode = businessShortCode + passkey + timestamp;
         byte[] dataBytes = Encoding.UTF8.GetBytes(dataToEncode);
