@@ -1,88 +1,87 @@
-﻿using ArpellaStores.Data;
+﻿using ArpellaStores.Data.Infrastructure;
 using ArpellaStores.Models;
 using EntityFramework.Exceptions.Common;
 using Microsoft.EntityFrameworkCore;
 
-namespace ArpellaStores.Services
+namespace ArpellaStores.Features.Inventory_and_Product_management.Category_and_Subcategory_Managment.Services;
+
+public class CategoriesService : ICategoriesService
 {
-    public class CategoriesService : ICategoriesService
+    private readonly ArpellaContext _context;
+    public CategoriesService(ArpellaContext context)
     {
-        private readonly ArpellaContext _context;
-        public CategoriesService(ArpellaContext context)
+        _context = context;
+    }
+    public async Task<IResult> GetCategories()
+    {
+        var categories = await _context.Categories.Select(c => new { c.Id, c.CategoryName }).ToListAsync();
+        if (categories == null || categories.Count == 0)
         {
-            _context = context;
+            return Results.NotFound("No Categories found");
         }
-        public async Task<IResult> GetCategories()
+        else
         {
-            var categories = _context.Categories.Select(c => new { c.Id, c.CategoryName }).ToList();
-            if (categories == null || categories.Count == 0)
-            {
-                return Results.NotFound("No Categories found");
-            }
-            else
-            {
-                return Results.Ok(categories);
-            }
+            return Results.Ok(categories);
         }
-        public async Task<IResult> GetCategory(int id)
+    }
+    public async Task<IResult> GetCategory(int id)
+    {
+        var category = _context.Categories.Select(c => new {c.Id, c.CategoryName}).SingleOrDefault(c => c.Id == id);
+        return category == null ? Results.NotFound($"Category with CategoryID = {id} was not found") : Results.Ok(category);
+    }
+    public async Task<IResult> CreateCategory(Category category)
+    {
+        var newCategory = new Category
         {
-            var category = _context.Categories.Select(c => new {c.Id, c.CategoryName}).SingleOrDefault(c => c.Id == id);
-            return category == null ? Results.NotFound($"Category with CategoryID = {id} was not found") : Results.Ok(category);
+            CategoryName = category.CategoryName
+        };
+        try
+        {
+            _context.Categories.Add(newCategory);
+            await _context.SaveChangesAsync();
         }
-        public async Task<IResult> CreateCategory(Category category)
+        catch (Exception ex)
         {
-            var newCategory = new Category
-            {
-                CategoryName = category.CategoryName
-            };
+            return Results.BadRequest(ex.InnerException?.Message ?? ex.Message);
+        }
+        return Results.Ok(newCategory);
+    }
+    public async Task<IResult> UpdateCategoryDetails(Category update, int id)
+    {
+        var retrievedCategory = _context.Categories.FirstOrDefault(c => c.Id == id);
+        if (retrievedCategory != null)
+        {
+            retrievedCategory.Id = update.Id;
+            retrievedCategory.CategoryName = update.CategoryName;
             try
             {
-                _context.Categories.Add(newCategory);
+                _context.Categories.Update(retrievedCategory);
                 await _context.SaveChangesAsync();
             }
             catch (Exception ex)
             {
                 return Results.BadRequest(ex.InnerException?.Message ?? ex.Message);
             }
-            return Results.Ok(newCategory);
+            return Results.Ok(retrievedCategory);
         }
-        public async Task<IResult> UpdateCategoryDetails(Category update, int id)
+        else
         {
-            var retrievedCategory = _context.Categories.FirstOrDefault(c => c.Id == id);
-            if (retrievedCategory != null)
-            {
-                retrievedCategory.Id = update.Id;
-                retrievedCategory.CategoryName = update.CategoryName;
-                try
-                {
-                    _context.Categories.Update(retrievedCategory);
-                    await _context.SaveChangesAsync();
-                }
-                catch (Exception ex)
-                {
-                    return Results.BadRequest(ex.InnerException?.Message ?? ex.Message);
-                }
-                return Results.Ok(retrievedCategory);
-            }
-            else
-            {
-                return Results.NotFound($"Category with CategoryID = {id} was not found");
-            }
+            return Results.NotFound($"Category with CategoryID = {id} was not found");
+        }
 
-        }
-        public async Task<IResult> RemoveCategory(int categoryId)
+    }
+    public async Task<IResult> RemoveCategory(int categoryId)
+    {
+        var retrievedCategory = _context.Categories.FirstOrDefault(c => c.Id == categoryId);
+        if (retrievedCategory != null)
         {
-            var retrievedCategory = _context.Categories.FirstOrDefault(c => c.Id == categoryId);
-            if (retrievedCategory != null)
-            {
-                _context.Categories.Remove(retrievedCategory);
-                await _context.SaveChangesAsync();
-                return Results.Ok(retrievedCategory);
-            }
-            else
-            {
-                return Results.NotFound($"Category with CategoryID = {categoryId} was not found");
-            }
+            _context.Categories.Remove(retrievedCategory);
+            await _context.SaveChangesAsync();
+            return Results.Ok(retrievedCategory);
+        }
+        else
+        {
+            return Results.NotFound($"Category with CategoryID = {categoryId} was not found");
         }
     }
 }

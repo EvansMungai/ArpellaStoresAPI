@@ -1,5 +1,5 @@
-﻿using ArpellaStores.Data;
-using ArpellaStores.Models;
+﻿using ArpellaStores.Data.Infrastructure;
+using ArpellaStores.Features.Authentication.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Caching.Memory;
 //using Microsoft.AspNetCore.Mvc;

@@ -1,7 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using ArpellaStores.Models;
 
-namespace ArpellaStores.Models;
+namespace ArpellaStores.Features.Final_Price_Management.Models;
 
 public partial class Flashsale
 {

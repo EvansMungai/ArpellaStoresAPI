@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace ArpellaStores.Models;
+namespace ArpellaStores.Features.Final_Price_Management.Models;
 
 public partial class Discount
 {

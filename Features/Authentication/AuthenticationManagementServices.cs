@@ -1,5 +1,5 @@
-﻿using ArpellaStores.Features.Authentication.Services.Authentication;
-using ArpellaStores.Services;
+﻿using ArpellaStores.Features.Authentication.Services;
+using ArpellaStores.Features.Authentication.Services.Authentication;
 
 namespace ArpellaStores.Features.Authentication;
 

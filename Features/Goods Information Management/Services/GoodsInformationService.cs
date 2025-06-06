@@ -1,6 +1,5 @@
-﻿using ArpellaStores.Data;
-using ArpellaStores.Models;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion.Internal;
+﻿using ArpellaStores.Data.Infrastructure;
+using ArpellaStores.Features.Goods_Information_Management.Models;
 
 namespace ArpellaStores.Services;
 

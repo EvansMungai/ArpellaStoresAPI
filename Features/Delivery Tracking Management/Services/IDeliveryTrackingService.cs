@@ -1,6 +1,6 @@
-﻿using ArpellaStores.Models;
+﻿using ArpellaStores.Features.Delivery_Tracking_Management.Models;
 
-namespace ArpellaStores.Services;
+namespace ArpellaStores.Features.Delivery_Tracking_Management.Services;
 
 public interface IDeliveryTrackingService
 {

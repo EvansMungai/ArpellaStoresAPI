@@ -1,10 +1,10 @@
-﻿using ArpellaStores.Data;
-using ArpellaStores.Features.Authentication.Services.Authentication;
-using ArpellaStores.Models;
+﻿using ArpellaStores.Data.Infrastructure;
+using ArpellaStores.Features.Authentication.Services;
+using ArpellaStores.Features.Authentication.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
-namespace ArpellaStores.Services;
+namespace ArpellaStores.Features.Authentication.Services;
 
 public class UserManagementService : IUserManagementService
 {

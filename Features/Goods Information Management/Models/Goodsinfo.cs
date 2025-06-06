@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace ArpellaStores.Models;
+namespace ArpellaStores.Features.Goods_Information_Management.Models;
 
 public partial class Goodsinfo
 {

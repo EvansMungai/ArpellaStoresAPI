@@ -1,7 +1,7 @@
-﻿using ArpellaStores.Data;
-using ArpellaStores.Models;
+﻿using ArpellaStores.Data.Infrastructure;
+using ArpellaStores.Features.Final_Price_Management.Models;
 
-namespace ArpellaStores.Services;
+namespace ArpellaStores.Features.Final_Price_Management.Services;
 
 public class CouponService : ICouponService
 {

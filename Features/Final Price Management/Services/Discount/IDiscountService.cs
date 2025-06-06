@@ -1,4 +1,4 @@
-﻿namespace ArpellaStores.Services;
+﻿namespace ArpellaStores.Features.Final_Price_Management.Services;
 
 public interface IDiscountService
 {

@@ -1,7 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using ArpellaStores.Features.Authentication.Models;
+using ArpellaStores.Models;
 
-namespace ArpellaStores.Models;
+namespace ArpellaStores.Features.Delivery_Tracking_Management.Models;
 
 public partial class Deliverytracking
 {

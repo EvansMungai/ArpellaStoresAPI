@@ -1,9 +1,13 @@
-﻿using ArpellaStores.Models;
+﻿using ArpellaStores.Features.Authentication.Models;
+using ArpellaStores.Features.Delivery_Tracking_Management.Models;
+using ArpellaStores.Features.Final_Price_Management.Models;
+using ArpellaStores.Features.Goods_Information_Management.Models;
+using ArpellaStores.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
-namespace ArpellaStores.Data;
+namespace ArpellaStores.Data.Infrastructure;
 
 public partial class ArpellaContext : IdentityDbContext<User>
 {
@@ -574,4 +578,5 @@ public partial class ArpellaContext : IdentityDbContext<User>
     }
 
     partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
+
 }

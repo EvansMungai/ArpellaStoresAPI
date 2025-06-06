@@ -1,6 +1,7 @@
-﻿using ArpellaStores.Data;
+﻿using ArpellaStores.Data.Infrastructure;
+using ArpellaStores.Services;
 
-namespace ArpellaStores.Services;
+namespace ArpellaStores.Features.Final_Price_Management.Services;
 
 public class DiscountService : IDiscountService
 {

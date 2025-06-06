@@ -1,4 +1,4 @@
-﻿using ArpellaStores.Data;
+﻿using ArpellaStores.Data.Infrastructure;
 using ArpellaStores.Models;
 using CsvHelper;
 using CsvHelper.Configuration;

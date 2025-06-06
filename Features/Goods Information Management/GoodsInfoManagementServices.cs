@@ -6,6 +6,6 @@ public static class GoodsInfoManagementServices
 {
     public static void RegisterApplicationServices(this IServiceCollection serviceCollection)
     {
-        serviceCollection.AddTransient<IGoodsInformationService, GoodsInformationService>();
+        serviceCollection.AddScoped<IGoodsInformationService, GoodsInformationService>();
     }
 }

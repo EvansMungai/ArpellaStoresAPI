@@ -1,6 +1,6 @@
-﻿using ArpellaStores.Models;
+﻿using ArpellaStores.Features.Final_Price_Management.Models;
 
-namespace ArpellaStores.Services;
+namespace ArpellaStores.Features.Final_Price_Management.Services;
 
 public interface ICouponService
 {

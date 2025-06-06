@@ -1,6 +1,6 @@
 ﻿using ArpellaStores.Extensions;
-using ArpellaStores.Models;
-using ArpellaStores.Services;
+using ArpellaStores.Features.Delivery_Tracking_Management.Services;
+using ArpellaStores.Features.Delivery_Tracking_Management.Models;
 using Microsoft.AspNetCore.Identity;
 
 namespace ArpellaStores.Features.Delivery_Tracking_Management.Endpoints;

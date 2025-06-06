@@ -1,4 +1,6 @@
-﻿namespace ArpellaStores.Models;
+﻿using ArpellaStores.Features.Final_Price_Management.Models;
+
+namespace ArpellaStores.Models;
 
 public partial class Product
 {

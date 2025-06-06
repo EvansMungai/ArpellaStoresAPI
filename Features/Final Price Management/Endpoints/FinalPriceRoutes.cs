@@ -1,6 +1,6 @@
 ﻿using ArpellaStores.Extensions;
-using ArpellaStores.Models;
-using ArpellaStores.Services;
+using ArpellaStores.Features.Final_Price_Management.Models;
+using ArpellaStores.Features.Final_Price_Management.Services;
 
 namespace ArpellaStores.Features.Final_Price_Management.Endpoints;
 

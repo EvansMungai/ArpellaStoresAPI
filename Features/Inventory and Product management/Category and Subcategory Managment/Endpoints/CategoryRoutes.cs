@@ -1,6 +1,7 @@
 ﻿using ArpellaStores.Services;
 using ArpellaStores.Models;
 using ArpellaStores.Extensions;
+using ArpellaStores.Features.Inventory_and_Product_management.Category_and_Subcategory_Managment.Services;
 
 namespace ArpellaStores.Features.Inventory_and_Product_management.Category_and_Subcategory_Managment.Endpoints;
 

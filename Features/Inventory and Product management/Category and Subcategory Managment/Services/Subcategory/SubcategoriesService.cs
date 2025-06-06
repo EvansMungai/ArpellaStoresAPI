@@ -1,4 +1,4 @@
-﻿using ArpellaStores.Data;
+﻿using ArpellaStores.Data.Infrastructure;
 using ArpellaStores.Models;
 
 namespace ArpellaStores.Services

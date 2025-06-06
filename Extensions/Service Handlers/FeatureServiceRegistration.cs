@@ -12,7 +12,7 @@ public static class FeatureServiceRegistration
         foreach (var feature in featureAssemblies)
         {
             var method = feature.GetMethod(methodName);
-            method?.Invoke(null, new object[] { services }); 
+            method?.Invoke(null, new object[] { services });
         }
     }
 }

@@ -6,6 +6,6 @@ public static class OrderManagementServices
 {
     public static void RegisterApplicationServices(this IServiceCollection serviceCollection)
     {
-        serviceCollection.AddTransient<IOrderService, OrderService>();
+        serviceCollection.AddScoped<IOrderService, OrderService>();
     }
 }

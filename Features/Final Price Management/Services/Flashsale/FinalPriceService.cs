@@ -1,7 +1,8 @@
-﻿using ArpellaStores.Data;
+﻿using ArpellaStores.Data.Infrastructure;
+using ArpellaStores.Features.Final_Price_Management.Models;
 using ArpellaStores.Models;
 
-namespace ArpellaStores.Services;
+namespace ArpellaStores.Features.Final_Price_Management.Services;
 
 public class FinalPriceService : IFinalPriceService
 {
