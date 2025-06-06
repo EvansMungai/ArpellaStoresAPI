@@ -1,9 +1,4 @@
-﻿using ArpellaStores.Features.Authentication.Endpoints;
-using ArpellaStores.Features.Delivery_Tracking_Management.Endpoints;
-using ArpellaStores.Features.Final_Price_Management.Endpoints;
-using ArpellaStores.Features.Goods_Information_Management.Endpoints;
-
-namespace ArpellaStores.Extensions;
+﻿namespace ArpellaStores.Extensions;
 
 public class RouteBuilder
 {

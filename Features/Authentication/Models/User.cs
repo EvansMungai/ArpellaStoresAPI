@@ -1,5 +1,5 @@
-﻿using ArpellaStores.Features.Delivery_Tracking_Management.Models;
-using ArpellaStores.Models;
+﻿using ArpellaStores.Features.DeliveryTrackingManagement.Models;
+using ArpellaStores.Features.OrderManagement.Models;
 using Microsoft.AspNetCore.Identity;
 
 namespace ArpellaStores.Features.Authentication.Models;

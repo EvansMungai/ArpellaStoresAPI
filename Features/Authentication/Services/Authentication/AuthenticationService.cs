@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Caching.Memory;
 //using Microsoft.AspNetCore.Mvc;
 
-namespace ArpellaStores.Features.Authentication.Services.Authentication;
+namespace ArpellaStores.Features.Authentication.Services;
 
 public class AuthenticationService : IAuthenticationService
 {

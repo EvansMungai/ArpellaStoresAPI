@@ -1,8 +1,9 @@
 ﻿using ArpellaStores.Features.Authentication.Models;
-using ArpellaStores.Features.Delivery_Tracking_Management.Models;
-using ArpellaStores.Features.Final_Price_Management.Models;
-using ArpellaStores.Features.Goods_Information_Management.Models;
-using ArpellaStores.Models;
+using ArpellaStores.Features.DeliveryTrackingManagement.Models;
+using ArpellaStores.Features.FinalPriceManagement.Models;
+using ArpellaStores.Features.GoodsInformationManagement.Models;
+using ArpellaStores.Features.InventoryManagement.Models;
+using ArpellaStores.Features.OrderManagement.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;

@@ -1,9 +1,6 @@
 ﻿using ArpellaStores.Data;
-using ArpellaStores.Data.Infrastructure;
 using ArpellaStores.Extensions.Service_Handlers;
-using ArpellaStores.Features.Payment_Management.Common;
-using ArpellaStores.Features.Payment_Management.Models;
-using Microsoft.EntityFrameworkCore;
+using ArpellaStores.Features.PaymentManagement.Models;
 
 namespace ArpellaStores.Extensions;
 
