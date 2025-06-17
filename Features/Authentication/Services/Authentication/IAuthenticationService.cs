@@ -1,7 +1,7 @@
-﻿using ArpellaStores.Models;
+﻿using ArpellaStores.Features.Authentication.Models;
 using Microsoft.AspNetCore.Identity;
 
-namespace ArpellaStores.Features.Authentication.Services.Authentication;
+namespace ArpellaStores.Features.Authentication.Services;
 
 public interface IAuthenticationService
 {

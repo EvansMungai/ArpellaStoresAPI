@@ -1,8 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using ArpellaStores.Features.DeliveryTrackingManagement.Models;
+using ArpellaStores.Features.OrderManagement.Models;
 using Microsoft.AspNetCore.Identity;
 
-namespace ArpellaStores.Models;
+namespace ArpellaStores.Features.Authentication.Models;
 
 public partial class User : IdentityUser
 {

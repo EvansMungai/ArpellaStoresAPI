@@ -1,4 +1,4 @@
-﻿namespace ArpellaStores.Models;
+﻿namespace ArpellaStores.Features.Authentication.Models;
 
 public class UserProfile
 {

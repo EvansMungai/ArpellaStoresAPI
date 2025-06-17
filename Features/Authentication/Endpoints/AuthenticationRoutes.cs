@@ -1,6 +1,6 @@
 ﻿using ArpellaStores.Extensions;
-using ArpellaStores.Features.Authentication.Services.Authentication;
-using ArpellaStores.Models;
+using ArpellaStores.Features.Authentication.Models;
+using ArpellaStores.Features.Authentication.Services;
 using Microsoft.AspNetCore.Identity;
 
 namespace ArpellaStores.Features.Authentication.Endpoints;
