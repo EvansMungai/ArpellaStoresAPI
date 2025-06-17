@@ -1,0 +1,54 @@
+name: Deploy to VPS
+
+on:
+  push:
+    branches:
+      - main  
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: '8.0.10'  
+
+    - name: Restore dependencies
+      run: dotnet restore
+
+    - name: Build project
+      run: dotnet build --no-restore --configuration Release
+
+    - name: Publish project
+      run: dotnet publish -c Release -o out
+
+    - name: Build Docker image
+      run: docker build -t arpellastores ./out
+
+    - name: Push Docker image to Docker Hub
+      run: |
+        docker tag arpellastores arpellastores/arpellaecommerce:latest
+        docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+        docker push arpellastores/arpellaecommerce:latest
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+    - name: SSH into VPS & Deploy
+      uses: appleboy/ssh-action@v0.1.6
+      with:
+        host: ${{ secrets.VPS_HOST }}
+        username: ${{ secrets.VPS_USER }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        script: |
+          docker pull arpellastores/arpellaecommerce:latest
+          docker stop arpellaecommerce || true
+          docker rm arpellaecommerce || true
+          docker run -d --name arpellaecommerce -p 8080:8080 -p 8081:8081 arpellastores/arpellaecommerce:latest
