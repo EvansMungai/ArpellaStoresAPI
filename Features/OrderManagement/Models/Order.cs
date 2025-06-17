@@ -12,7 +12,7 @@ public partial class Order
 
     public string? Status { get; set; }
 
-    public decimal? Total { get; set; }
+    public decimal Total { get; set; }
 
     public string? BuyerPin { get; set; }
 

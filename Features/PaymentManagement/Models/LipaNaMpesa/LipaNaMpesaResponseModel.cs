@@ -12,7 +12,7 @@ public class LipaNaMpesaResponseModel
     /// Merchant Request ID
     /// </summary>
     [DataMember(Name = "MerchantRequestID")]
-    public string MerchMerchantRequestID { get; set; }
+    public string MerchantRequestID { get; set; }
 
     /// <summary>
     /// Check out Request ID
@@ -24,7 +24,7 @@ public class LipaNaMpesaResponseModel
     /// Response Code
     /// </summary>
     [DataMember(Name = "ResponseCode")]
-    public string ResponseCode { get; set; }
+    public int ResponseCode { get; set; }
 
     /// <summary>
     /// Response Description message
@@ -37,4 +37,11 @@ public class LipaNaMpesaResponseModel
     /// </summary>
     [DataMember(Name = "CustomerMessage")]
     public string CustomerMessage { get; set; }
+
+    /// <summary>
+    /// Actual MpesaReceiptNumber
+    /// </summary>
+    [DataMember(Name = "MpesaReceiptNumber")]
+    public string MpesaReceiptNumber { get; set; }
+
 }

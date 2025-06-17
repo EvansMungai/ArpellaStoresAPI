@@ -38,7 +38,7 @@ public class LipaNaMpesaRequestModel
     /// The amount being transacted
     /// </summary>
     [DataMember(Name = "Amount")]
-    public int Amount { get; set; }
+    public decimal Amount { get; set; }
 
     /// <summary>
     /// The Debit party of the transaction/the party paying out in the transaction, hereby the phone number of the customer.

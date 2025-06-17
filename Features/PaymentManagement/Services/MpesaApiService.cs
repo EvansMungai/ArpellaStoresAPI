@@ -28,7 +28,7 @@ public class MpesaApiService : IMpesaApiService
 
     public async Task<OAuthResponseModel> GenerateAccessToken()
     {
-        if (_cache.TryGetValue("MpesaAccessToken", out OAuthResponseModel cachedToken)) return cachedToken;
+        //if (_cache.TryGetValue("MpesaAccessToken", out OAuthResponseModel cachedToken)) return cachedToken;
 
         string encodedKeySecret = GenerateEncodedKeySecret();
         string oAuthUri = "https://api.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials";
@@ -45,7 +45,7 @@ public class MpesaApiService : IMpesaApiService
         //deserialize object
         var result = JsonConvert.DeserializeObject<OAuthResponseModel>(resultContent);
         // Store the token in cache with expiration
-        _cache.Set("MpesaAccessToken", result, TimeSpan.FromSeconds(double.Parse(result.ExpiresIn) - 300));
+        //_cache.Set("MpesaAccessToken", result, TimeSpan.FromSeconds(double.Parse(result.ExpiresIn) - 300));
 
         return result;
     }
@@ -60,7 +60,6 @@ public class MpesaApiService : IMpesaApiService
         var content = new StringContent(serializedObject, Encoding.UTF8, "application/json");
         //Remove initial authorization header
         _httpClient.DefaultRequestHeaders.Remove("Authorization");
-        Console.WriteLine($"This is the access token: {accessTokenModel.AccessToken}");
         //Set current authorization header
         _httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + accessTokenModel.AccessToken);
         //send request
@@ -199,8 +198,8 @@ public class MpesaApiService : IMpesaApiService
     #region Helpers 
     public string GenerateEncodedKeySecret()
     {
-        string consumerKey = _mpesaConfig.ConsumerKey;
-        string consumerSecret = _mpesaConfig.ConsumerSecret;
+        string consumerKey = _mpesaConfig.ConsumerKey.Trim();
+        string consumerSecret = _mpesaConfig.ConsumerSecret.Trim();
 
         if (string.IsNullOrEmpty(consumerKey) || string.IsNullOrEmpty(consumerSecret))
         {
