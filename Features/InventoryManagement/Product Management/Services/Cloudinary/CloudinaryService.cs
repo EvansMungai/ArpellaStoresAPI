@@ -8,7 +8,7 @@ public class CloudinaryService : ICloudinaryService
     private readonly Cloudinary _cloudinary;
     public CloudinaryService(IConfiguration configuration)
     {
-        var cloudinaryConfig = configuration.GetSection("Cloudinary");
+        var cloudinaryConfig = configuration.GetSection("CloudinaryConfig");
         var account = new Account(
             cloudinaryConfig["CloudName"],
             cloudinaryConfig["ApiKey"],
