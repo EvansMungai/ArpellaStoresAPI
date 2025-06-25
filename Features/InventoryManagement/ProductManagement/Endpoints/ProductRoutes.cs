@@ -1,6 +1,5 @@
 ﻿using ArpellaStores.Extensions;
 using ArpellaStores.Features.InventoryManagement.Models;
-using ArpellaStores.Features.InventoryManagement.Services;
 
 namespace ArpellaStores.Features.InventoryManagement.Endpoints;
 
