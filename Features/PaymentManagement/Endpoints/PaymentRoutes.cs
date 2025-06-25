@@ -31,8 +31,8 @@ public class PaymentRoutes : IRouteRegistrar
     public void MapPaymentRoutes(WebApplication webApplication)
     {
         var app = webApplication.MapGroup("").WithTags("Mpesa");
-        app.MapGet("/access-token", () => this._mpesaApiService.GenerateAccessToken());
-        app.MapPost("register-url", async () =>
+        app.MapGet("/access-token", (PaymentHandler handler) => handler.GenerateAccessToken());
+        app.MapPost("register-url", async (PaymentHandler handler) =>
         {
             string registerUri = "https://api.safaricom.co.ke/mpesa/c2b/v1/registerurl";
             var requestModel = new RegisterUrlRequestModel
@@ -42,7 +42,7 @@ public class PaymentRoutes : IRouteRegistrar
                 ConfirmationUrl = _mpesaConfig.ConfirmationUri,
                 ValidationUrl = _mpesaConfig.ValidationUri
             };
-            return await this._mpesaApiService.RegisterUrl(registerUri, requestModel);
+            return await handler.RegisterUrl(registerUri, requestModel);
         });
         app.MapPost("/pay", async (LipaNaMpesaRequestModel request, string orderId) =>
         {

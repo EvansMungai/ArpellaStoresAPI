@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace ArpellaStores.Features.InventoryManagement.Models;
+﻿namespace ArpellaStores.Features.InventoryManagement.Models;
 
 public partial class Productimage
 {

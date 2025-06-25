@@ -6,7 +6,7 @@ namespace ArpellaStores.Features.OrderManagement.Services;
 
 public class OrderService : IOrderService
 {
-    private static Random random = new Random();
+    private static readonly Random random = new Random();
     private readonly ArpellaContext _context;
     public OrderService(ArpellaContext context)
     {
@@ -15,7 +15,7 @@ public class OrderService : IOrderService
 
     public async Task<IResult> GetOrders()
     {
-        var orders = _context.Orders.Include(o => o.Orderitems).ThenInclude(oi => oi.Product).Select(o => new
+        var orders = await _context.Orders.Include(o => o.Orderitems).ThenInclude(oi => oi.Product).Select(o => new
         {
             o.Orderid,
             o.UserId,
@@ -34,13 +34,13 @@ public class OrderService : IOrderService
                 }
             })
         })
-    .ToList();
+    .ToListAsync();
         return orders == null || orders.Count == 0 ? Results.NotFound("NO orders found") : Results.Ok(orders);
     }
 
     public async Task<IResult> GetOrder(string id)
     {
-        var order = _context.Orders
+        var order = await _context.Orders
     .Include(o => o.Orderitems)
         .ThenInclude(oi => oi.Product)
     .Where(o => o.Orderid == id)
@@ -62,7 +62,7 @@ public class OrderService : IOrderService
             }
         })
     })
-    .SingleOrDefault();
+    .SingleOrDefaultAsync();
         return order == null ? Results.NotFound($"No order with id = {id} was found") : Results.Ok(order);
     }
 
@@ -102,7 +102,7 @@ public class OrderService : IOrderService
                                   Product = product,
                                   Inventory = inventory
                               })
-                        .FirstOrDefaultAsync();
+                        .SingleOrDefaultAsync();
                 if (productWithInventory == null)
                 {
                     return Results.BadRequest($"Product with ID {orderItem.ProductId} not found in the inventory.");
@@ -112,7 +112,7 @@ public class OrderService : IOrderService
                 {
                     return Results.BadRequest($"Insufficient stock for product '{productWithInventory.Product.Name}'. Only {productWithInventory.Inventory.StockQuantity} left in stock.");
                 }
-                
+
                 productWithInventory.Inventory.StockQuantity -= orderItem.Quantity;
 
                 _context.Orderitems.Add(orderItem);

@@ -4,7 +4,6 @@ namespace ArpellaStores.Features.InventoryManagement.Services;
 
 public interface IProductsService
 {
-    //List<Product> GetProducts();
     Task<IResult> GetProducts();
     Task<IResult> GetProduct(int productId);
     Task<IResult> CreateProduct(Product product);

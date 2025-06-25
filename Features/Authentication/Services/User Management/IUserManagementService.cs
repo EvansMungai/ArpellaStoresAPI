@@ -5,7 +5,7 @@ namespace ArpellaStores.Features.Authentication.Services;
 
 public interface IUserManagementService
 {
-    Task<IResult> RegisterSpecialUsers(UserManager<User> userManager, User model, string role);
+    Task<IResult> RegisterSpecialUsers(UserProfile userProfile);
     Task<IResult> GetUsers();
     Task<IResult> GetSpecialUsers();
     Task<IResult> UpdateUserDetails(string number, User update);

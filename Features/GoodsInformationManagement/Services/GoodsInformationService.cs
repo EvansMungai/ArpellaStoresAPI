@@ -1,5 +1,6 @@
 ﻿using ArpellaStores.Data.Infrastructure;
 using ArpellaStores.Features.GoodsInformationManagement.Models;
+using Microsoft.EntityFrameworkCore;
 
 
 namespace ArpellaStores.Features.GoodsInformationManagement.Services;
@@ -13,17 +14,17 @@ public class GoodsInformationService : IGoodsInformationService
     }
     public async Task<IResult> GetGoodsInformation()
     {
-        var goodsInfo = _context.Goodsinfos.Select(g => new { g.ItemCode, g.ItemDescription, g.UnitMeasure, g.TaxRate }).ToList();
+        var goodsInfo = await _context.Goodsinfos.Select(g => new { g.ItemCode, g.ItemDescription, g.UnitMeasure, g.TaxRate }).ToListAsync();
         return goodsInfo == null || goodsInfo.Count == 0 ? Results.NotFound("No Goods info was found.") : Results.Ok(goodsInfo);
     }
     public async Task<IResult> GetGoodInformation(string itemCode)
     {
-        var goodsInfo = _context.Goodsinfos.Where(g => g.ItemCode == itemCode).Select(g => new { g.ItemCode, g.ItemDescription, g.UnitMeasure, g.TaxRate }).FirstOrDefault();
+        var goodsInfo = await _context.Goodsinfos.Where(g => g.ItemCode == itemCode).Select(g => new { g.ItemCode, g.ItemDescription, g.UnitMeasure, g.TaxRate }).SingleOrDefaultAsync();
         return goodsInfo == null ? Results.NotFound($"No Goods information for the item code={itemCode} was found") : Results.Ok(goodsInfo);
     }
     public async Task<IResult> CreateGoodsInformation(Goodsinfo goodsinfo)
     {
-        var existing = _context.Goodsinfos.FirstOrDefault(g => g.ItemCode == goodsinfo.ItemCode);
+        var existing = await _context.Goodsinfos.SingleOrDefaultAsync(g => g.ItemCode == goodsinfo.ItemCode);
         if (existing != null)
             return Results.Conflict($"Goods info with item code={goodsinfo.ItemCode} exists.");
         var newGoodsInfo = new Goodsinfo
@@ -43,7 +44,7 @@ public class GoodsInformationService : IGoodsInformationService
     }
     public async Task<IResult> UpdateGoodsInfo(Goodsinfo update, string itemCode)
     {
-        Goodsinfo? retrievedGoodsInfo = _context.Goodsinfos.FirstOrDefault(g => g.ItemCode == itemCode);
+        Goodsinfo? retrievedGoodsInfo = await _context.Goodsinfos.SingleOrDefaultAsync(g => g.ItemCode == itemCode);
         if (retrievedGoodsInfo != null)
         {
             retrievedGoodsInfo.ItemCode = update.ItemCode;
@@ -65,7 +66,7 @@ public class GoodsInformationService : IGoodsInformationService
     }
     public async Task<IResult> RemoveGoodsInfo(string itemCode)
     {
-        Goodsinfo? retrievedGoodsinfo = _context.Goodsinfos.FirstOrDefault(g => g.ItemCode == itemCode);
+        Goodsinfo? retrievedGoodsinfo = await  _context.Goodsinfos.SingleOrDefaultAsync(g => g.ItemCode == itemCode);
         if (retrievedGoodsinfo != null)
         {
             try

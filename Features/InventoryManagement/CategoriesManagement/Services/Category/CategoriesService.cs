@@ -14,18 +14,11 @@ public class CategoriesService : ICategoriesService
     public async Task<IResult> GetCategories()
     {
         var categories = await _context.Categories.Select(c => new { c.Id, c.CategoryName }).ToListAsync();
-        if (categories == null || categories.Count == 0)
-        {
-            return Results.NotFound("No Categories found");
-        }
-        else
-        {
-            return Results.Ok(categories);
-        }
+        return categories == null || categories.Count == 0 ? Results.NotFound("No categories found") : Results.Ok(categories);
     }
     public async Task<IResult> GetCategory(int id)
     {
-        var category = _context.Categories.Select(c => new {c.Id, c.CategoryName}).SingleOrDefault(c => c.Id == id);
+        var category = await _context.Categories.Select(c => new { c.Id, c.CategoryName }).SingleOrDefaultAsync(c => c.Id == id);
         return category == null ? Results.NotFound($"Category with CategoryID = {id} was not found") : Results.Ok(category);
     }
     public async Task<IResult> CreateCategory(Category category)
@@ -38,16 +31,16 @@ public class CategoriesService : ICategoriesService
         {
             _context.Categories.Add(newCategory);
             await _context.SaveChangesAsync();
+            return Results.Ok(newCategory);
         }
         catch (Exception ex)
         {
             return Results.BadRequest(ex.InnerException?.Message ?? ex.Message);
         }
-        return Results.Ok(newCategory);
     }
     public async Task<IResult> UpdateCategoryDetails(Category update, int id)
     {
-        var retrievedCategory = _context.Categories.FirstOrDefault(c => c.Id == id);
+        var retrievedCategory = await _context.Categories.SingleOrDefaultAsync(c => c.Id == id);
         if (retrievedCategory != null)
         {
             retrievedCategory.Id = update.Id;
@@ -56,12 +49,12 @@ public class CategoriesService : ICategoriesService
             {
                 _context.Categories.Update(retrievedCategory);
                 await _context.SaveChangesAsync();
+                return Results.Ok(retrievedCategory);
             }
             catch (Exception ex)
             {
                 return Results.BadRequest(ex.InnerException?.Message ?? ex.Message);
             }
-            return Results.Ok(retrievedCategory);
         }
         else
         {
@@ -71,7 +64,7 @@ public class CategoriesService : ICategoriesService
     }
     public async Task<IResult> RemoveCategory(int categoryId)
     {
-        var retrievedCategory = _context.Categories.FirstOrDefault(c => c.Id == categoryId);
+        var retrievedCategory = await _context.Categories.SingleOrDefaultAsync(c => c.Id == categoryId);
         if (retrievedCategory != null)
         {
             _context.Categories.Remove(retrievedCategory);

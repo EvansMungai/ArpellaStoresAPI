@@ -8,35 +8,33 @@ namespace ArpellaStores.Features.Authentication.Services;
 public class UserManagementService : IUserManagementService
 {
     private readonly UserManager<User> _userManager;
-    private readonly SignInManager<User> _signInManager;
     private readonly RoleManager<IdentityRole> _roleManager;
     private readonly ArpellaContext _context;
-    public UserManagementService(UserManager<User> userManager, SignInManager<User> signInManager, RoleManager<IdentityRole> roleManager, ArpellaContext context)
+    public UserManagementService(UserManager<User> userManager,RoleManager<IdentityRole> roleManager, ArpellaContext context)
     {
         this._userManager = userManager;
-        this._signInManager = signInManager;
         this._roleManager = roleManager;
         this._context = context;
     }
     #region Users 
-    public async Task<IResult> RegisterSpecialUsers(UserManager<User> userManager, User model, string role)
+    public async Task<IResult> RegisterSpecialUsers(UserProfile userProfile)
     {
         User user = new User
         {
-            FirstName = model.FirstName,
-            LastName = model.LastName,
-            PhoneNumber = model.PhoneNumber,
-            UserName = model.PhoneNumber,
-            Email = model.Email,
-            PasswordHash = model.PasswordHash,
+            FirstName = userProfile.User.FirstName,
+            LastName = userProfile.User.LastName,
+            PhoneNumber = userProfile.User.PhoneNumber,
+            UserName = userProfile.User.PhoneNumber,
+            Email = userProfile.User.Email,
+            PasswordHash = userProfile.User.PasswordHash,
             LastLoginTime = DateTime.Now
         };
         try
         {
-            var result = await userManager.CreateAsync(user, user.PasswordHash);
+            var result = await _userManager.CreateAsync(user, user.PasswordHash);
             if (result.Succeeded)
             {
-                await AssignRoleToUserAsync(user.UserName, role);
+                await AssignRoleToUserAsync(user.UserName, userProfile.Role);
                 return await GetUser(user.UserName);
             }
             return Results.BadRequest(result.Errors);
