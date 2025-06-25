@@ -2,6 +2,7 @@
 using ArpellaStores.Features.InventoryManagement.Models;
 using CsvHelper;
 using CsvHelper.Configuration;
+using Microsoft.EntityFrameworkCore;
 using OfficeOpenXml;
 using System.Globalization;
 
@@ -18,12 +19,12 @@ public class ProductsService : IProductsService
     }
     public async Task<IResult> GetProducts()
     {
-        var products = _context.Products.ToList();
+        var products = await _context.Products.Select(p => new { p.Id, p.InventoryId, p.Name, p.Price, p.Category, p.PurchaseCap, p.Subcategory, p.Barcodes, p.TaxCode, p.CreatedAt, p.UpdatedAt }).ToListAsync();
         return products == null || products.Count == 0 ? Results.NotFound("No Products Found") : Results.Ok(products);
     }
     public async Task<IResult> GetProduct(int productId)
     {
-        Product? product = _context.Products.SingleOrDefault(p => p.Id == productId);
+        var product = await _context.Products.Select(p => new { p.Id, p.InventoryId, p.Name, p.Price, p.Category, p.PurchaseCap, p.Subcategory, p.Barcodes, p.TaxCode, p.CreatedAt, p.UpdatedAt }).SingleOrDefaultAsync(p => p.Id == productId);
         return product == null ? Results.NotFound($"Product with ProductID = {productId} was not found") : Results.Ok(product);
     }
     public async Task<IResult> CreateProduct(Product product)
@@ -57,13 +58,13 @@ public class ProductsService : IProductsService
         try
         {
             if (file == null || file.Length == 0) return Results.BadRequest("File is empty");
-            var products = file.FileName.EndsWith("csv") ? ParseCsv(file.OpenReadStream()) : ParseExcel(file.OpenReadStream());
-            if (products == null || !products.Any())
-            {
-                return Results.NotFound("No valid data found in the file");
-            }
+            var isCsv = file.ContentType == "text/csv" || file.FileName.EndsWith(".csv", StringComparison.OrdinalIgnoreCase);
 
-            _context.Products.AddRangeAsync(products);
+            using var stream = file.OpenReadStream();
+            var products = isCsv ? ParseCsv(stream) : ParseExcel(stream);
+            if (products == null || products.Count == 0) return Results.NotFound("No valid data found in the file");
+
+            await _context.Products.AddRangeAsync(products);
             await _context.SaveChangesAsync();
             return Results.Ok(products);
 
@@ -92,7 +93,10 @@ public class ProductsService : IProductsService
                 _context.Update(retrievedProduct);
                 await _context.SaveChangesAsync();
             }
-            catch (Exception ex) { }
+            catch (Exception ex)
+            {
+                return Results.BadRequest(ex.InnerException?.Message ?? ex.Message);
+            }
             return Results.Ok(retrievedProduct);
         }
         else
@@ -112,7 +116,10 @@ public class ProductsService : IProductsService
                 _context.Update(retrievedProduct);
                 await _context.SaveChangesAsync();
             }
-            catch (Exception ex) { }
+            catch (Exception ex)
+            {
+                return Results.BadRequest(ex.InnerException?.Message ?? ex.Message);
+            }
             return Results.Ok(retrievedProduct);
         }
         else
@@ -132,7 +139,7 @@ public class ProductsService : IProductsService
                 await _context.SaveChangesAsync();
                 return Results.Ok(product);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return Results.BadRequest(ex.InnerException?.Message ?? ex.Message);
             }
@@ -146,12 +153,12 @@ public class ProductsService : IProductsService
     #region Product Images Functions
     public async Task<IResult> GetProductImageDetails()
     {
-        var productImageDetails = _context.Productimages.ToList();
+        var productImageDetails = await _context.Productimages.ToListAsync();
         return productImageDetails == null || productImageDetails.Count == 0 ? Results.NotFound("No Product Image Details Found") : Results.Ok(productImageDetails);
     }
     public async Task<IResult> GetProductImageUrl(string productId)
     {
-        var imageUrl = _context.Productimages.SingleOrDefault(i => i.ProductId == productId);
+        var imageUrl = await _context.Productimages.SingleOrDefaultAsync(i => i.ProductId == productId);
         return imageUrl == null ? Results.NotFound($"No image with productId = {productId} was found") : Results.Ok(imageUrl);
     }
     public async Task<IResult> CreateProductImagesDetails(HttpRequest request)
@@ -171,7 +178,7 @@ public class ProductsService : IProductsService
             isPrimary = parsedIsPrimary;
 
 
-        var file = form.Files.FirstOrDefault();
+        var file = form.Files.Count > 0 ? form.Files[0] : null;
         if (file == null)
             return Results.BadRequest("No image file provided");
         var imageUrl = await GetProductImageUrl(file);
@@ -191,7 +198,7 @@ public class ProductsService : IProductsService
         }
         catch (Exception ex)
         {
-            return Results.BadRequest(ex.Message);
+            return Results.BadRequest(ex.InnerException?.Message ?? ex.Message);
         }
 
         return Results.Ok(newProductImageDetails);
