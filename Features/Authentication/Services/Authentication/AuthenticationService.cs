@@ -2,7 +2,6 @@
 using ArpellaStores.Features.Authentication.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Caching.Memory;
-//using Microsoft.AspNetCore.Mvc;
 
 namespace ArpellaStores.Features.Authentication.Services;
 
@@ -23,7 +22,7 @@ public class AuthenticationService : IAuthenticationService
         _context = context;
         _cache = cache;
     }
-    public async Task<IResult> RegisterUser(UserManager<User> userManager, User model)
+    public async Task<IResult> RegisterUser(User model)
     {
         User user1 = new User
         {
@@ -61,10 +60,10 @@ public class AuthenticationService : IAuthenticationService
         }
         catch (Exception ex)
         {
-            return Results.BadRequest("Error occurred!: " + ex.InnerException?.Message ?? ex.Message);
+            return Results.BadRequest("Error occurred!: " + ex.ToString());
         }
     }
-    public async Task<IResult> Login(SignInManager<User> signInManager, UserManager<User> userManager, User model)
+    public async Task<IResult> Login(User model)
     {
         var retrievedUser = await _userManager.FindByNameAsync(model.UserName);
         if (retrievedUser != null)
@@ -107,7 +106,7 @@ public class AuthenticationService : IAuthenticationService
             return Results.BadRequest("User not found");
         }
     }
-    public async Task<IResult> LogOut(SignInManager<User> signInManager)
+    public async Task<IResult> LogOut()
     {
         await _signInManager.SignOutAsync();
         return Results.Ok("Successfully logged out");
@@ -138,7 +137,7 @@ public class AuthenticationService : IAuthenticationService
         }
         else
         {
-            message = "No OTP found or it has expired";
+            message = $"No OTP found for username {username} or it has expired";
             return false;
         }
     }

@@ -31,6 +31,9 @@ public static class ServiceRegistration
         // Register application services
         serviceCollection.RegisterFeatureServices();
 
+        // Register Route Handlers for the endpoint services.
+        serviceCollection.RegisterHandlers();
+
         // Register application endpoints services
         serviceCollection.RegisterRouteRegistrars();
 
