@@ -7,6 +7,6 @@ public interface IAuthenticationService
     Task<IResult> RegisterUser(User model);
     Task<IResult> Login(User model);
     Task<IResult> LogOut();
-    Task<IResult> GetOTP(string username);
+    IResult GetOTP(string username);
     bool VerifyOTP(string username, string otp, out string message);
 }

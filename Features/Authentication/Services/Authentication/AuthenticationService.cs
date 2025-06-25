@@ -112,7 +112,7 @@ public class AuthenticationService : IAuthenticationService
         return Results.Ok("Successfully logged out");
     }
     #region Utilities
-    public async Task<IResult> GetOTP(string username)
+    public IResult GetOTP(string username)
     {
         var random = new Random();
         var otp = random.Next(100000, 999999).ToString();
