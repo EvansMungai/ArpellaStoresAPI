@@ -44,9 +44,9 @@ jobs:
         username: ${{ secrets.VPS_USER }}
         key: ${{ secrets.VPS_SSH_KEY }}
         source: |
-          docker-compose.yml
-          docker-compose.override.yml
-          .env
+          ./docker-compose.yml
+          ./docker-compose.override.yml
+          ./.env
         target: ~/
         debug: true
 
