@@ -33,6 +33,11 @@ jobs:
       run: |
         echo "${{ secrets.ENV_FILE }}" | base64 -d > .env
 
+    - name: List files in workspace
+      run: |
+        pwd
+        ls -al
+        
     - name: Copy files to VPS
       uses: appleboy/scp-action@v0.1.4
       with:
