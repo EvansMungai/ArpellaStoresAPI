@@ -8,6 +8,7 @@ public static class KestrelConfiguration
     public static void ConfigureCustomHttps(this KestrelServerOptions options)
     {
         var certPath = Environment.GetEnvironmentVariable("HTTPS_PFX_PATH");
+        var password = Environment.GetEnvironmentVariable("HTTPS_PFX_PASSWORD");
 
         options.ListenAnyIP(8081, listenOptions =>
         {
