@@ -11,5 +11,5 @@ services:
     environment:
         ASPNETCORE_ENVIRONMENT: "Production"
         HTTPS_PFX_PATH: "/certs/bundle.pfx"
-        HTTPS_PFX_PASSWORD: "yourpassword"
+        HTTPS_PFX_PASSWORD: "arpellastores"
     restart: always
