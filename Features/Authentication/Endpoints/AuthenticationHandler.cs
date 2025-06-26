@@ -1,6 +1,6 @@
-﻿using ArpellaStores.Features.Authentication.Models;
+﻿using ArpellaStores.Extensions.RouteHandlers;
+using ArpellaStores.Features.Authentication.Models;
 using ArpellaStores.Features.Authentication.Services;
-using ArpellaStores.Extensions;
 
 namespace ArpellaStores.Features.Authentication.Endpoints;
 

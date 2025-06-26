@@ -2,7 +2,7 @@
 using ArpellaStores.Features.Authentication.Models;
 using Microsoft.AspNetCore.Identity;
 
-namespace ArpellaStores.Extensions.Service_Handlers;
+namespace ArpellaStores.Extensions.ServiceHandlers;
 
 public static class AuthenticationServiceRegistration
 {

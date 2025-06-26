@@ -1,4 +1,4 @@
-﻿using ArpellaStores.Extensions;
+﻿using ArpellaStores.Extensions.RouteHandlers;
 using ArpellaStores.Features.FinalPriceManagement.Models;
 using ArpellaStores.Features.FinalPriceManagement.Services;
 

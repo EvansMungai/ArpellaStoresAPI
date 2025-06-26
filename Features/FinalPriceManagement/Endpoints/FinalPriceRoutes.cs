@@ -1,4 +1,4 @@
-﻿using ArpellaStores.Extensions;
+﻿using ArpellaStores.Extensions.RouteHandlers;
 using ArpellaStores.Features.FinalPriceManagement.Models;
 
 namespace ArpellaStores.Features.FinalPriceManagement.Endpoints;

@@ -1,8 +1,6 @@
-﻿using ArpellaStores.Extensions;
+﻿using ArpellaStores.Extensions.RouteHandlers;
 using ArpellaStores.Features.InventoryManagement.Models;
 using ArpellaStores.Features.InventoryManagement.Services;
-using Microsoft.EntityFrameworkCore.Metadata.Conventions;
-using Microsoft.Identity.Client;
 
 namespace ArpellaStores.Features.InventoryManagement.Endpoints;
 
