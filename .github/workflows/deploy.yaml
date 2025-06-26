@@ -33,21 +33,15 @@ jobs:
       run: |
         echo "${{ secrets.ENV_FILE }}" | base64 -d > .env
 
-    - name: Confirm files exist before SCP
-      run: ls -l docker-compose* .env || true
+    - name: Copy files to /root/
+      run: |
+        echo "${{ secrets.VPS_SSH_KEY }}" > id_rsa
+        chmod 600 id_rsa
 
-    - name: Copy files manually with scp
-      uses: appleboy/ssh-action@v1.0.0
-      with:
-        host: ${{ secrets.VPS_HOST }}
-        username: ${{ secrets.VPS_USER }}
-        key: ${{ secrets.VPS_SSH_KEY }}
-        script: |
-          echo "${{ secrets.ENV_FILE_B64 }}" | base64 -d > .env
-          echo "Uploading files..."
-          scp -o StrictHostKeyChecking=no \
-          docker-compose.yml docker-compose.override.yml .env \
-          ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:~
+        scp -i id_rsa -o StrictHostKeyChecking=no \
+        docker-compose.yml docker-compose.override.yml .env \
+        ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/root/
+
 
 
     - name: SSH into VPS and deploy
@@ -57,6 +51,7 @@ jobs:
         username: ${{ secrets.VPS_USER }}
         key: ${{ secrets.VPS_SSH_KEY }}
         script: |
+          cd /root
           docker-compose pull
           docker-compose down
           docker-compose up -d
