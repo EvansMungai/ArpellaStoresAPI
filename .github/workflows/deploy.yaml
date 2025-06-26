@@ -40,13 +40,10 @@ jobs:
         username: ${{ secrets.VPS_USER }}
         key: ${{ secrets.VPS_SSH_KEY }}
         source: |
-          docker-compose.yml
-          docker-compose.override.yml
-          .env
+          ./docker-compose.yml
+          ./docker-compose.override.yml
+          ./.env
         target: ~/
-
-    - name: Check files before SCP
-      run: ls -l
 
     - name: SSH into VPS and deploy
       uses: appleboy/ssh-action@v1.0.0
@@ -55,7 +52,6 @@ jobs:
         username: ${{ secrets.VPS_USER }}
         key: ${{ secrets.VPS_SSH_KEY }}
         script: |
-          cd ~/
           docker-compose pull
           docker-compose down
           docker-compose up -d
