@@ -33,6 +33,11 @@ jobs:
       run: |
         echo "${{ secrets.ENV_FILE }}" | base64 -d > .env
 
+    - name: Verify .env contents
+      run: |
+        echo "--- .env file preview ---"
+        cat .env | grep -v 'PASSWORD' || echo "(redacted)"
+
     - name: Copy files to server
       run: |
         echo "${{ secrets.VPS_SSH_KEY }}" > id_rsa
