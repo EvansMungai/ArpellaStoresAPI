@@ -30,7 +30,8 @@ jobs:
         tags: ${{ secrets.DOCKER_HUB_USERNAME }}/arpellastores:latest
 
     - name: Create .env file
-      run: echo "${{ secrets.ENV_FILE }}" > .env
+      run: |
+        printf "%s" "${{ secrets.ENV_FILE }}" > .env
 
     - name: Copy files to VPS
       uses: appleboy/scp-action@v0.1.4
