@@ -1,4 +1,4 @@
-﻿using ArpellaStores.Extensions;
+﻿using ArpellaStores.Extensions.RouteHandlers;
 using ArpellaStores.Features.GoodsInformationManagement.Models;
 
 namespace ArpellaStores.Features.GoodsInformationManagement.Endpoints;

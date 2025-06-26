@@ -1,8 +1,7 @@
-﻿using ArpellaStores.Extensions;
+﻿using ArpellaStores.Extensions.RouteHandlers;
 using ArpellaStores.Features.Authentication.Models;
 using ArpellaStores.Features.Authentication.Services;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace ArpellaStores.Features.Authentication.Endpoints;
 

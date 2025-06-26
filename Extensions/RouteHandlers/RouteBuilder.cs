@@ -1,4 +1,4 @@
-﻿namespace ArpellaStores.Extensions;
+﻿namespace ArpellaStores.Extensions.RouteHandlers;
 
 public class RouteBuilder
 {

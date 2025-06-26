@@ -1,10 +1,13 @@
-﻿namespace ArpellaStores.Extensions;
+﻿using ArpellaStores.Extensions.RouteHandlers;
+using RouteBuilder = ArpellaStores.Extensions.RouteHandlers.RouteBuilder;
+namespace ArpellaStores.Extensions;
 
 public static class MiddlewareConfiguration
 {
     public static void ConfigureMiddleware(this WebApplication app)
     {
         app.UseCors();
+        app.UseHttpsRedirection();
         app.UseAuthentication();
         app.UseAuthorization();
 

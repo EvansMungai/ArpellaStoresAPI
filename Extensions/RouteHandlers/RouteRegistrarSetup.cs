@@ -1,6 +1,6 @@
 ﻿using System.Reflection;
 
-namespace ArpellaStores.Extensions;
+namespace ArpellaStores.Extensions.RouteHandlers;
 
 public static class RouteRegistrarSetup
 {

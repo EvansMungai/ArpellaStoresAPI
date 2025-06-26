@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace ArpellaStores.Extensions.Service_Handlers;
+namespace ArpellaStores.Extensions.ServiceHandlers;
 
 public static class JSONSerializer
 {

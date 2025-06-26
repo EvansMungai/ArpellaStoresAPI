@@ -1,7 +1,6 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.OpenApi.Models;
+﻿using Microsoft.OpenApi.Models;
 
-namespace ArpellaStores.Extensions.Service_Handlers;
+namespace ArpellaStores.Extensions.ServiceHandlers;
 
 public static class SwaggerConfiguration
 {

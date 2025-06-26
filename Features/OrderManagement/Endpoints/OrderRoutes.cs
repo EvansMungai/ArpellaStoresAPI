@@ -1,6 +1,5 @@
-﻿using ArpellaStores.Extensions;
+﻿using ArpellaStores.Extensions.RouteHandlers;
 using ArpellaStores.Features.OrderManagement.Models;
-using ArpellaStores.Features.OrderManagement.Services;
 
 namespace ArpellaStores.Features.OrderManagement.Endpoints;
 
