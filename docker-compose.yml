@@ -1,0 +1,12 @@
+services:
+  arpellastores:
+    image: evansmungai/arpellastores:latest
+    ports:
+      - "8080:8080" # HTTP
+      - "8081:8081" # HTTPS
+    volumes:
+      - /etc/ssl/myapp:/certs:ro
+    environment:
+      ASPNETCORE_ENVIRONMENT: "Production"
+      HTTPS_PFX_PATH: /certs/bundle.pfx
+    restart: always
