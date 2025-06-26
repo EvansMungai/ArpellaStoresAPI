@@ -45,6 +45,9 @@ jobs:
           .env
         target: ~/
 
+    - name: Check files before SCP
+      run: ls -l
+
     - name: SSH into VPS and deploy
       uses: appleboy/ssh-action@v1.0.0
       with:
