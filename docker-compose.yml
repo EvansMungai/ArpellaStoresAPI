@@ -8,8 +8,4 @@ services:
       .env
     volumes:
       - /etc/ssl/myapp:/certs:ro
-    environment:
-      ASPNETCORE_ENVIRONMENT: "Production"
-      HTTPS_PFX_PATH: /certs/bundle.pfx
-      HTTPS_PFX_PASSWORD: arpellastores
     restart: always
