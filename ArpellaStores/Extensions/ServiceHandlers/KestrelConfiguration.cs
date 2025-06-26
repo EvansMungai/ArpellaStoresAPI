@@ -12,8 +12,12 @@ public static class KestrelConfiguration
 
         options.ListenAnyIP(8081, listenOptions =>
         {
-            var cert = new X509Certificate2(certPath, "", X509KeyStorageFlags.Exportable);
-            listenOptions.UseHttps(cert);
+            try
+            {
+                var cert = new X509Certificate2(certPath, "", X509KeyStorageFlags.Exportable);
+                listenOptions.UseHttps(cert);
+            }
+            catch (Exception ex) { Console.WriteLine($"Failed to load certificate: {ex.Message}"); }
         });
 
     }
