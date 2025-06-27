@@ -33,23 +33,27 @@ jobs:
       run: |
         echo "${{ secrets.ENV_FILE }}" | base64 -d > .env
 
-    - name: Verify .env contents
+    - name: Generate .pfx from Cloudflare certs
       run: |
-        echo "--- .env file preview ---"
-        cat .env | grep -v 'PASSWORD' || echo "(redacted)"
+        mkdir certs
+        echo "${{ secrets.CLOUDFLARE_CERT_PEM }}" > certs/cert.pem
+        echo "${{ secrets.CLOUDFLARE_KEY_PEM }}" > certs/key.pem
+        openssl pkcs12 -export \
+          -in certs/cert.pem \
+          -inkey certs/key.pem \
+          -out certs/cloudflare.pfx \
+          -passout pass:${{ secrets.CERT_PASSWORD }}
 
-    - name: Copy files to server
+    - name: Copy files to VPS
       run: |
         echo "${{ secrets.VPS_SSH_KEY }}" > id_rsa
         chmod 600 id_rsa
 
         scp -i id_rsa -o StrictHostKeyChecking=no \
-        docker-compose.yml docker-compose.override.yml .env \
+        docker-compose.yml docker-compose.override.yml .env certs/cloudflare.pfx \
         ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/root/
 
-
-
-    - name: SSH into VPS and deploy
+    - name: SSH into VPS and deploy containers
       uses: appleboy/ssh-action@v1.0.0
       with:
         host: ${{ secrets.VPS_HOST }}

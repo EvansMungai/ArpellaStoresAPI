@@ -7,9 +7,9 @@ services:
     env_file:
       .env
     volumes:
-      - /etc/ssl/myapp:/certs:ro
+      - /root/cloudflare.pfx:/https/cloudflare.pfx:ro
     environment:
         ASPNETCORE_ENVIRONMENT: "Production"
-        HTTPS_PFX_PATH: "/certs/bundle.pfx"
-        HTTPS_PFX_PASSWORD: "arpellastores"
+        HTTPS_PFX_PATH: "/https/cloudflare.pfx"
+        HTTPS_PFX_PASSWORD: "${CERT_PASSWORD}"
     restart: always

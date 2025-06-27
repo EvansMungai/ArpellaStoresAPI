@@ -10,10 +10,6 @@ public static class KestrelConfiguration
         var certPath = Environment.GetEnvironmentVariable("HTTPS_PFX_PATH");
         var certPwd = Environment.GetEnvironmentVariable("HTTPS_PFX_PASSWORD");
 
-        System.IO.File.WriteAllText("/app/kestrel-check.txt",
-    $"PFX_PATH: {(string.IsNullOrEmpty(certPath) ? "null" : certPath)}\n" +
-    $"PFX_PASSWORD: {(string.IsNullOrEmpty(certPwd) ? "null or empty" : "set")}");
-
         options.ListenAnyIP(8081, listenOptions =>
         {
             try
