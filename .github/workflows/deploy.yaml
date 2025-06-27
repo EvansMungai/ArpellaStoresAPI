@@ -36,8 +36,8 @@ jobs:
     - name: Generate .pfx from Cloudflare certs
       run: |
         mkdir certs
-        echo "${{ secrets.CLOUDFLARE_CERT_PEM }}" > certs/cert.pem
-        echo "${{ secrets.CLOUDFLARE_KEY_PEM }}" > certs/key.pem
+        echo "${{ secrets.CLOUDFLARE_CERT_PEM }}" | base64 -d > certs/cert.pem
+        echo "${{ secrets.CLOUDFLARE_KEY_PEM }}" | base64 -d > certs/key.pem
         openssl pkcs12 -export \
           -in certs/cert.pem \
           -inkey certs/key.pem \
