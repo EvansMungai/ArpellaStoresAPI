@@ -7,7 +7,8 @@ public static class ServiceRegistration
 {
     public static void RegisterDataServices(this IServiceCollection serviceCollection, IConfiguration configuration)
     {
-        var connectionString = configuration.GetConnectionString("arpellaDB");
+        //var connectionString = configuration.GetConnectionString("arpellaDB");
+        var connectionString = Environment.GetEnvironmentVariable("ConnectionStrings__arpellaDB");
         serviceCollection.AddDbContext<ArpellaContext>(options =>
         {
             options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));

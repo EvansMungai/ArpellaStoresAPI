@@ -20,7 +20,8 @@ public partial class ArpellaContext : IdentityDbContext<User>
     public ArpellaContext(DbContextOptions<ArpellaContext> options, IConfiguration configuration)
         : base(options)
     {
-        _connectionString = configuration.GetConnectionString("arpellaDB");
+        //_connectionString = configuration.GetConnectionString("arpellaDB");
+        _connectionString = Environment.GetEnvironmentVariable("ConnectionStrings__arpellaDB");
     }
 
     public virtual DbSet<Category> Categories { get; set; }
