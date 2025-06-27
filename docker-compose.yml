@@ -8,6 +8,7 @@ services:
       .env
     volumes:
       - /root/cloudflare.pfx:/https/cloudflare.pfx:ro
+      - /root/ca.pem:/certs/ca.pem:ro
     environment:
         ASPNETCORE_ENVIRONMENT: "Production"
         HTTPS_PFX_PATH: "/https/cloudflare.pfx"
