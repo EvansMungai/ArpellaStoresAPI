@@ -20,7 +20,12 @@ public static class KestrelConfiguration
                 listenOptions.UseHttps(cert);
                 Console.WriteLine("[Kestrel] HTTPS endpoint configured successfully.");
             }
-            catch (Exception ex) { Console.WriteLine($"[Kestrel] Failed to load certificate:\n{ex}"); }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[Kestrel] Failed to load cert from '{certPath}'");
+                Console.WriteLine($"[Kestrel] Password length: {certPwd?.Length}");
+                Console.WriteLine($"[Kestrel] Exception: {ex}");
+            }
         });
 
     }
