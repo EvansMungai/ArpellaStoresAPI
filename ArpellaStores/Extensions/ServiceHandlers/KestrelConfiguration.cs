@@ -14,10 +14,13 @@ public static class KestrelConfiguration
         {
             try
             {
-                var cert = new X509Certificate2(certPath, certPwd, X509KeyStorageFlags.Exportable);
+                if (string.IsNullOrEmpty(certPath) || string.IsNullOrEmpty(certPwd)) throw new InvalidOperationException("Certificate path or password is missing.");
+
+                var cert = new X509Certificate2(certPath, certPwd, X509KeyStorageFlags.Exportable | X509KeyStorageFlags.MachineKeySet | X509KeyStorageFlags.PersistKeySet);
                 listenOptions.UseHttps(cert);
+                Console.WriteLine("[Kestrel] HTTPS endpoint configured successfully.");
             }
-            catch (Exception ex) { Console.WriteLine($"Failed to load certificate: {ex.Message}"); }
+            catch (Exception ex) { Console.WriteLine($"[Kestrel] Failed to load certificate:\n{ex}"); }
         });
 
     }
