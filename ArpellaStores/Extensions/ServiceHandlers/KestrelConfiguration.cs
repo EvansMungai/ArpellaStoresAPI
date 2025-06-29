@@ -16,7 +16,9 @@ public static class KestrelConfiguration
             {
                 if (string.IsNullOrEmpty(certPath) || string.IsNullOrEmpty(certPwd)) throw new InvalidOperationException("Certificate path or password is missing.");
 
-                var cert = new X509Certificate2(certPath, certPwd, X509KeyStorageFlags.Exportable | X509KeyStorageFlags.MachineKeySet | X509KeyStorageFlags.PersistKeySet);
+                var cert = new X509Certificate2(certPath, certPwd, X509KeyStorageFlags.DefaultKeySet);
+                Console.WriteLine($"[TEST] Cert loaded: {cert.Subject}");
+                Console.WriteLine($"[TEST] Valid from: {cert.NotBefore} to {cert.NotAfter}");
                 listenOptions.UseHttps(cert);
                 Console.WriteLine("[Kestrel] HTTPS endpoint configured successfully.");
             }

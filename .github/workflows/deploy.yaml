@@ -38,7 +38,8 @@ jobs:
           -in certs/cert.pem \
           -inkey certs/key.pem \
           -out certs/cloudflare.pfx \
-          -passout pass:${{ secrets.CERT_PASSWORD }}
+          -passout pass:${{ secrets.CERT_PASSWORD }} \
+          -certpbe AES-256-CBC -keypbe AES-256-CBC
 
     - name: Copy files to VPS
       run: |
