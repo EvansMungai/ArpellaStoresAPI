@@ -9,6 +9,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add environment variables
 builder.Configuration.AddEnvironmentVariables();
+Console.WriteLine($"ASPNETCORE_ENVIRONMENT = '{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")}'");
+
 
 var env = builder.Environment;
 //Configure HTTPS
