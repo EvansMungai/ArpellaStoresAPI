@@ -1,7 +1,9 @@
 using ArpellaStores.Extensions;
 using ArpellaStores.Extensions.ServiceHandlers;
+using DotNetEnv;
 
 
+Env.Load();
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
