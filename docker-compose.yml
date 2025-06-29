@@ -10,7 +10,7 @@ services:
       - /root/cloudflare.pfx:/https/cloudflare.pfx:ro
       - /root/ca.pem:/certs/ca.pem:ro
     environment:
-        ASPNETCORE_ENVIRONMENT: Production
-        HTTPS_PFX_PATH: "/https/cloudflare.pfx"
-        HTTPS_PFX_PASSWORD: "${CERT_PASSWORD}"
+        - ASPNETCORE_ENVIRONMENT=Production
+        - HTTPS_PFX_PATH=/https/cloudflare.pfx
+        - HTTPS_PFX_PASSWORD=${CERT_PASSWORD}
     restart: always
