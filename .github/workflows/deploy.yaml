@@ -47,7 +47,7 @@ jobs:
         chmod 600 id_rsa
 
         scp -i id_rsa -o StrictHostKeyChecking=no \
-          docker-compose.yml .env certs/cloudflare.pfx certs/ca.pem \
+          docker-compose.yml docker-compose.override.yml .env certs/cloudflare.pfx certs/ca.pem \
           ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/root/
 
     - name: SSH into VPS and deploy
