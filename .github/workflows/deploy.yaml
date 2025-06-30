@@ -35,11 +35,12 @@ jobs:
         echo "${{ secrets.AIVEN_CA_PEM }}" | base64 -d > certs/ca.pem
 
         openssl pkcs12 -export \
-          -in certs/cert.pem \
-          -inkey certs/key.pem \
-          -out certs/cloudflare.pfx \
+          -in /etc/letsencrypt/live/arpella1.hostpinnacleservers.com/cert.pem \
+          -inkey /etc/letsencrypt/live/arpella1.hostpinnacleservers.com/privkey.pem \
+          -out -certfile /etc/letsencrypt/live/arpella1.hostpinnacleservers.com/chain.pem \
           -passout pass:${{ secrets.CERT_PASSWORD }} \
-          -certpbe AES-256-CBC -keypbe AES-256-CBC
+          -certpbe AES-256-CBC -keypbe AES-256-CBC \
+          -certfile /etc/letsencrypt/live/arpella1.hostpinnacleservers.com/chain.pem
 
     - name: Copy files to VPS
       run: |
