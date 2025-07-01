@@ -14,7 +14,7 @@
 *.userprefs
 
 # Certificates and Environment variables
-Certificates/
+certs/
 .env
 
 # Mono auto generated files

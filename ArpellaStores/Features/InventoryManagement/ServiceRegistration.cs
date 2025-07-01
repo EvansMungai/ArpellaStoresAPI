@@ -8,6 +8,7 @@ public static class ServiceRegistration
         serviceCollection.AddScoped<ICategoriesService, CategoriesService>();
         serviceCollection.AddScoped<ISubcategoriesServices, SubcategoriesService>();
         serviceCollection.AddScoped<IInventoryService, InventoryService>();
+        serviceCollection.AddScoped<IInvoiceService, InvoiceService>();
         serviceCollection.AddScoped<IProductsService, ProductsService>();
         serviceCollection.AddScoped<ISupplierService, SupplierService>();
     }
