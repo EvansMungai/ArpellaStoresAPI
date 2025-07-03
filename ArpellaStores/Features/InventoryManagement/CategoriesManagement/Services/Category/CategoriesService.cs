@@ -43,7 +43,6 @@ public class CategoriesService : ICategoriesService
         var retrievedCategory = await _context.Categories.SingleOrDefaultAsync(c => c.Id == id);
         if (retrievedCategory != null)
         {
-            retrievedCategory.Id = update.Id;
             retrievedCategory.CategoryName = update.CategoryName;
             try
             {
