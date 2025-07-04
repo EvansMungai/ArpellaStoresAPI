@@ -1,4 +1,5 @@
 ﻿using ArpellaStores.Data.Infrastructure;
+using ArpellaStores.Features.InventoryManagement.Models;
 using ArpellaStores.Features.OrderManagement.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -33,7 +34,7 @@ public class OrderService : IOrderService
                     oi.Product.Price
                 }
             })
-        })
+        }).AsNoTracking()
     .ToListAsync();
         return orders == null || orders.Count == 0 ? Results.NotFound("NO orders found") : Results.Ok(orders);
     }
@@ -61,13 +62,24 @@ public class OrderService : IOrderService
                 oi.Product.Name,
             }
         })
-    })
+    }).AsNoTracking()
     .SingleOrDefaultAsync();
         return order == null ? Results.NotFound($"No order with id = {id} was found") : Results.Ok(order);
     }
 
     public async Task<IResult> CreateOrder(Order orderDetails)
     {
+        var local = _context.Orders.Local.FirstOrDefault(o => o.Orderid == orderDetails.Orderid);
+
+        if (local != null)
+        {
+            _context.Entry(local).State = EntityState.Detached;
+        }
+
+        var existing = await _context.Orders.AsNoTracking().SingleOrDefaultAsync(o => o.Orderid == orderDetails.Orderid);
+        if (existing != null)
+            return Results.Conflict($"An Order with OrderID = {orderDetails.Orderid} already exists.");
+
         var order = new Order
         {
             Orderid = GenerateOrderId(),
@@ -130,7 +142,13 @@ public class OrderService : IOrderService
 
     public async Task<IResult> RemoveOrder(string id)
     {
+        var local = _context.Orders.Local.FirstOrDefault(o => o.Orderid == id);
 
+        if (local != null)
+        {
+            _context.Entry(local).State = EntityState.Detached;
+        }
+        
         var order = await _context.Orders.Include(o => o.Orderitems).SingleOrDefaultAsync(o => o.Orderid == id);
 
         if (order == null)

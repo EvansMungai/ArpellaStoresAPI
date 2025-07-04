@@ -19,16 +19,27 @@ public class ProductsService : IProductsService
     }
     public async Task<IResult> GetProducts()
     {
-        var products = await _context.Products.Select(p => new { p.Id, p.InventoryId, p.Name, p.Price, p.Category, p.PurchaseCap, p.Subcategory, p.Barcodes, p.TaxCode, p.CreatedAt, p.UpdatedAt }).ToListAsync();
+        var products = await _context.Products.Select(p => new { p.Id, p.InventoryId, p.Name, p.Price, p.Category, p.PurchaseCap, p.Subcategory, p.Barcodes, p.TaxCode, p.CreatedAt, p.UpdatedAt }).AsNoTracking().ToListAsync();
         return products == null || products.Count == 0 ? Results.NotFound("No Products Found") : Results.Ok(products);
     }
     public async Task<IResult> GetProduct(int productId)
     {
-        var product = await _context.Products.Select(p => new { p.Id, p.InventoryId, p.Name, p.Price, p.Category, p.PurchaseCap, p.Subcategory, p.Barcodes, p.TaxCode, p.CreatedAt, p.UpdatedAt }).SingleOrDefaultAsync(p => p.Id == productId);
+        var product = await _context.Products.Select(p => new { p.Id, p.InventoryId, p.Name, p.Price, p.Category, p.PurchaseCap, p.Subcategory, p.Barcodes, p.TaxCode, p.CreatedAt, p.UpdatedAt }).AsNoTracking().SingleOrDefaultAsync(p => p.Id == productId);
         return product == null ? Results.NotFound($"Product with ProductID = {productId} was not found") : Results.Ok(product);
     }
     public async Task<IResult> CreateProduct(Product product)
     {
+        var local = _context.Products.Local.FirstOrDefault(p => p.Id == product.Id);
+
+        if (local != null)
+        {
+            _context.Entry(local).State = EntityState.Detached;
+        }
+
+        var existing = await _context.Products.AsNoTracking().SingleOrDefaultAsync(p => p.Id == product.Id);
+        if (existing != null)
+            return Results.Conflict($"An Product with ProductID = {product.Id} already exists.");
+
         var newProduct = new Product
         {
             InventoryId = product.InventoryId,
@@ -76,7 +87,12 @@ public class ProductsService : IProductsService
     }
     public async Task<IResult> UpdateProductDetails(Product product, int id)
     {
-        var retrievedProduct = _context.Products.FirstOrDefault(p => p.Id == id);
+        var local = _context.Products.Local.FirstOrDefault(p => p.Id == product.Id);
+
+        if (local != null)
+            _context.Entry(local).State = EntityState.Detached;
+
+        var retrievedProduct = await _context.Products.AsNoTracking().SingleOrDefaultAsync(p => p.Id == id);
         if (retrievedProduct != null)
         {
             retrievedProduct.Id = product.Id;
@@ -107,7 +123,12 @@ public class ProductsService : IProductsService
     }
     public async Task<IResult> UpdateProductPrice(int id, decimal price)
     {
-        var retrievedProduct = _context.Products.FirstOrDefault(p => p.Id == id);
+        var local = _context.Products.Local.FirstOrDefault(p => p.Id == id);
+
+        if (local != null)
+            _context.Entry(local).State = EntityState.Detached;
+
+        var retrievedProduct = await _context.Products.AsNoTracking().SingleOrDefaultAsync(p => p.Id == id);
         if (retrievedProduct != null)
         {
             retrievedProduct.PriceAfterDiscount = price;
@@ -130,7 +151,14 @@ public class ProductsService : IProductsService
     }
     public async Task<IResult> RemoveProduct(int productId)
     {
-        var product = _context.Products.FirstOrDefault(p => p.Id == productId);
+        var local = _context.Products.Local.FirstOrDefault(p => p.Id == productId);
+
+        if (local != null)
+        {
+            _context.Entry(local).State = EntityState.Detached;
+        }
+
+        var product = await _context.Products.AsNoTracking().SingleOrDefaultAsync(p => p.Id == productId);
         if (product != null)
         {
             try
@@ -153,12 +181,12 @@ public class ProductsService : IProductsService
     #region Product Images Functions
     public async Task<IResult> GetProductImageDetails()
     {
-        var productImageDetails = await _context.Productimages.ToListAsync();
+        var productImageDetails = await _context.Productimages.AsNoTracking().ToListAsync();
         return productImageDetails == null || productImageDetails.Count == 0 ? Results.NotFound("No Product Image Details Found") : Results.Ok(productImageDetails);
     }
     public async Task<IResult> GetProductImageUrl(string productId)
     {
-        var imageUrl = await _context.Productimages.SingleOrDefaultAsync(i => i.ProductId == productId);
+        var imageUrl = await _context.Productimages.AsNoTracking().SingleOrDefaultAsync(i => i.ProductId == productId);
         return imageUrl == null ? Results.NotFound($"No image with productId = {productId} was found") : Results.Ok(imageUrl);
     }
     public async Task<IResult> CreateProductImagesDetails(HttpRequest request)
@@ -206,6 +234,13 @@ public class ProductsService : IProductsService
 
     public async Task<IResult> DeleteProductImagesDetails(int id)
     {
+        var local = _context.Productimages.Local.FirstOrDefault(pI => pI.ImageId == id);
+
+        if (local != null)
+        {
+            _context.Entry(local).State = EntityState.Detached;
+        }
+
         var existingProductImage = await _context.Productimages.FindAsync(id);
         if (existingProductImage == null)
         {
