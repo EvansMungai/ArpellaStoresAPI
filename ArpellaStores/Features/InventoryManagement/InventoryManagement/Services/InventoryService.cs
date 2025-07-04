@@ -168,9 +168,9 @@ public class InventoryService : IInventoryService
     {
         var newRestockLog = new Restocklog
         {
-            LogId = restocklog.LogId,
             ProductId = restocklog.ProductId,
             RestockQuantity = restocklog.RestockQuantity,
+            RestockDate = DateTime.Now,
             SupplierId = restocklog.SupplierId,
             InvoiceNumber = restocklog.InvoiceNumber
         };

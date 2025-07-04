@@ -238,6 +238,8 @@ public partial class ArpellaContext : IdentityDbContext<User>
 
             entity.ToTable("inventory");
 
+            entity.HasIndex(e => e.InvoiceNumber, "invoiceNumber");
+
             entity.HasIndex(e => e.ProductId, "product_id");
 
             entity.HasIndex(e => e.SupplierId, "supplierId");
@@ -247,6 +249,9 @@ public partial class ArpellaContext : IdentityDbContext<User>
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")
                 .HasColumnType("timestamp")
                 .HasColumnName("createdAt");
+            entity.Property(e => e.InvoiceNumber)
+                .HasMaxLength(30)
+                .HasColumnName("invoiceNumber");
             entity.Property(e => e.ProductId)
                 .HasMaxLength(30)
                 .HasColumnName("product_id");
@@ -264,9 +269,10 @@ public partial class ArpellaContext : IdentityDbContext<User>
                 .HasColumnType("timestamp")
                 .HasColumnName("updatedAt");
 
-            entity.HasOne(d => d.Supplier).WithMany(p => p.Inventories)
-                .HasForeignKey(d => d.SupplierId)
-                .HasConstraintName("inventory_ibfk_1");
+            entity.HasOne(d => d.InvoiceNumberNavigation).WithMany(p => p.Inventories)
+                .HasForeignKey(d => d.InvoiceNumber)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("inventory_ibfk_2");
         });
 
         modelBuilder.Entity<Invoice>(entity =>
@@ -293,10 +299,6 @@ public partial class ArpellaContext : IdentityDbContext<User>
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")
                 .HasColumnType("timestamp")
                 .HasColumnName("updatedAt");
-
-            entity.HasOne(d => d.Supplier).WithMany(p => p.Invoices)
-                .HasForeignKey(d => d.SupplierId)
-                .HasConstraintName("invoices_ibfk_1");
         });
 
         modelBuilder.Entity<Order>(entity =>
