@@ -25,7 +25,8 @@ public partial class Inventory
 
     [Required(ErrorMessage = "Supplier Id is required")]
     public int? SupplierId { get; set; }
-
+    public string InvoiceNumber { get; set; } = null!;
     public virtual Supplier? Supplier { get; set; }
+    public virtual Invoice InvoiceNumberNavigation { get; set; } = null!;
     public ICollection<Product> Products { get; set; }
 }
