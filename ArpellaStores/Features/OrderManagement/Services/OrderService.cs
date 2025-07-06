@@ -1,17 +1,25 @@
 ﻿using ArpellaStores.Data.Infrastructure;
 using ArpellaStores.Features.InventoryManagement.Models;
 using ArpellaStores.Features.OrderManagement.Models;
+using ArpellaStores.Features.PaymentManagement.Models;
+using ArpellaStores.Features.PaymentManagement.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
+using System.Text;
 
 namespace ArpellaStores.Features.OrderManagement.Services;
 
 public class OrderService : IOrderService
 {
     private static readonly Random random = new Random();
+    private readonly IMpesaApiService _mpesaApiService;
+    private readonly MpesaConfig _mpesaConfig;
     private readonly ArpellaContext _context;
-    public OrderService(ArpellaContext context)
+    public OrderService(ArpellaContext context, IOptions<MpesaConfig> mpesaConfig, IMpesaApiService mpesaApiService)
     {
         _context = context;
+        _mpesaConfig = mpesaConfig.Value;
+        _mpesaApiService = mpesaApiService;
     }
 
     public async Task<IResult> GetOrders()
@@ -94,6 +102,8 @@ public class OrderService : IOrderService
 
         try
         {
+            await InitiateStkPush(order);
+
             _context.Orders.Add(order);
 
             foreach (var item in orderDetails.Orderitems)
@@ -190,6 +200,43 @@ public class OrderService : IOrderService
             }
         }
         return totalCost;
+    }
+    private async Task<LipaNaMpesaResponseModel> InitiateStkPush(Order order)
+    {
+        string timestamp = DateTime.Now.ToString("yyyyMMddHHmmss"); ;
+        string password = Convert.ToBase64String(Encoding.UTF8.GetBytes(_mpesaConfig.BusinessShortCode + _mpesaConfig.Passkey + timestamp));
+
+        var requestPayload = new LipaNaMpesaRequestModel
+        {
+            BusinessShortCode = int.Parse(_mpesaConfig.BusinessShortCode),
+            Password = password,
+            Timestamp = timestamp,
+            TransactionType = "CustomerBuyGoodsOnline",
+            Amount = order.Total,
+            PartyA = order.PhoneNumber,
+            PartyB = int.Parse(_mpesaConfig.BusinessShortCode),
+            PhoneNumber = order.PhoneNumber,
+            CallBackUrl = _mpesaConfig.CallbackUri,
+            AccountReference = "ArpellaStores",
+            TransactionDescription = $"Payment for Order {order.Orderid}"
+        };
+
+        string stkPushUri = "https://api.safaricom.co.ke/mpesa/stkpush/v1/processrequest";
+
+        var response = await this._mpesaApiService.LipaNaMpesa(stkPushUri, requestPayload);
+
+        if (response != null || !string.IsNullOrEmpty(response.MerchantRequestID))
+        {
+            var paymentRecord = new Payment
+            {
+                Orderid = order.Orderid,
+                Status = "Pending",
+                TransactionId = response.CheckoutRequestID
+            };
+            _context.Payments.Add(paymentRecord);
+            await _context.SaveChangesAsync();
+        }
+        return response;
     }
     #endregion
 }
