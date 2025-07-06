@@ -19,12 +19,12 @@ public class ProductsService : IProductsService
     }
     public async Task<IResult> GetProducts()
     {
-        var products = await _context.Products.Select(p => new { p.Id, p.InventoryId, p.Name, p.Price, p.Category, p.PurchaseCap, p.Subcategory, p.Barcodes, p.TaxCode, p.CreatedAt, p.UpdatedAt }).AsNoTracking().ToListAsync();
+        var products = await _context.Products.Select(p => new { p.Id, p.InventoryId, p.Name, p.Price, p.Category, p.PurchaseCap, p.Subcategory, p.Barcodes, p.CreatedAt, p.UpdatedAt }).AsNoTracking().ToListAsync();
         return products == null || products.Count == 0 ? Results.NotFound("No Products Found") : Results.Ok(products);
     }
     public async Task<IResult> GetProduct(int productId)
     {
-        var product = await _context.Products.Select(p => new { p.Id, p.InventoryId, p.Name, p.Price, p.Category, p.PurchaseCap, p.Subcategory, p.Barcodes, p.TaxCode, p.CreatedAt, p.UpdatedAt }).AsNoTracking().SingleOrDefaultAsync(p => p.Id == productId);
+        var product = await _context.Products.Select(p => new { p.Id, p.InventoryId, p.Name, p.Price, p.Category, p.PurchaseCap, p.Subcategory, p.Barcodes, p.CreatedAt, p.UpdatedAt }).AsNoTracking().SingleOrDefaultAsync(p => p.Id == productId);
         return product == null ? Results.NotFound($"Product with ProductID = {productId} was not found") : Results.Ok(product);
     }
     public async Task<IResult> CreateProduct(Product product)
@@ -50,8 +50,7 @@ public class ProductsService : IProductsService
             Subcategory = product.Subcategory,
             DiscountQuantity = product.DiscountQuantity,
             Barcodes = product.Barcodes,
-            PurchaseCap = product.PurchaseCap,
-            TaxCode = product.TaxCode
+            PurchaseCap = product.PurchaseCap
         };
         try
         {
@@ -290,8 +289,7 @@ public class ProductsService : IProductsService
                 Barcodes = worksheet.Cells[row, 6].Text,
                 DiscountQuantity = int.Parse(worksheet.Cells[row, 7].Text),
                 PurchaseCap = int.Parse(worksheet.Cells[row, 8].Text),
-                TaxCode = worksheet.Cells[row, 9].Text,
-                PriceAfterDiscount = decimal.Parse(worksheet.Cells[row, 10].Text)
+                PriceAfterDiscount = decimal.Parse(worksheet.Cells[row, 9].Text)
             };
             products.Add(product);
         }
