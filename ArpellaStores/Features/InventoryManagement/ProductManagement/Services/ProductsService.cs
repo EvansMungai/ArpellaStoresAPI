@@ -50,7 +50,7 @@ public class ProductsService : IProductsService
         }
         catch (Exception ex)
         {
-            return Results.NotFound(ex.InnerException?.Message ?? ex.Message);
+            return Results.BadRequest(ex.InnerException?.Message ?? ex.Message);
         }
     }
     public async Task<IResult> CreateProducts(IFormFile file)
