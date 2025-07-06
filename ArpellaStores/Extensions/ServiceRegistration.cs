@@ -14,7 +14,7 @@ public static class ServiceRegistration
         serviceCollection.ConfigureSwaggerUIDocumentation();
 
         //Configure DBContext
-        serviceCollection.RegisterDataServices(configuration);
+        serviceCollection.RegisterDataServices();
 
         // Configure JSON serializer options
         serviceCollection.ConfigureJsonSerializerSettings();
