@@ -44,7 +44,8 @@ public class InventoryService : IInventoryService
             StockQuantity = inventory.StockQuantity,
             StockThreshold = inventory.StockThreshold,
             StockPrice = inventory.StockPrice,
-            SupplierId = inventory.SupplierId
+            SupplierId = inventory.SupplierId,
+            InvoiceNumber = inventory.InvoiceNumber
         };
         try
         {
