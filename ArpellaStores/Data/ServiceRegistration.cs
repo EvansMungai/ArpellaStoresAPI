@@ -5,12 +5,12 @@ namespace ArpellaStores.Data;
 
 public static class ServiceRegistration
 {
-    public static void RegisterDataServices(this IServiceCollection serviceCollection, IConfiguration configuration)
+    public static void RegisterDataServices(this IServiceCollection serviceCollection)
     {
         var connectionString = Environment.GetEnvironmentVariable("ConnectionStrings__arpellaDB");
         serviceCollection.AddDbContext<ArpellaContext>(options =>
         {
-            options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
-        }, ServiceLifetime.Singleton);
+            options.UseMySql(connectionString, new MySqlServerVersion(new Version(8, 0, 35)));
+        });
     }
 }
