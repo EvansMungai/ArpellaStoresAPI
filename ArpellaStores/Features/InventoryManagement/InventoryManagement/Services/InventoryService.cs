@@ -44,7 +44,8 @@ public class InventoryService : IInventoryService
             StockQuantity = inventory.StockQuantity,
             StockThreshold = inventory.StockThreshold,
             StockPrice = inventory.StockPrice,
-            SupplierId = inventory.SupplierId
+            SupplierId = inventory.SupplierId,
+            InvoiceNumber = inventory.InvoiceNumber
         };
         try
         {
@@ -174,7 +175,8 @@ public class InventoryService : IInventoryService
                 StockQuantity = int.Parse(worksheet.Cells[row, 2].Text),
                 StockThreshold = int.Parse(worksheet.Cells[row, 3].Text),
                 StockPrice = decimal.Parse(worksheet.Cells[row, 4].Text),
-                SupplierId = int.Parse(worksheet.Cells[row, 5].Text)
+                SupplierId = int.Parse(worksheet.Cells[row, 5].Text),
+                InvoiceNumber = worksheet.Cells[row, 6].Text
             };
             inventories.Add(inventory);
         }

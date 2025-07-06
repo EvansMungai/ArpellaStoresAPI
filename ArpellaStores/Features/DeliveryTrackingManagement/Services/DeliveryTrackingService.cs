@@ -1,6 +1,5 @@
 ﻿using ArpellaStores.Data.Infrastructure;
 using ArpellaStores.Features.DeliveryTrackingManagement.Models;
-using ArpellaStores.Features.InventoryManagement.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace ArpellaStores.Features.DeliveryTrackingManagement.Services;
