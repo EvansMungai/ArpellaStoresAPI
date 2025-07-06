@@ -437,6 +437,18 @@ public partial class ArpellaContext : IdentityDbContext<User>
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")
                 .HasColumnType("timestamp")
                 .HasColumnName("updatedAt");
+            entity.HasOne(d => d.CategoryNavigation).WithMany(p => p.Products)
+                .HasForeignKey(d => d.Category)
+                .HasConstraintName("products_ibfk_1");
+
+            entity.HasOne(d => d.SubcategoryNavigation).WithMany(p => p.Products)
+                .HasForeignKey(d => d.Subcategory)
+                .HasConstraintName("products_ibfk_6");
+            entity.HasOne(d => d.IdNavigation)
+                  .WithMany(p => p.Products)
+                  .HasForeignKey(d => d.InventoryId)
+                  .HasPrincipalKey(p => p.ProductId)
+                  .HasConstraintName("products_ibfk_7");
         });
 
         modelBuilder.Entity<Productimage>(entity =>
