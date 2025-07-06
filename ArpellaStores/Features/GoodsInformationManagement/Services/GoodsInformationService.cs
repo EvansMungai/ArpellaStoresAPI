@@ -15,12 +15,12 @@ public class GoodsInformationService : IGoodsInformationService
     }
     public async Task<IResult> GetGoodsInformation()
     {
-        var goodsInfo = await _context.Goodsinfos.Select(g => new { g.ItemCode, g.ItemDescription, g.UnitMeasure, g.TaxRate }).AsNoTracking().ToListAsync();
+        var goodsInfo = await _context.Goodsinfos.Select(g => new { g.ItemCode, g.ItemDescription, g.UnitMeasure, g.TaxRate, g.ProductId }).AsNoTracking().ToListAsync();
         return goodsInfo == null || goodsInfo.Count == 0 ? Results.NotFound("No Goods info was found.") : Results.Ok(goodsInfo);
     }
     public async Task<IResult> GetGoodInformation(string itemCode)
     {
-        var goodsInfo = await _context.Goodsinfos.Where(g => g.ItemCode == itemCode).Select(g => new { g.ItemCode, g.ItemDescription, g.UnitMeasure, g.TaxRate }).AsNoTracking().SingleOrDefaultAsync();
+        var goodsInfo = await _context.Goodsinfos.Where(g => g.ItemCode == itemCode).Select(g => new { g.ItemCode, g.ItemDescription, g.UnitMeasure, g.TaxRate, g.ProductId }).AsNoTracking().SingleOrDefaultAsync();
         return goodsInfo == null ? Results.NotFound($"No Goods information for the item code={itemCode} was found") : Results.Ok(goodsInfo);
     }
     public async Task<IResult> CreateGoodsInformation(Goodsinfo goodsinfo)
@@ -40,7 +40,8 @@ public class GoodsInformationService : IGoodsInformationService
             ItemCode = goodsinfo.ItemCode,
             ItemDescription = goodsinfo.ItemDescription,
             UnitMeasure = goodsinfo.UnitMeasure,
-            TaxRate = goodsinfo.TaxRate
+            TaxRate = goodsinfo.TaxRate,
+            ProductId = goodsinfo.ProductId
         };
         try
         {
@@ -66,6 +67,7 @@ public class GoodsInformationService : IGoodsInformationService
             retrievedGoodsInfo.ItemDescription = update.ItemDescription;
             retrievedGoodsInfo.UnitMeasure = update.UnitMeasure;
             retrievedGoodsInfo.TaxRate = update.TaxRate;
+            retrievedGoodsInfo.ProductId = update.ProductId;
             try
             {
                 _context.Goodsinfos.Update(retrievedGoodsInfo);

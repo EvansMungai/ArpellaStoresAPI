@@ -215,6 +215,8 @@ public partial class ArpellaContext : IdentityDbContext<User>
 
             entity.ToTable("goodsinfo");
 
+            entity.HasIndex(e => e.ProductId, "productId");
+
             entity.Property(e => e.Id)
                 .ValueGeneratedNever()
                 .HasColumnName("id");
@@ -224,6 +226,9 @@ public partial class ArpellaContext : IdentityDbContext<User>
             entity.Property(e => e.ItemDescription)
                 .HasMaxLength(30)
                 .HasColumnName("itemDescription");
+            entity.Property(e => e.ProductId)
+                .HasMaxLength(30)
+                .HasColumnName("productId");
             entity.Property(e => e.TaxRate)
                 .HasPrecision(10, 2)
                 .HasColumnName("taxRate");
@@ -397,13 +402,11 @@ public partial class ArpellaContext : IdentityDbContext<User>
 
             entity.ToTable("products");
 
-            entity.HasIndex(e => e.InventoryId, "AK_products_inventoryId").IsUnique();
+            entity.HasIndex(e => e.InventoryId, "AK_products_inventoryId");
 
             entity.HasIndex(e => e.Category, "products_ibfk_1");
 
             entity.HasIndex(e => e.Subcategory, "subcategory");
-
-            entity.HasIndex(e => e.TaxCode, "taxCode");
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Barcodes)
@@ -429,27 +432,11 @@ public partial class ArpellaContext : IdentityDbContext<User>
                 .HasColumnName("price_after_discount");
             entity.Property(e => e.PurchaseCap).HasColumnName("purchaseCap");
             entity.Property(e => e.Subcategory).HasColumnName("subcategory");
-            entity.Property(e => e.TaxCode)
-                .HasMaxLength(30)
-                .HasColumnName("taxCode");
             entity.Property(e => e.UpdatedAt)
                 .ValueGeneratedOnAddOrUpdate()
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")
                 .HasColumnType("timestamp")
                 .HasColumnName("updatedAt");
-
-            entity.HasOne(d => d.CategoryNavigation).WithMany(p => p.Products)
-                .HasForeignKey(d => d.Category)
-                .HasConstraintName("products_ibfk_1");
-
-            entity.HasOne(d => d.SubcategoryNavigation).WithMany(p => p.Products)
-                .HasForeignKey(d => d.Subcategory)
-                .HasConstraintName("products_ibfk_6");
-            entity.HasOne(d => d.IdNavigation)
-                  .WithMany(p => p.Products)
-                  .HasForeignKey(d => d.InventoryId)
-                  .HasPrincipalKey(p => p.ProductId)
-                  .HasConstraintName("products_ibfk_7");
         });
 
         modelBuilder.Entity<Productimage>(entity =>
