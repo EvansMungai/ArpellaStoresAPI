@@ -38,8 +38,6 @@ public partial class Product
 
     public string? Barcodes { get; set; }
 
-    public string? TaxCode { get; set; }
-
     public virtual Category? CategoryNavigation { get; set; }
 
     public virtual ICollection<Flashsale> Flashsales { get; set; } = new List<Flashsale>();

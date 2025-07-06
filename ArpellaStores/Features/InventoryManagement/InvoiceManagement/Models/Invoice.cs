@@ -14,4 +14,5 @@ public partial class Invoice
 
     public virtual Supplier? Supplier { get; set; }
     public virtual ICollection<Restocklog> Restocklogs { get; set; } = new List<Restocklog>();
+    public virtual ICollection<Inventory> Inventories { get; set; } = new List<Inventory>();
 }

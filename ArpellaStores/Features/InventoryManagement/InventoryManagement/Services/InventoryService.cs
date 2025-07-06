@@ -17,19 +17,26 @@ public class InventoryService : IInventoryService
     }
     public async Task<IResult> GetInventories()
     {
-        var inventories = await _context.Inventories.Select(i => new { i.InventoryId, i.ProductId, i.StockQuantity, i.StockThreshold, i.StockPrice, i.SupplierId, i.CreatedAt, i.UpdatedAt }).ToListAsync();
+        var inventories = await _context.Inventories.Select(i => new { i.InventoryId, i.ProductId, i.StockQuantity, i.StockThreshold, i.StockPrice, i.SupplierId, i.CreatedAt, i.UpdatedAt }).AsNoTracking().ToListAsync();
         return inventories == null || inventories.Count == 0 ? Results.NotFound("No inventories found") : Results.Ok(inventories);
     }
     public async Task<IResult> GetInventory(string id)
     {
-        var inventory = await _context.Inventories.Where(i => i.ProductId == id).Select(i => new { i.InventoryId, i.ProductId, i.StockQuantity, i.StockThreshold, i.StockPrice, i.SupplierId, i.CreatedAt, i.UpdatedAt }).SingleOrDefaultAsync();
+        var inventory = await _context.Inventories.Where(i => i.ProductId == id).Select(i => new { i.InventoryId, i.ProductId, i.StockQuantity, i.StockThreshold, i.StockPrice, i.SupplierId, i.CreatedAt, i.UpdatedAt }).AsNoTracking().SingleOrDefaultAsync();
         return inventory == null ? Results.NotFound($"Inventory with ProductId = {id} was not found") : Results.Ok(inventory);
     }
     public async Task<IResult> CreateInventory(Inventory inventory)
     {
-        //var existing = _context.Inventories.FirstOrDefault(i => i.ProductId == inventory.ProductId);
-        //if (existing != null)
-        //    return Results.Conflict($"An inventory with ProductID = {inventory.ProductId} already exists.");
+        var local = _context.Inventories.Local.FirstOrDefault(i => i.ProductId == inventory.ProductId);
+
+        if (local != null)
+        {
+            _context.Entry(local).State = EntityState.Detached;
+        }
+
+        var existing = await _context.Inventories.AsNoTracking().SingleOrDefaultAsync(i => i.ProductId == inventory.ProductId);
+        if (existing != null)
+            return Results.Conflict($"An inventory with ProductID = {inventory.ProductId} already exists.");
 
         var newInventory = new Inventory
         {
@@ -37,7 +44,8 @@ public class InventoryService : IInventoryService
             StockQuantity = inventory.StockQuantity,
             StockThreshold = inventory.StockThreshold,
             StockPrice = inventory.StockPrice,
-            SupplierId = inventory.SupplierId
+            SupplierId = inventory.SupplierId,
+            InvoiceNumber = inventory.InvoiceNumber
         };
         try
         {
@@ -56,7 +64,7 @@ public class InventoryService : IInventoryService
         {
             if (file == null || file.Length == 0) return Results.BadRequest("File is empty");
             var inventory = file.FileName.EndsWith("csv") ? ParseCsv(file.OpenReadStream()) : ParseExcel(file.OpenReadStream());
-            if (inventory == null || !inventory.Any())
+            if (inventory == null || inventory.Count == 0)
             {
                 return Results.NotFound("No valid data found in the file");
             }
@@ -73,7 +81,12 @@ public class InventoryService : IInventoryService
     }
     public async Task<IResult> UpdateInventory(Inventory update, string id)
     {
-        Inventory? retrievedInventory = await _context.Inventories.SingleOrDefaultAsync(i => i.ProductId == id);
+        var local =  _context.Inventories.Local.FirstOrDefault(i => i.ProductId == id);
+
+        if (local != null)
+            _context.Entry(local).State = EntityState.Detached;
+
+        Inventory? retrievedInventory = await _context.Inventories.AsNoTracking().SingleOrDefaultAsync(i => i.ProductId == id);
         if (retrievedInventory != null)
         {
             retrievedInventory.StockQuantity = update.StockQuantity;
@@ -98,7 +111,14 @@ public class InventoryService : IInventoryService
     }
     public async Task<IResult> RemoveInventory(string id)
     {
-        Inventory? retrievedInventory = await _context.Inventories.SingleOrDefaultAsync(i => i.ProductId == id);
+        var local = _context.Inventories.Local.FirstOrDefault(i => i.ProductId == id);
+
+        if (local != null)
+        {
+            _context.Entry(local).State = EntityState.Detached;
+        }
+
+        Inventory? retrievedInventory = await _context.Inventories.AsNoTracking().SingleOrDefaultAsync(i => i.ProductId == id);
         if (retrievedInventory != null)
         {
             try
@@ -155,7 +175,8 @@ public class InventoryService : IInventoryService
                 StockQuantity = int.Parse(worksheet.Cells[row, 2].Text),
                 StockThreshold = int.Parse(worksheet.Cells[row, 3].Text),
                 StockPrice = decimal.Parse(worksheet.Cells[row, 4].Text),
-                SupplierId = int.Parse(worksheet.Cells[row, 5].Text)
+                SupplierId = int.Parse(worksheet.Cells[row, 5].Text),
+                InvoiceNumber = worksheet.Cells[row, 6].Text
             };
             inventories.Add(inventory);
         }
@@ -168,9 +189,9 @@ public class InventoryService : IInventoryService
     {
         var newRestockLog = new Restocklog
         {
-            LogId = restocklog.LogId,
             ProductId = restocklog.ProductId,
             RestockQuantity = restocklog.RestockQuantity,
+            RestockDate = DateTime.Now,
             SupplierId = restocklog.SupplierId,
             InvoiceNumber = restocklog.InvoiceNumber
         };

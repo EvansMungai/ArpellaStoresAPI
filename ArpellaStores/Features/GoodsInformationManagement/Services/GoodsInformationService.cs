@@ -1,5 +1,6 @@
 ﻿using ArpellaStores.Data.Infrastructure;
 using ArpellaStores.Features.GoodsInformationManagement.Models;
+using ArpellaStores.Features.InventoryManagement.Models;
 using Microsoft.EntityFrameworkCore;
 
 
@@ -14,16 +15,23 @@ public class GoodsInformationService : IGoodsInformationService
     }
     public async Task<IResult> GetGoodsInformation()
     {
-        var goodsInfo = await _context.Goodsinfos.Select(g => new { g.ItemCode, g.ItemDescription, g.UnitMeasure, g.TaxRate }).ToListAsync();
+        var goodsInfo = await _context.Goodsinfos.Select(g => new { g.ItemCode, g.ItemDescription, g.UnitMeasure, g.TaxRate, g.ProductId }).AsNoTracking().ToListAsync();
         return goodsInfo == null || goodsInfo.Count == 0 ? Results.NotFound("No Goods info was found.") : Results.Ok(goodsInfo);
     }
     public async Task<IResult> GetGoodInformation(string itemCode)
     {
-        var goodsInfo = await _context.Goodsinfos.Where(g => g.ItemCode == itemCode).Select(g => new { g.ItemCode, g.ItemDescription, g.UnitMeasure, g.TaxRate }).SingleOrDefaultAsync();
+        var goodsInfo = await _context.Goodsinfos.Where(g => g.ItemCode == itemCode).Select(g => new { g.ItemCode, g.ItemDescription, g.UnitMeasure, g.TaxRate, g.ProductId }).AsNoTracking().SingleOrDefaultAsync();
         return goodsInfo == null ? Results.NotFound($"No Goods information for the item code={itemCode} was found") : Results.Ok(goodsInfo);
     }
     public async Task<IResult> CreateGoodsInformation(Goodsinfo goodsinfo)
     {
+        var local = _context.Goodsinfos.Local.FirstOrDefault(g => g.Id == goodsinfo.Id);
+
+        if (local != null)
+        {
+            _context.Entry(local).State = EntityState.Detached;
+        }
+
         var existing = await _context.Goodsinfos.SingleOrDefaultAsync(g => g.ItemCode == goodsinfo.ItemCode);
         if (existing != null)
             return Results.Conflict($"Goods info with item code={goodsinfo.ItemCode} exists.");
@@ -32,7 +40,8 @@ public class GoodsInformationService : IGoodsInformationService
             ItemCode = goodsinfo.ItemCode,
             ItemDescription = goodsinfo.ItemDescription,
             UnitMeasure = goodsinfo.UnitMeasure,
-            TaxRate = goodsinfo.TaxRate
+            TaxRate = goodsinfo.TaxRate,
+            ProductId = goodsinfo.ProductId
         };
         try
         {
@@ -44,13 +53,21 @@ public class GoodsInformationService : IGoodsInformationService
     }
     public async Task<IResult> UpdateGoodsInfo(Goodsinfo update, string itemCode)
     {
+        var local = _context.Goodsinfos.Local.FirstOrDefault(g => g.Id == update.Id);
+
+        if (local != null)
+        {
+            _context.Entry(local).State = EntityState.Detached;
+        }
         Goodsinfo? retrievedGoodsInfo = await _context.Goodsinfos.SingleOrDefaultAsync(g => g.ItemCode == itemCode);
+
         if (retrievedGoodsInfo != null)
         {
             retrievedGoodsInfo.ItemCode = update.ItemCode;
             retrievedGoodsInfo.ItemDescription = update.ItemDescription;
             retrievedGoodsInfo.UnitMeasure = update.UnitMeasure;
             retrievedGoodsInfo.TaxRate = update.TaxRate;
+            retrievedGoodsInfo.ProductId = update.ProductId;
             try
             {
                 _context.Goodsinfos.Update(retrievedGoodsInfo);
@@ -66,7 +83,15 @@ public class GoodsInformationService : IGoodsInformationService
     }
     public async Task<IResult> RemoveGoodsInfo(string itemCode)
     {
+        var local = _context.Goodsinfos.Local.FirstOrDefault(g => g.ItemCode == itemCode);
+
+        if (local != null)
+        {
+            _context.Entry(local).State = EntityState.Detached;
+        }
+
         Goodsinfo? retrievedGoodsinfo = await  _context.Goodsinfos.SingleOrDefaultAsync(g => g.ItemCode == itemCode);
+
         if (retrievedGoodsinfo != null)
         {
             try

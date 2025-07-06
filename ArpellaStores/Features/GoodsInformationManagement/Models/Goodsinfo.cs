@@ -11,4 +11,5 @@ public partial class Goodsinfo
     public decimal? TaxRate { get; set; }
 
     public int Id { get; set; }
+    public string? ProductId { get; set; }
 }
