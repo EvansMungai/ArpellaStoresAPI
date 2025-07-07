@@ -44,20 +44,20 @@ public class LipaNaMpesaRequestModel
     /// The Debit party of the transaction/the party paying out in the transaction, hereby the phone number of the customer.
     /// </summary>
     [DataMember(Name = "PartyA")]
-    public long PartyA { get; set; }
+    public string PartyA { get; set; }
 
     /// <summary>
     /// The credit party of the transaction/the party being paid in the transaction,
     /// hereby being the shortcode of the organization. This is the same value as the Business Shortcode
     /// </summary>
     [DataMember(Name = "PartyB")]
-    public int PartyB { get; set; }
+    public string PartyB { get; set; }
 
     /// <summary>
     /// Same as PartyA.
     /// </summary>
     [DataMember(Name = "PhoneNumber")]
-    public long PhoneNumber { get; set; }
+    public string PhoneNumber { get; set; }
 
     /// <summary>
     /// This is the endpoint where you want the results of the transaction delivered. Same rules for Register URL API callbacks apply

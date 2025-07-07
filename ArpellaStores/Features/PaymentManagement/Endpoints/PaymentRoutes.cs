@@ -3,7 +3,9 @@ using ArpellaStores.Extensions.RouteHandlers;
 using ArpellaStores.Features.OrderManagement.Models;
 using ArpellaStores.Features.PaymentManagement.Models;
 using ArpellaStores.Features.PaymentManagement.Services;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using System.Text;
@@ -15,12 +17,14 @@ public class PaymentRoutes : IRouteRegistrar
     private readonly IMpesaApiService _mpesaApiService;
     private readonly MpesaConfig _mpesaConfig;
     private readonly ArpellaContext _context;
+    private readonly IMemoryCache _cache;
 
-    public PaymentRoutes(IMpesaApiService mpesaApiService, IOptions<MpesaConfig> mpesaConfig, ArpellaContext context)
+    public PaymentRoutes(IMpesaApiService mpesaApiService, IOptions<MpesaConfig> mpesaConfig, ArpellaContext context, IMemoryCache cache)
     {
         _mpesaApiService = mpesaApiService;
         _mpesaConfig = mpesaConfig.Value;
         _context = context;
+        _cache = cache;
     }
 
     public void RegisterRoutes(WebApplication app)
@@ -44,7 +48,7 @@ public class PaymentRoutes : IRouteRegistrar
             };
             return await handler.RegisterUrl(registerUri, requestModel);
         });
-        app.MapPost("/pay", async (LipaNaMpesaRequestModel request, string orderId) =>
+        app.MapPost("/pay", async (LipaNaMpesaRequestModel request, string orderId, [FromServices] ArpellaContext context) =>
         {
             var order = await _context.Orders.SingleOrDefaultAsync(o => o.Orderid == orderId);
             if (order == null) return Results.NotFound("Order not found");
@@ -52,9 +56,10 @@ public class PaymentRoutes : IRouteRegistrar
             var paymentResponse = await InitiateStkPush(request, orderId);
             return Results.Ok(new { message = "Payment Initiated!", response = paymentResponse });
         });
-        app.MapPost("/mpesa/callback", (LipaNaMpesaResponseModel callback) => ReceiveMpesaCallback(callback));
+        app.MapPost("/mpesa/callback", (MpesaCallbackModel callback) => ReceiveMpesaCallback(callback));
     }
 
+    #region Helpers
     private async Task<LipaNaMpesaResponseModel> InitiateStkPush(LipaNaMpesaRequestModel request, string orderId)
     {
         // **Fetch Order Details**
@@ -72,7 +77,7 @@ public class PaymentRoutes : IRouteRegistrar
             TransactionType = "CustomerBuyGoodsOnline",
             Amount = order.Total,
             PartyA = request.PhoneNumber,
-            PartyB = int.Parse(_mpesaConfig.BusinessShortCode),
+            PartyB = _mpesaConfig.BusinessShortCode,
             PhoneNumber = request.PhoneNumber,
             CallBackUrl = _mpesaConfig.CallbackUri,
             AccountReference = "ArpellaStores",
@@ -96,30 +101,84 @@ public class PaymentRoutes : IRouteRegistrar
         }
         return response;
     }
-    private async Task<IResult> ReceiveMpesaCallback(LipaNaMpesaResponseModel callbackData)
+    private async Task<IResult> ReceiveMpesaCallback(MpesaCallbackModel callback)
     {
-        Console.WriteLine($"Received M-Pesa Callback: {JsonConvert.SerializeObject(callbackData)}");
+        var stk = callback.Body?.stkCallback;
+        var metadata = stk?.CallbackMetadata?.Item;
 
-        // Validate Callback data
-        if (callbackData == null || string.IsNullOrEmpty(callbackData.CheckoutRequestID)) return Results.BadRequest("Invalid callback data");
+        if (stk == null || metadata == null)
+            return Results.BadRequest("Invalid callback structure.");
 
-        // Find payment record using CheckoutRequestId
-        var paymentRecord = await _context.Payments.SingleOrDefaultAsync(p => p.TransactionId ==  callbackData.CheckoutRequestID);
-        if (paymentRecord == null) Results.NotFound($"Payment record for Transaction ID {callbackData.CheckoutRequestID} not found");
+        var resultCode = stk.ResultCode;
+        var resultDesc = stk.ResultDesc;
+        var checkoutRequestId = stk.CheckoutRequestID;
+        var receipt = _mpesaApiService.GetValue(metadata, "MpesaReceiptNumber");
+        var phone = _mpesaApiService.GetValue(metadata, "PhoneNumber");
+        var amount = _mpesaApiService.GetValue(metadata, "Amount");
+        var transactionDesc = _mpesaApiService.GetValue(metadata, "TransactionDesc");
 
-        var order = await _context.Orders.SingleOrDefaultAsync(o => o.Orderid == paymentRecord.Orderid);
-        if (order == null) Results.NotFound($"Order with ID {paymentRecord.Orderid} not found");
+        string cacheKey = $"pending-order-{checkoutRequestId}";
 
-        // Check if payment was successfull
-        if(callbackData.ResponseCode == 0)
+        // 🟢 Successful payment (PIN entered, transaction completed)
+        if (resultCode == 0)
         {
-            order.Status = "Paid";
-            paymentRecord.Status = "Paid";
-            paymentRecord.TransactionId = callbackData.MpesaReceiptNumber;
-            await _context.SaveChangesAsync();
+            if (_cache.TryGetValue<Order>(cacheKey, out var cachedOrder))
+            {
+                cachedOrder.Status = "Paid";
+                _context.Orders.Add(cachedOrder);
 
-            return Results.Ok(new { message = "Payment successful", orderId = order.Orderid });
+                foreach (var item in cachedOrder.Orderitems)
+                {
+                    var orderItem = new Orderitem
+                    {
+                        OrderId = cachedOrder.Orderid,
+                        ProductId = item.ProductId,
+                        Quantity = item.Quantity
+                    };
+
+                    var productWithInventory = await _context.Products
+                        .Where(p => p.Id == orderItem.ProductId)
+                        .Join(_context.Inventories,
+                              product => product.InventoryId,
+                              inventory => inventory.ProductId,
+                              (product, inventory) => new
+                              {
+                                  Product = product,
+                                  Inventory = inventory
+                              })
+                        .SingleOrDefaultAsync();
+
+                    if (productWithInventory == null || productWithInventory.Inventory.StockQuantity < orderItem.Quantity)
+                        return Results.BadRequest($"Product issue with '{orderItem.ProductId}'.");
+
+                    productWithInventory.Inventory.StockQuantity -= orderItem.Quantity;
+                    _context.Orderitems.Add(orderItem);
+                    _context.Inventories.Update(productWithInventory.Inventory);
+                }
+
+                var payment = new Payment
+                {
+                    Orderid = cachedOrder.Orderid,
+                    Status = "Completed",
+                    TransactionId = receipt,
+                };
+                _context.Payments.Add(payment);
+
+                await _context.SaveChangesAsync();
+                _cache.Remove(cacheKey);
+                return Results.Ok("Payment received. Order saved successfully.");
+            }
+            else
+            {
+                return Results.BadRequest("No pending order found for this transaction.");
+            }
         }
-        return Results.BadRequest(new { message = "Payment failed", reason = callbackData.ResponseDescription });
+        else
+        {
+             // Payment failed or cancelled
+            _cache.Remove(cacheKey);
+            return Results.BadRequest($"Payment failed: {resultDesc}");
+        }
     }
+    #endregion
 }

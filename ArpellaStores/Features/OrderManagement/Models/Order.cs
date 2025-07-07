@@ -8,7 +8,7 @@ public partial class Order
     public string Orderid { get; set; } = null!;
 
     public string? UserId { get; set; }
-    public long PhoneNumber { get; set; }
+    public string PhoneNumber { get; set; }
 
     public string? Status { get; set; }
 

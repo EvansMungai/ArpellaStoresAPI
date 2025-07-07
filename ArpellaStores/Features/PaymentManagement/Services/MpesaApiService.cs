@@ -210,5 +210,9 @@ public class MpesaApiService : IMpesaApiService
         byte[] keySecretBytes = Encoding.UTF8.GetBytes(keySecret);
         return Convert.ToBase64String(keySecretBytes);
     }
+    public string GetValue(List<CallbackItem> items, string key)
+    {
+        return items?.FirstOrDefault(i => i.Name == key)?.Value?.ToString();
+    }
     #endregion
 }

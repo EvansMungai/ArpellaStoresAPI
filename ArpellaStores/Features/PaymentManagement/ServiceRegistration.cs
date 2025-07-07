@@ -11,6 +11,6 @@ public static class ServiceRegistration
         {
             c.BaseAddress = new Uri(environmentUri);
         });
-        serviceCollection.AddSingleton<IMpesaApiService, MpesaApiService>();
+        serviceCollection.AddScoped<IMpesaApiService, MpesaApiService>();
     }
 }

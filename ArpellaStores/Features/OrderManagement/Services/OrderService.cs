@@ -1,10 +1,11 @@
 ﻿using ArpellaStores.Data.Infrastructure;
-using ArpellaStores.Features.InventoryManagement.Models;
 using ArpellaStores.Features.OrderManagement.Models;
 using ArpellaStores.Features.PaymentManagement.Models;
 using ArpellaStores.Features.PaymentManagement.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
 using System.Text;
 
 namespace ArpellaStores.Features.OrderManagement.Services;
@@ -15,11 +16,13 @@ public class OrderService : IOrderService
     private readonly IMpesaApiService _mpesaApiService;
     private readonly MpesaConfig _mpesaConfig;
     private readonly ArpellaContext _context;
-    public OrderService(ArpellaContext context, IOptions<MpesaConfig> mpesaConfig, IMpesaApiService mpesaApiService)
+    private readonly IMemoryCache _cache;
+    public OrderService(ArpellaContext context, IOptions<MpesaConfig> mpesaConfig, IMpesaApiService mpesaApiService, IMemoryCache cache)
     {
         _context = context;
         _mpesaConfig = mpesaConfig.Value;
         _mpesaApiService = mpesaApiService;
+        _cache = cache;
     }
 
     public async Task<IResult> GetOrders()
@@ -100,54 +103,14 @@ public class OrderService : IOrderService
             BuyerPin = orderDetails.BuyerPin,
         };
 
-        try
-        {
-            await InitiateStkPush(order);
+        var stkResponse = await InitiateStkPush(order);
+        if (stkResponse == null || string.IsNullOrEmpty(stkResponse.CheckoutRequestID)) return Results.BadRequest("STK Push failed. Could not initiate payment");
 
-            _context.Orders.Add(order);
+        // Cache order for 4 minutes using CheckoutRequestID
+        string cacheKey = $"pending-order-{stkResponse.CheckoutRequestID}";
+        _cache.Set(cacheKey, order, TimeSpan.FromMinutes(4));
 
-            foreach (var item in orderDetails.Orderitems)
-            {
-                var orderItem = new Orderitem
-                {
-                    OrderId = order.Orderid,
-                    ProductId = item.ProductId,
-                    Quantity = item.Quantity
-                };
-                var productWithInventory = await _context.Products
-                        .Where(p => p.Id == orderItem.ProductId)
-                        .Join(_context.Inventories,
-                              product => product.InventoryId,
-                              inventory => inventory.ProductId,
-                              (product, inventory) => new
-                              {
-                                  Product = product,
-                                  Inventory = inventory
-                              })
-                        .SingleOrDefaultAsync();
-                if (productWithInventory == null)
-                {
-                    return Results.BadRequest($"Product with ID {orderItem.ProductId} not found in the inventory.");
-                }
-
-                if (productWithInventory.Inventory.StockQuantity < orderItem.Quantity)
-                {
-                    return Results.BadRequest($"Insufficient stock for product '{productWithInventory.Product.Name}'. Only {productWithInventory.Inventory.StockQuantity} left in stock.");
-                }
-
-                productWithInventory.Inventory.StockQuantity -= orderItem.Quantity;
-
-                _context.Orderitems.Add(orderItem);
-                _context.Inventories.Update(productWithInventory.Inventory);
-            }
-
-            await _context.SaveChangesAsync();
-            return Results.Ok(order);
-        }
-        catch (Exception ex)
-        {
-            return Results.BadRequest(ex.InnerException?.Message ?? ex.Message);
-        }
+        return Results.Accepted("STK Push sent. Awaiting payment.");
     }
 
     public async Task<IResult> RemoveOrder(string id)
@@ -158,7 +121,7 @@ public class OrderService : IOrderService
         {
             _context.Entry(local).State = EntityState.Detached;
         }
-        
+
         var order = await _context.Orders.Include(o => o.Orderitems).SingleOrDefaultAsync(o => o.Orderid == id);
 
         if (order == null)
@@ -214,28 +177,17 @@ public class OrderService : IOrderService
             TransactionType = "CustomerBuyGoodsOnline",
             Amount = order.Total,
             PartyA = order.PhoneNumber,
-            PartyB = int.Parse(_mpesaConfig.BusinessShortCode),
+            PartyB = _mpesaConfig.BusinessShortCode,
             PhoneNumber = order.PhoneNumber,
             CallBackUrl = _mpesaConfig.CallbackUri,
             AccountReference = "ArpellaStores",
-            TransactionDescription = $"Payment for Order {order.Orderid}"
+            TransactionDescription = $"{order.Orderid}"
         };
-
+        Console.WriteLine($"This is what i am sending: {JsonConvert.SerializeObject(requestPayload, Formatting.Indented)}");
         string stkPushUri = "https://api.safaricom.co.ke/mpesa/stkpush/v1/processrequest";
 
         var response = await this._mpesaApiService.LipaNaMpesa(stkPushUri, requestPayload);
 
-        if (response != null || !string.IsNullOrEmpty(response.MerchantRequestID))
-        {
-            var paymentRecord = new Payment
-            {
-                Orderid = order.Orderid,
-                Status = "Pending",
-                TransactionId = response.CheckoutRequestID
-            };
-            _context.Payments.Add(paymentRecord);
-            await _context.SaveChangesAsync();
-        }
         return response;
     }
     #endregion
