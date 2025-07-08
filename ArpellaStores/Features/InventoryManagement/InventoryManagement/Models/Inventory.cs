@@ -13,7 +13,7 @@ public partial class Inventory
     [Required(ErrorMessage = "Stock quantity is required.")]
     public int? StockQuantity { get; set; }
 
-    [Required(ErrorMessage = "Stoc threshold is required.")]
+    [Required(ErrorMessage = "Stock threshold is required.")]
     public int? StockThreshold { get; set; }
 
     [Required(ErrorMessage = "Stock price is required.")]
@@ -25,6 +25,9 @@ public partial class Inventory
 
     [Required(ErrorMessage = "Supplier Id is required")]
     public int? SupplierId { get; set; }
+
+    [Required(ErrorMessage = "Invoice Nummber is required.")]
+    [StringLength(30, ErrorMessage ="Invoice Number must be at most 30 characters.")]
     public string InvoiceNumber { get; set; } = null!;
     public virtual Supplier? Supplier { get; set; }
     public virtual Invoice InvoiceNumberNavigation { get; set; } = null!;

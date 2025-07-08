@@ -14,7 +14,7 @@ public partial class Order
 
     [Required(ErrorMessage = "Phone number is required.")]
     [StringLength(30, ErrorMessage = "Phone number must be at most 30 characters.")]
-    public string? PhoneNumber { get; set; }
+    public string PhoneNumber { get; set; }
 
     public string? Status { get; set; }
 
