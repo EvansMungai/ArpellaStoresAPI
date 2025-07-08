@@ -13,9 +13,15 @@ public class PaymentResultHelper : IPaymentResultHelper
     {
         string cacheKey = $"payment-result-{checkoutRequestId}";
 
-        if (_cache.TryGetValue(cacheKey, out var resultData))
+        if (_cache.TryGetValue<object>(cacheKey, out var resultData))
+        {
             return Results.Ok(resultData);
+        }
 
-        return Results.Ok(new { Status = "Pending" });
+        return Results.Ok(new
+        {
+            Status = "Pending",
+            Message = "Payment is still being processed or has expired."
+        });
     }
 }
