@@ -30,8 +30,6 @@ public class OrderService : IOrderService
             return Results.BadRequest("STK Push failed");
 
         _cache.CacheOrder($"pending-order-{stk.CheckoutRequestID}", order, TimeSpan.FromMinutes(4));
-
-        await _repo.AddOrderAsync(order);
         return Results.Accepted("STK push sent. Awaiting Payment");
     }
 
