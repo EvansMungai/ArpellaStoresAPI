@@ -30,6 +30,12 @@ public class MpesaCallbackHandler : IMpesaCallbackHandler
         if (stk.ResultCode != 0)
         {
             _cache.Remove($"pending-order-{stk.CheckoutRequestID}");
+            _cache.Set($"payment-result-{stk.CheckoutRequestID}", new
+            {
+                Status = "Failed",
+                Description = stk.ResultDesc
+            }, TimeSpan.FromMinutes(4));
+
             return Results.BadRequest($"Payment failed: {stk.ResultDesc}");
         }
 
@@ -43,10 +49,22 @@ public class MpesaCallbackHandler : IMpesaCallbackHandler
         {
             await _repo.FinalizeOrderAsync(cachedOrder, transactionId);
             _cache.Remove(cacheKey);
+            _cache.Set($"payment-result-{stk.CheckoutRequestID}", new
+            {
+                Status = "Success",
+                Description = stk.ResultDesc,
+                OrderId = cachedOrder.Orderid
+            }, TimeSpan.FromMinutes(4));
+
             return Results.Ok("Order successfully recorded after confirmed payment.");
         }
         catch (Exception ex)
         {
+            _cache.Set($"payment-result-{stk.CheckoutRequestID}", new
+            {
+                Status = "Error",
+                Message = ex.Message
+            }, TimeSpan.FromMinutes(4));
             return Results.BadRequest($"Persistence error: {ex.Message}");
         }
     }

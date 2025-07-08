@@ -13,5 +13,6 @@ public static class ServiceRegistration
         });
         serviceCollection.AddScoped<IMpesaApiService, MpesaApiService>();
         serviceCollection.AddScoped<IMpesaCallbackHandler, MpesaCallbackHandler>();
+        serviceCollection.AddScoped<IPaymentResultHelper, PaymentResultHelper>();
     }
 }
