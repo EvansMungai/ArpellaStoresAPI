@@ -4,6 +4,7 @@ using ArpellaStores.Features.FinalPriceManagement.Models;
 using ArpellaStores.Features.GoodsInformationManagement.Models;
 using ArpellaStores.Features.InventoryManagement.Models;
 using ArpellaStores.Features.OrderManagement.Models;
+using ArpellaStores.Features.SettingManagement.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -41,6 +42,7 @@ public partial class ArpellaContext : IdentityDbContext<User>
     public virtual DbSet<Product> Products { get; set; }
     public virtual DbSet<Productimage> Productimages { get; set; }
     public virtual DbSet<Restocklog> Restocklogs { get; set; }
+    public virtual DbSet<Setting> Settings { get; set; }
     public virtual DbSet<Subcategory> Subcategories { get; set; }
     public virtual DbSet<Supplier> Suppliers { get; set; }
 
@@ -518,6 +520,21 @@ public partial class ArpellaContext : IdentityDbContext<User>
             entity.HasOne(d => d.Supplier).WithMany(p => p.Restocklogs)
                 .HasForeignKey(d => d.SupplierId)
                 .HasConstraintName("restocklog_ibfk_2");
+        });
+
+        modelBuilder.Entity<Setting>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PRIMARY");
+
+            entity.ToTable("settings");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.SettingName)
+                .HasMaxLength(30)
+                .HasColumnName("settingName");
+            entity.Property(e => e.SettingValue)
+                .HasMaxLength(50)
+                .HasColumnName("settingValue");
         });
 
         modelBuilder.Entity<Subcategory>(entity =>
