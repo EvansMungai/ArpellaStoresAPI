@@ -42,13 +42,21 @@ public class OrderRepository : IOrderRepository
     public decimal CalculateTotalOrderCost(Order order)
     {
         decimal totalCost = 0;
-        foreach(var item in order.Orderitems)
+        foreach (var item in order.Orderitems)
         {
             var product = _context.Products.SingleOrDefault(p => p.Id == item.ProductId);
             if (product is not null)
             {
-                decimal price = product.PriceAfterDiscount ?? product.Price;
-                totalCost += (decimal)item.Quantity * price;
+                if (item.Quantity > product.DiscountQuantity)
+                {
+                    decimal price = (decimal)product.PriceAfterDiscount;
+                    totalCost += (decimal)item.Quantity * price;
+                }
+                else
+                {
+                    decimal price = product.Price;
+                    totalCost += (decimal)item.Quantity * price;
+                }
             }
         }
         return totalCost;
