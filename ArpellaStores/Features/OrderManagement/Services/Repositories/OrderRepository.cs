@@ -39,9 +39,20 @@ public class OrderRepository : IOrderRepository
         _context.Orders.Remove(order);
         await _context.SaveChangesAsync();
     }
-    public decimal CalculateTotalOrderCost(Order order)
+    public async Task<decimal> CalculateTotalOrderCost(Order order)
     {
         decimal totalCost = 0;
+
+        // Retrieve and parse delivery fee
+        var deliverySetting = await _context.Settings
+            .SingleOrDefaultAsync(s => s.SettingName == "Delivery Fee");
+
+        decimal deliveryfee = 0;
+        if (deliverySetting != null && decimal.TryParse(deliverySetting.SettingValue, out var fee))
+        {
+            deliveryfee = fee;
+        }
+
         foreach (var item in order.Orderitems)
         {
             var product = _context.Products.SingleOrDefault(p => p.Id == item.ProductId);
@@ -57,6 +68,7 @@ public class OrderRepository : IOrderRepository
                     decimal price = product.Price;
                     totalCost += (decimal)item.Quantity * price;
                 }
+                totalCost += (decimal)deliveryfee;
             }
         }
         return totalCost;

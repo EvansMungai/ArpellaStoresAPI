@@ -1,9 +1,7 @@
 ﻿using ArpellaStores.Features.OrderManagement.Models;
 using ArpellaStores.Features.PaymentManagement.Models;
 using ArpellaStores.Features.PaymentManagement.Services;
-using CloudinaryDotNet;
 using Microsoft.Extensions.Options;
-using Newtonsoft.Json;
 using System.Text;
 
 namespace ArpellaStores.Features.OrderManagement.Services;
