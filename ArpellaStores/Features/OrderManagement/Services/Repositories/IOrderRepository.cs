@@ -9,6 +9,6 @@ public interface IOrderRepository
     Task<bool> ExistsAsync(string orderId);
     Task AddOrderAsync(Order order);
     Task RemoveOrderAsync(string id);
-    decimal CalculateTotalOrderCost(Order order);
+    Task<decimal> CalculateTotalOrderCost(Order order);
     Task FinalizeOrderAsync(Order order, string transactionId);
 }

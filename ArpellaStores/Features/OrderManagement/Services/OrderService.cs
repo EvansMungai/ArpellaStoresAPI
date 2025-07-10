@@ -22,7 +22,7 @@ public class OrderService : IOrderService
         if (await _repo.ExistsAsync(orderDetails.Orderid))
             return Results.Conflict($"OrderID {orderDetails.Orderid} already exists");
 
-        var total = _repo.CalculateTotalOrderCost(orderDetails);
+        var total = await _repo.CalculateTotalOrderCost(orderDetails);
         var order = _helper.BuildNewOrder(orderDetails, total);
 
         var stk = await _payment.InitiateStkPushAsync(order);
