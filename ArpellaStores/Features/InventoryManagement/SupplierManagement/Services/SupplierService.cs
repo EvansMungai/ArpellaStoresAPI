@@ -93,7 +93,7 @@ public class SupplierService : ISupplierService
         {
             try
             {
-                _context.Suppliers.Update(retrievedSupplier);
+                _context.Suppliers.Remove(retrievedSupplier);
                 await _context.SaveChangesAsync();
                 return Results.Ok(retrievedSupplier);
             }
