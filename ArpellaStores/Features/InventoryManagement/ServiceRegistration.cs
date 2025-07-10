@@ -6,7 +6,9 @@ public static class ServiceRegistration
     {
         serviceCollection.AddScoped<ICloudinaryService, CloudinaryService>();
         serviceCollection.AddScoped<ICategoriesService, CategoriesService>();
+        serviceCollection.AddScoped<ICategoryRepository, CategoryRepository>();
         serviceCollection.AddScoped<ISubcategoriesServices, SubcategoriesService>();
+        serviceCollection.AddScoped<ISubcategoryRepository, SubcategoryRepository>();
         serviceCollection.AddScoped<IInventoryService, InventoryService>();
         serviceCollection.AddScoped<IInvoiceService, InvoiceService>();
         serviceCollection.AddScoped<IProductsService, ProductsService>();
