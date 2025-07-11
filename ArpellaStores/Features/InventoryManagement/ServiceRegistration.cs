@@ -11,6 +11,7 @@ public static class ServiceRegistration
         serviceCollection.AddScoped<ISubcategoryRepository, SubcategoryRepository>();
         serviceCollection.AddScoped<IInventoryService, InventoryService>();
         serviceCollection.AddScoped<IInvoiceService, InvoiceService>();
+        serviceCollection.AddScoped<IInvoiceRepository, InvoiceRepository>();
         serviceCollection.AddScoped<IProductsService, ProductsService>();
         serviceCollection.AddScoped<ISupplierService, SupplierService>();
     }
