@@ -14,5 +14,6 @@ public static class ServiceRegistration
         serviceCollection.AddScoped<IInvoiceRepository, InvoiceRepository>();
         serviceCollection.AddScoped<IProductsService, ProductsService>();
         serviceCollection.AddScoped<ISupplierService, SupplierService>();
+        serviceCollection.AddScoped<ISupplierRepository, SupplierRepository>();
     }
 }
