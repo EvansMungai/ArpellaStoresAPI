@@ -17,6 +17,6 @@ public class SupplierRoutes : IRouteRegistrar
         app.MapGet("/supplier/{id}", (SupplierHandler handler,int id) => handler.GetSupplier(id)).Produces(200).Produces(404).Produces<Supplier>();
         app.MapPost("/supplier", (SupplierHandler handler, Supplier supplier) => handler.CreateSupplier(supplier)).Produces<Supplier>().AddEndpointFilter<ValidationEndpointFilter<Supplier>>();
         app.MapPut("/supplier/{id}", (SupplierHandler handler, Supplier supplier, int id) => handler.EditSupplierDetails(supplier, id)).Produces<Supplier>().AddEndpointFilter<ValidationEndpointFilter<Supplier>>();
-        app.MapDelete("/supplier/{id}", (SupplierHandler handler, int id) => handler.RemoveSupplier(id)).Produces(200).Produces(404).Produces<Supplier>();
+        app.MapDelete("/supplier/{id}", (SupplierHandler handler, int id) => handler.RemoveSupplier(id)).Produces(204).Produces(404).Produces<Supplier>();
     }
 }
