@@ -7,8 +7,8 @@ services:
     env_file:
       .env
     volumes:
-      - /root/cloudflare.pfx:/https/cloudflare.pfx:ro
-      - /root/ca.pem:/certs/ca.pem:ro
+      - /arpella-stores/certificates/cloudflare.pfx:/https/cloudflare.pfx:ro
+      - /arpella-stores/certificates/ca.pem:/certs/ca.pem:ro
     environment:
         - ASPNETCORE_ENVIRONMENT=Production
         - HTTPS_PFX_PATH=/etc/ssl/private/arpella1.pfx
