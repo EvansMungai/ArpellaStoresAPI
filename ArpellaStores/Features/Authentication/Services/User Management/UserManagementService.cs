@@ -1,5 +1,6 @@
 ﻿using ArpellaStores.Data.Infrastructure;
 using ArpellaStores.Features.Authentication.Models;
+using CloudinaryDotNet.Actions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -103,17 +104,17 @@ public class UserManagementService : IUserManagementService
         User retrievedUser = await _userManager.FindByNameAsync(number);
         if (retrievedUser == null)
             return Results.NotFound($"User with Username = {number} was not found");
+
         retrievedUser.FirstName = model.FirstName;
         retrievedUser.LastName = model.LastName;
-        retrievedUser.PhoneNumber = model.PhoneNumber;
-        retrievedUser.UserName = model.PhoneNumber;
         retrievedUser.Email = model.Email;
-        retrievedUser.PasswordHash = model.PasswordHash;
         
         var result = await _userManager.UpdateAsync(retrievedUser);
         if (!result.Succeeded)
             return Results.BadRequest(result.Errors);
-        return Results.Ok(retrievedUser);
+
+        var user = await GetUser(number);
+        return Results.Ok(user);
     }
     public async Task<IResult> RemoveUser(string number)
     {
