@@ -1,6 +1,5 @@
 ﻿using ArpellaStores.Data.Infrastructure;
 using ArpellaStores.Features.Authentication.Models;
-using CloudinaryDotNet.Actions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -140,8 +139,22 @@ public class UserManagementService : IUserManagementService
         {
             return Results.BadRequest("Exception: " + ex.InnerException?.Message);
         }
+    }
 
+    public async Task<IResult> ChangeUserPassword(ChangePasswordModel model, HttpContext context)
+    {
+        var userId = _userManager.GetUserId(context.User);
+        var user = await _userManager.FindByIdAsync(userId);
 
+        if (user == null) return Results.Unauthorized();
+
+        var result = await _userManager.ChangePasswordAsync(user, model.CurrentPassword, model.NewPassword);
+        if (result.Succeeded) {
+            await _userManager.UpdateSecurityStampAsync(user);
+            return Results.Ok("Password changed successfully");
+        }
+
+        return Results.BadRequest(result.Errors.Select(e => e.Description));
     }
     #endregion
 

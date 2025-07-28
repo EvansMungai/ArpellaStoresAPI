@@ -17,4 +17,5 @@ public interface IUserManagementService
     Task<IdentityResult> CreateRole(string role);
     Task<IResult> EditRole(string role, string newRoleName);
     Task<IdentityResult> RemoveRole(string roleName);
+    Task<IResult> ChangeUserPassword(ChangePasswordModel model, HttpContext context);
 }
