@@ -22,4 +22,7 @@ public partial class Restocklog
     public string? InvoiceNumber { get; set; }
     public virtual Invoice? InvoiceNumberNavigation { get; set; }
     public virtual Supplier? Supplier { get; set; }
+
+    [Required(ErrorMessage = "Purchase Price is required.")]
+    public decimal? PurchasePrice { get; set; }
 }
