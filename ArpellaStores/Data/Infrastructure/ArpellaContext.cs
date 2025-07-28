@@ -506,6 +506,9 @@ public partial class ArpellaContext : IdentityDbContext<User>
             entity.Property(e => e.ProductId)
                 .HasMaxLength(30)
                 .HasColumnName("productId");
+            entity.Property(e => e.PurchasePrice)
+                .HasPrecision(10, 2)
+                .HasColumnName("purchasePrice");
             entity.Property(e => e.RestockDate)
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")
                 .HasColumnType("timestamp")

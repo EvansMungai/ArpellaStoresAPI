@@ -59,8 +59,18 @@ public class InventoryRepository : IInventoryRepository
         if (inventory == null) return;
 
         inventory.StockQuantity += restocklog.RestockQuantity;
+
+        if (restocklog.PurchasePrice.HasValue)
+        {
+            inventory.StockPrice = restocklog.PurchasePrice.Value;
+        }
+
+        inventory.SupplierId = restocklog.SupplierId;
+        inventory.InvoiceNumber = restocklog.InvoiceNumber;
+        inventory.UpdatedAt = DateTime.Now;
+
         _context.Restocklogs.Add(restocklog);
-        _context.SaveChangesAsync();
+        await _context.SaveChangesAsync();
     }
 
     public async Task UpdateInventoryDetails(Inventory inventory, string id)
