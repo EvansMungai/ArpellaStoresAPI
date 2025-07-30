@@ -5,7 +5,7 @@ namespace ArpellaStores.Features.InventoryManagement.Services;
 public interface IProductImageRepository
 {
     Task<List<Productimage>> GetProductImageDetailsAsync();
-    Task<List<Productimage>> GetProductImageUrlAsync(string productId);
+    Task<List<Productimage>> GetProductImageUrlAsync(int productId);
     Task<Productimage?> GetProductImageObjectById(int id);
     Task AddProductImageDetails(Productimage productimage);
     Task RemoveProductImage(int id);
