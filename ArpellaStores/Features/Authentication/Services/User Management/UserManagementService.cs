@@ -103,17 +103,17 @@ public class UserManagementService : IUserManagementService
         User retrievedUser = await _userManager.FindByNameAsync(number);
         if (retrievedUser == null)
             return Results.NotFound($"User with Username = {number} was not found");
+
         retrievedUser.FirstName = model.FirstName;
         retrievedUser.LastName = model.LastName;
-        retrievedUser.PhoneNumber = model.PhoneNumber;
-        retrievedUser.UserName = model.PhoneNumber;
         retrievedUser.Email = model.Email;
-        retrievedUser.PasswordHash = model.PasswordHash;
         
         var result = await _userManager.UpdateAsync(retrievedUser);
         if (!result.Succeeded)
             return Results.BadRequest(result.Errors);
-        return Results.Ok(retrievedUser);
+
+        var user = await GetUser(number);
+        return Results.Ok(user);
     }
     public async Task<IResult> RemoveUser(string number)
     {
@@ -139,8 +139,22 @@ public class UserManagementService : IUserManagementService
         {
             return Results.BadRequest("Exception: " + ex.InnerException?.Message);
         }
+    }
 
+    public async Task<IResult> ChangeUserPassword(ChangePasswordModel model, HttpContext context)
+    {
+        var userId = _userManager.GetUserId(context.User);
+        var user = await _userManager.FindByIdAsync(userId);
 
+        if (user == null) return Results.Unauthorized();
+
+        var result = await _userManager.ChangePasswordAsync(user, model.CurrentPassword, model.NewPassword);
+        if (result.Succeeded) {
+            await _userManager.UpdateSecurityStampAsync(user);
+            return Results.Ok("Password changed successfully");
+        }
+
+        return Results.BadRequest(result.Errors.Select(e => e.Description));
     }
     #endregion
 

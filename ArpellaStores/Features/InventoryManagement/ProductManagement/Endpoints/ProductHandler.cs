@@ -28,7 +28,7 @@ public class ProductHandler : IHandler
     #region Product Images Handlers
     public Task<string> GetProductImageUrl(IFormFile file) => _productImageService.GetProductImageUrl(file);
     public Task<IResult> GetProductImageDetails() => _productImageService.GetProductImageDetails();
-    public Task<IResult> GetProductImageUrl(string productId) => _productImageService.GetProductImageUrl(productId);
+    public Task<IResult> GetProductImageUrl(int productId) => _productImageService.GetProductImageUrl(productId);
     public Task<IResult> CreateProductImageDetails(HttpRequest request) => _productImageService.CreateProductImagesDetails(request);
     public Task<IResult> DeleteProductImageDetails(int id) => _productImageService.DeleteProductImagesDetails(id);
     #endregion

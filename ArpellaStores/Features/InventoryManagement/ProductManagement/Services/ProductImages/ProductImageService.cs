@@ -17,13 +17,13 @@ public class ProductImageService : IProductImageService
     {
         var form = await request.ReadFormAsync();
 
-        //if (!int.TryParse(form["ProductId"], out int productId))
-        //{
-        //    return Results.BadRequest("Invalid or missing ProductId.");
-        //}
-        var productId = form["ProductId"].ToString();
-        if (string.IsNullOrEmpty(productId))
+        if (!int.TryParse(form["ProductId"], out int productId))
+        {
             return Results.BadRequest("Invalid or missing ProductId.");
+        }
+        //var productId = form["ProductId"].ToString();
+        //if (string.IsNullOrEmpty(productId))
+        //    return Results.BadRequest("Invalid or missing ProductId.");
 
         bool isPrimary = false;
         if (bool.TryParse(form["IsPrimary"], out bool parsedIsPrimary))
@@ -72,7 +72,7 @@ public class ProductImageService : IProductImageService
         return productImageDetails == null || productImageDetails.Count == 0 ? Results.NotFound("No Product Image Details Found") : Results.Ok(productImageDetails);
     }
 
-    public async Task<IResult> GetProductImageUrl(string productId)
+    public async Task<IResult> GetProductImageUrl(int productId)
     {
         var imageUrl = await _repo.GetProductImageUrlAsync(productId);
         return imageUrl == null ? Results.NotFound($"No image with productId = {productId} was found") : Results.Ok(imageUrl);

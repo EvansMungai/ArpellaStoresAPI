@@ -28,7 +28,7 @@ public class ProductImageRepository : IProductImageRepository
         return await _context.Productimages.FindAsync(id);
     }
 
-    public async Task<List<Productimage>> GetProductImageUrlAsync(string productId)
+    public async Task<List<Productimage>> GetProductImageUrlAsync(int productId)
     {
         return await _context.Productimages.AsNoTracking().Where(i => i.ProductId == productId).ToListAsync();
     }

@@ -3,7 +3,7 @@
 public interface IProductImageService
 {
     Task<IResult> GetProductImageDetails();
-    Task<IResult> GetProductImageUrl(string productId);
+    Task<IResult> GetProductImageUrl(int productId);
     Task<IResult> CreateProductImagesDetails(HttpRequest request);
     Task<IResult> DeleteProductImagesDetails(int id);
     Task<string> GetProductImageUrl(IFormFile formFile);

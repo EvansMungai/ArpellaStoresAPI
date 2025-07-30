@@ -24,7 +24,7 @@ public class ProductRoutes : IRouteRegistrar
     public void MapProductImagesRoutes(WebApplication webApplication) {
         var app = webApplication.MapGroup("").WithTags("Product Images");
         app.MapGet("/product-image-details", (ProductHandler handler) => handler.GetProductImageDetails());
-        app.MapGet("/product-image/{id}", (ProductHandler handler, string id) => handler.GetProductImageUrl(id));
+        app.MapGet("/product-image/{id}", (ProductHandler handler, int id) => handler.GetProductImageUrl(id));
         app.MapPost("/product-image-details", (ProductHandler handler, HttpRequest request) => handler.CreateProductImageDetails(request));
         app.MapDelete("/product-image-details/{id}", (ProductHandler handler, int id) => handler.DeleteProductImageDetails(id)).Produces(200).Produces(404);
     }
