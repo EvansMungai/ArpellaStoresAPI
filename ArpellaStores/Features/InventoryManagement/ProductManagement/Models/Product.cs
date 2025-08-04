@@ -22,7 +22,6 @@ public partial class Product
     [Required(ErrorMessage = "Category Id is required.")]
     public int? Category { get; set; }
 
-    [Required(ErrorMessage = "Purchase cap is required.")]
     public int? PurchaseCap { get; set; }
 
     [Required(ErrorMessage ="Product price after discount is required.")]
