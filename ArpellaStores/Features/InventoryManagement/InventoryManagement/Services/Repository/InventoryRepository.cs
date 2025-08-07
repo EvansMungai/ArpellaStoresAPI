@@ -12,10 +12,13 @@ public class InventoryRepository : IInventoryRepository
         _context = context;
     }
 
-    public async Task AddInventoriesAsync(List<Inventory> inventory)
+    public async Task<int> AddInventoriesAsync(List<Inventory> inventory)
     {
-        _context.Inventories.AddRangeAsync(inventory);
-        await _context.SaveChangesAsync();
+        foreach (var batch in inventory.Chunk(500))
+        {
+            _context.Inventories.AddRangeAsync(batch);
+        }
+        return await _context.SaveChangesAsync();
     }
 
     public async Task AddInventoryAsync(Inventory inventory)
