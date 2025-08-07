@@ -1,8 +1,4 @@
 ﻿using ArpellaStores.Features.InventoryManagement.Models;
-using CsvHelper;
-using CsvHelper.Configuration;
-using OfficeOpenXml;
-using System.Globalization;
 
 namespace ArpellaStores.Features.InventoryManagement.Services;
 
@@ -54,21 +50,31 @@ public class InventoryService : IInventoryService
     {
         try
         {
-            if (file == null || file.Length == 0) return Results.BadRequest("File is empty");
-            var inventory = file.FileName.EndsWith("csv") ?  _helper.ParseCsv(file.OpenReadStream()) : _helper.ParseExcel(file.OpenReadStream());
-            if (inventory == null || inventory.Count == 0)
+            if (file == null || file.Length == 0)
+                return Results.BadRequest("File is empty.");
+
+            using var stream = file.OpenReadStream();
+            // Parse and validate
+            var (inventories, errors) = _helper.ParseExcel(stream);
+
+            // Insert only valid records
+            int insertedCount = 0;
+            if (inventories.Any())
+                insertedCount = await _repo.AddInventoriesAsync(inventories);
+
+            // Return response
+            return Results.Ok(new
             {
-                return Results.NotFound("No valid data found in the file");
-            }
-
-            await _repo.AddInventoriesAsync(inventory);
-            return Results.Ok(inventory);
-
+                message = insertedCount > 0
+                    ? errors.Any()
+                        ? "Upload completed with some validation errors."
+                        : "Upload completed successfully."
+                    : "Upload failed. No valid records were inserted.",
+                insertedRecords = insertedCount,
+                errors = errors
+            });
         }
-        catch (Exception ex)
-        {
-            return Results.BadRequest(ex.InnerException?.Message ?? ex.Message);
-        }
+        catch (Exception ex) { return Results.BadRequest(ex.InnerException?.Message ?? ex.Message); }
     }
     public async Task<IResult> UpdateInventory(Inventory update, string id)
     {

@@ -20,8 +20,11 @@ public class ProductRepository : IProductRepository
 
     public async Task AddProductsAsync(List<Product> products)
     {
-        _context.Products.AddRangeAsync(products);
-        await _context.SaveChangesAsync();
+        foreach (var batch in products.Chunk(500))
+        {
+            _context.Products.AddRangeAsync(batch);
+            await _context.SaveChangesAsync();
+        }
     }
 
     public async Task<List<Product>> GetAllProductsAsync()

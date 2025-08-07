@@ -56,19 +56,34 @@ public class ProductsService : IProductsService
     {
         try
         {
-            if (file == null || file.Length == 0) return Results.BadRequest("File is empty");
-            var isCsv = file.ContentType == "text/csv" || file.FileName.EndsWith(".csv", StringComparison.OrdinalIgnoreCase);
+            if (file == null || file.Length == 0)
+                return Results.BadRequest("File is empty");
 
             using var stream = file.OpenReadStream();
-            var products = isCsv ? _helper.ParseCsv(stream) : _helper.ParseExcel(stream);
-            if (products == null || products.Count == 0) return Results.NotFound("No valid data found in the file");
+            var (products, validationErrors) = _helper.ParseExcel(stream);
 
-            await _repo.AddProductsAsync(products);
-            return Results.Ok(products);
+            var result = new ProductUploadResult
+            {
+                ValidProducts = products,
+                ValidationErrors = validationErrors
+            };
 
+            if (products.Any())
+                await _repo.AddProductsAsync(products);
+
+            return Results.Ok(new
+            {
+                message = products.Any()
+                    ? "Upload completed with some validation errors."
+                    : "Upload failed. No valid records were inserted.",
+                insertedRecords = result.InsertedCount,
+                errors = result.ValidationErrors
+            });
         }
         catch (Exception ex) { return Results.BadRequest(ex.InnerException?.Message ?? ex.Message); }
     }
+
+
     public async Task<IResult> UpdateProductDetails(Product product, int id)
     {
         var retrievedProduct = await _repo.GetProductByIdAsync(id);

@@ -229,7 +229,7 @@ public partial class ArpellaContext : IdentityDbContext<User>
                 .HasMaxLength(30)
                 .HasColumnName("itemDescription");
             entity.Property(e => e.ProductId)
-                .HasMaxLength(30)
+                .HasMaxLength(150)
                 .HasColumnName("productId");
             entity.Property(e => e.TaxRate)
                 .HasPrecision(10, 2)
@@ -247,7 +247,9 @@ public partial class ArpellaContext : IdentityDbContext<User>
 
             entity.HasIndex(e => e.InvoiceNumber, "invoiceNumber");
 
-            entity.HasIndex(e => e.ProductId, "product_id");
+            entity.HasIndex(e => e.ProductId)
+                .IsUnique()
+                .HasDatabaseName("unique_product_id");
 
             entity.HasIndex(e => e.SupplierId, "supplierId");
 
@@ -421,10 +423,10 @@ public partial class ArpellaContext : IdentityDbContext<User>
                 .HasColumnName("createdAt");
             entity.Property(e => e.DiscountQuantity).HasColumnName("discount_quantity");
             entity.Property(e => e.InventoryId)
-                .HasMaxLength(30)
+                .HasMaxLength(150)
                 .HasColumnName("inventoryId");
             entity.Property(e => e.Name)
-                .HasMaxLength(50)
+                .HasMaxLength(255)
                 .HasColumnName("name");
             entity.Property(e => e.Price)
                 .HasPrecision(10, 2)
