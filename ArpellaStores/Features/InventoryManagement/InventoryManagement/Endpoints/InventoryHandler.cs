@@ -15,6 +15,7 @@ public class InventoryHandler : IHandler
     }
 
     public Task<IResult> GetInventories() => _inventoryService.GetInventories();
+    public Task<IResult> GetPagedInventories(int pageNumber, int pageSize) => _inventoryService.GetPagedInventories(pageNumber, pageSize);
     public Task<IResult> GetInventory(string id) => _inventoryService.GetInventory(id);
     public Task<IResult> CreateInventory(Inventory inventory) => _inventoryService.CreateInventory(inventory);
     public Task<IResult> CreateInventories(IFormFile file) => _inventoryService.CreateInventories(file);

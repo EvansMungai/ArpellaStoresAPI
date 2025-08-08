@@ -19,7 +19,7 @@ public class InventoryRepository : IInventoryRepository
             _context.Inventories.AddRangeAsync(batch);
         }
         return await _context.SaveChangesAsync();
-    }
+    } 
 
     public async Task AddInventoryAsync(Inventory inventory)
     {
@@ -35,6 +35,13 @@ public class InventoryRepository : IInventoryRepository
     public async Task<List<Inventory>> GetAllInventoriesAsync()
     {
         return await _context.Inventories.Select(i => new Inventory { InventoryId = i.InventoryId, ProductId = i.ProductId, StockQuantity = i.StockQuantity, StockThreshold = i.StockThreshold, StockPrice = i.StockPrice, SupplierId = i.SupplierId, InvoiceNumber = i.InvoiceNumber, CreatedAt = i.CreatedAt, UpdatedAt = i.UpdatedAt }).AsNoTracking().ToListAsync();
+    }
+
+    public async Task<List<Inventory>> GetPagedInventoriesAsync(int pageNumber, int pageSize)
+    {
+        return await _context.Inventories.Select(i => new Inventory { InventoryId = i.InventoryId, ProductId = i.ProductId, StockQuantity = i.StockQuantity, StockThreshold = i.StockThreshold, StockPrice = i.StockPrice, SupplierId = i.SupplierId, InvoiceNumber = i.InvoiceNumber, CreatedAt = i.CreatedAt, UpdatedAt = i.UpdatedAt })
+            .Skip((pageNumber - 1)* pageSize).Take(pageSize)
+            .AsNoTracking().ToListAsync();
     }
 
     public async Task<List<Restocklog>> GetAllRestocklogsAsync()
