@@ -17,12 +17,13 @@ public class ProductHandler : IHandler
 
     #region Products Handlers
     public Task<IResult> GetProducts() => _productsService.GetProducts();
+    public Task<IResult> GetPagedProducts(int pageNumber, int pageSize) => _productsService.GetPagedProducts(pageNumber, pageSize);
     public Task<IResult> GetProduct(int productId) => _productsService.GetProduct(productId);
     public Task<IResult> CreateProduct(Product product) => _productsService.CreateProduct(product);
     public Task<IResult> CreateProducts(IFormFile file) => _productsService.CreateProducts(file);
     public Task<IResult> UpdateProductDetails(Product product, int id) => _productsService.UpdateProductDetails(product, id);
     public Task<IResult> UpdateProductPrice(int id, decimal price) => _productsService.UpdateProductPrice(id, price);
-    public Task<IResult> RemoveProduct(int productId) =>  _productsService.RemoveProduct(productId);
+    public Task<IResult> RemoveProduct(int productId) => _productsService.RemoveProduct(productId);
     #endregion
 
     #region Product Images Handlers

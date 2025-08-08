@@ -18,6 +18,11 @@ public class ProductsService : IProductsService
         var products = await _repo.GetAllProductsAsync();
         return products == null || products.Count == 0 ? Results.NotFound("No Products Found") : Results.Ok(products);
     }
+    public async Task<IResult> GetPagedProducts(int pageNumber, int pageSize)
+    {
+        var products = await _repo.GetPagedProductsAsync(pageNumber, pageSize);
+        return products == null || products.Count == 0 ? Results.NotFound("No Products Found") : Results.Ok(products);
+    }
     public async Task<IResult> GetProduct(int productId)
     {
         var product = await _repo.GetProductByIdAsync(productId);

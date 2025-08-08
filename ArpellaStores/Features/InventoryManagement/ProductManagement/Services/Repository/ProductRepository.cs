@@ -32,6 +32,13 @@ public class ProductRepository : IProductRepository
         return await _context.Products.Select(p => new Product { Id = p.Id, InventoryId = p.InventoryId, Name = p.Name, Price = p.Price, PriceAfterDiscount = p.PriceAfterDiscount, Category = p.Category, PurchaseCap = p.PurchaseCap, Subcategory = p.Subcategory, Barcodes = p.Barcodes, DiscountQuantity = p.DiscountQuantity, CreatedAt = p.CreatedAt, UpdatedAt = p.UpdatedAt }).AsNoTracking().ToListAsync();
     }
 
+    public async Task<List<Product>> GetPagedProductsAsync(int pageNumber, int pageSize)
+    {
+        return await _context.Products.Select(p => new Product { Id = p.Id, InventoryId = p.InventoryId, Name = p.Name, Price = p.Price, PriceAfterDiscount = p.PriceAfterDiscount, Category = p.Category, PurchaseCap = p.PurchaseCap, Subcategory = p.Subcategory, Barcodes = p.Barcodes, DiscountQuantity = p.DiscountQuantity, CreatedAt = p.CreatedAt, UpdatedAt = p.UpdatedAt })
+            .Skip((pageNumber - 1) * pageSize).Take(pageSize)
+            .AsNoTracking().ToListAsync();
+    }
+
     public async Task<Product?> GetProductByIdAsync(int id)
     {
         return await _context.Products.Select(p => new Product { Id = p.Id, InventoryId = p.InventoryId, Name = p.Name, Price = p.Price, PriceAfterDiscount = p.PriceAfterDiscount, Category = p.Category, PurchaseCap = p.PurchaseCap, Subcategory = p.Subcategory, Barcodes = p.Barcodes, DiscountQuantity = p.DiscountQuantity, CreatedAt = p.CreatedAt, UpdatedAt = p.UpdatedAt }).AsNoTracking().SingleOrDefaultAsync(p => p.Id == id);
