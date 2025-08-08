@@ -72,6 +72,13 @@ public class ProductHelper : IProductHelper
             else
                 product.Subcategory = subcategory;
 
+            // Barcodes
+            var barcodes = worksheet.Cells[row, 6].Text?.Trim();
+            if (string.IsNullOrEmpty(barcodes))
+                rowErrors["Barcode"] = "Barcode is required.";
+            else
+                product.Barcodes = barcodes;
+
             // DiscountQuantity
             var discountQtyText = worksheet.Cells[row, 7].Text?.Trim();
             int discountQty = int.TryParse(discountQtyText, out var result) ? result : 0;

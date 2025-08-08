@@ -79,11 +79,14 @@ public class ProductsService : IProductsService
             return Results.Ok(new
             {
                 message = products.Any()
-                    ? "Upload completed with no errors."
+                    ? (result.ValidationErrors.Any()
+                        ? "Upload completed with some records. The following failed due to validation errors."
+                        : "Upload completed with no errors.")
                     : "Upload failed. No valid records were inserted.",
                 insertedRecords = result.InsertedCount,
                 errors = result.ValidationErrors
             });
+
         }
         catch (Exception ex) { return Results.BadRequest(ex.InnerException?.Message ?? ex.Message); }
     }
