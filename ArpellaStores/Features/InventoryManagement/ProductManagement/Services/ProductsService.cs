@@ -74,7 +74,7 @@ public class ProductsService : IProductsService
             return Results.Ok(new
             {
                 message = products.Any()
-                    ? "Upload completed with some validation errors."
+                    ? "Upload completed with no errors."
                     : "Upload failed. No valid records were inserted.",
                 insertedRecords = result.InsertedCount,
                 errors = result.ValidationErrors

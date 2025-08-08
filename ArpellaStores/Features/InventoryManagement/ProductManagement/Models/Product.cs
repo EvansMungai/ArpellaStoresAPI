@@ -24,7 +24,7 @@ public partial class Product
 
     public int? PurchaseCap { get; set; }
 
-    [Required(ErrorMessage ="Product price after discount is required.")]
+    [Required(ErrorMessage = "Product price after discount is required.")]
     public decimal? PriceAfterDiscount { get; set; }
 
     public DateTime? CreatedAt { get; set; }

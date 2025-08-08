@@ -74,12 +74,8 @@ public class ProductHelper : IProductHelper
 
             // DiscountQuantity
             var discountQtyText = worksheet.Cells[row, 7].Text?.Trim();
-            if (string.IsNullOrEmpty(discountQtyText))
-                rowErrors["DiscountQuantity"] = "Discount quantity is required.";
-            else if (!int.TryParse(discountQtyText, out var discountQty))
-                rowErrors["DiscountQuantity"] = "Discount quantity must be a valid integer.";
-            else
-                product.DiscountQuantity = discountQty;
+            int discountQty = int.TryParse(discountQtyText, out var result) ? result : 0;
+            product.DiscountQuantity = discountQty;
 
             // PurchaseCap
             var purchaseCapText = worksheet.Cells[row, 8].Text?.Trim();
