@@ -16,6 +16,7 @@ public class InventoryRoutes : IRouteRegistrar
     {
         var app = webApplication.MapGroup("").WithTags("Inventories");
         app.MapGet("/inventories", (InventoryHandler handler) => handler.GetInventories()).Produces(200).Produces(404).Produces<List<Inventory>>();
+        app.MapGet("/paged-inventories", (InventoryHandler handler, int pageNumber, int pageSize) => handler.GetPagedInventories(pageNumber, pageSize)).Produces(200).Produces(404).Produces<List<Inventory>>();
         app.MapGet("/inventory/{id}", (InventoryHandler handler ,string id) => handler.GetInventory(id)).Produces(200).Produces(404).Produces<Inventory>();
         app.MapPost("/inventory", (InventoryHandler handler, Inventory inventory) => handler.CreateInventory(inventory)).Produces(200).Produces(404).Produces<Inventory>().AddEndpointFilter<ValidationEndpointFilter<Inventory>>();
         app.MapPost("/inventories", (InventoryHandler handler, IFormFile file) => handler.CreateInventories(file)).Produces(200).Produces(404).Produces<List<Inventory>>().DisableAntiforgery();

@@ -18,6 +18,11 @@ public class ProductsService : IProductsService
         var products = await _repo.GetAllProductsAsync();
         return products == null || products.Count == 0 ? Results.NotFound("No Products Found") : Results.Ok(products);
     }
+    public async Task<IResult> GetPagedProducts(int pageNumber, int pageSize)
+    {
+        var products = await _repo.GetPagedProductsAsync(pageNumber, pageSize);
+        return products == null || products.Count == 0 ? Results.NotFound("No Products Found") : Results.Ok(products);
+    }
     public async Task<IResult> GetProduct(int productId)
     {
         var product = await _repo.GetProductByIdAsync(productId);
@@ -74,11 +79,14 @@ public class ProductsService : IProductsService
             return Results.Ok(new
             {
                 message = products.Any()
-                    ? "Upload completed with no errors."
+                    ? (result.ValidationErrors.Any()
+                        ? "Upload completed with some records. The following failed due to validation errors."
+                        : "Upload completed with no errors.")
                     : "Upload failed. No valid records were inserted.",
                 insertedRecords = result.InsertedCount,
                 errors = result.ValidationErrors
             });
+
         }
         catch (Exception ex) { return Results.BadRequest(ex.InnerException?.Message ?? ex.Message); }
     }

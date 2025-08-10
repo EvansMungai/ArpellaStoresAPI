@@ -16,6 +16,11 @@ public class InventoryService : IInventoryService
         var inventories = await _repo.GetAllInventoriesAsync();
         return inventories == null || inventories.Count == 0 ? Results.NotFound("No inventories found") : Results.Ok(inventories);
     }
+    public async Task<IResult> GetPagedInventories(int pageNumber, int pageSize)
+    {
+        var inventories = await _repo.GetPagedInventoriesAsync(pageNumber, pageSize);
+        return inventories == null || inventories.Count == 0 ? Results.NotFound("No inventories found") : Results.Ok(inventories);
+    }
     public async Task<IResult> GetInventory(string id)
     {
         var inventory = await _repo.GetInventoryByIdAsync(id);
