@@ -30,7 +30,7 @@ public class OrderPaymentService : IOrderPaymentService
             TransactionType = "CustomerBuyGoodsOnline",
             Amount = order.Total,
             PartyA = order.PhoneNumber,
-            PartyB = _mpesaConfig.BusinessShortCode,
+            PartyB = _mpesaConfig.TillNumber,
             PhoneNumber = order.PhoneNumber,
             CallBackUrl = _mpesaConfig.CallbackUri,
             AccountReference = "ArpellaStores",
