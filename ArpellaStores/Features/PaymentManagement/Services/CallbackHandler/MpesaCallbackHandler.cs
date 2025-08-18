@@ -50,7 +50,7 @@ public class MpesaCallbackHandler : IMpesaCallbackHandler
         try
         {
             var rebuiltOrder = _helper.RebuildOrder(cachedOrder);
-            await _repo.FinalizeOrderAsync(cachedOrder, transactionId);
+            await _repo.FinalizeOrderAsync(rebuiltOrder, transactionId);
 
             _cache.Remove(cacheKey);
             _cache.Set($"payment-result-{stk.CheckoutRequestID}", new
