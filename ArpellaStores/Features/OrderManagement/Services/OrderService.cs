@@ -29,12 +29,13 @@ public class OrderService : IOrderService
         if (stk == null || string.IsNullOrEmpty(stk.CheckoutRequestID))
             return Results.BadRequest("STK Push failed");
 
-        _cache.CacheOrder($"pending-order-{stk.CheckoutRequestID}", order, TimeSpan.FromMinutes(4));
+        _cache.CacheOrder($"pending-order-{stk.CheckoutRequestID}", order, TimeSpan.FromMinutes(15));
 
         var responseData = new
         {
             Message = "STK push sent. Awaiting payment.",
             CheckoutRequestID = stk.CheckoutRequestID,
+            MerchantRequestID = stk.MerchantRequestID,
             Amount = order.Total,
             Phonenumber = order.PhoneNumber
         };

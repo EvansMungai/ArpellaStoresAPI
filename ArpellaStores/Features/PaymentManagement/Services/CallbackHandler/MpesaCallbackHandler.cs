@@ -12,12 +12,14 @@ public class MpesaCallbackHandler : IMpesaCallbackHandler
     private readonly ArpellaContext _context;
     private readonly IMpesaApiService _mpesaApi;
     private readonly IOrderRepository _repo;
-    public MpesaCallbackHandler(IMemoryCache cache, ArpellaContext context, IMpesaApiService mpesaApi, IOrderRepository repo)
+    private readonly IOrderHelper _helper;
+    public MpesaCallbackHandler(IMemoryCache cache, ArpellaContext context, IMpesaApiService mpesaApi, IOrderRepository repo, IOrderHelper helper)
     {
         _cache = cache;
         _context = context;
         _mpesaApi = mpesaApi;
         _repo = repo;
+        _helper = helper;
     }
 
     public async Task<IResult> HandleAsync(MpesaCallbackModel callback)
@@ -47,14 +49,16 @@ public class MpesaCallbackHandler : IMpesaCallbackHandler
 
         try
         {
+            var rebuiltOrder = _helper.RebuildOrder(cachedOrder);
             await _repo.FinalizeOrderAsync(cachedOrder, transactionId);
+
             _cache.Remove(cacheKey);
             _cache.Set($"payment-result-{stk.CheckoutRequestID}", new
             {
                 Status = "Success",
                 Description = stk.ResultDesc,
                 OrderId = cachedOrder.Orderid
-            }, TimeSpan.FromMinutes(4));
+            }, TimeSpan.FromMinutes(10));
 
             return Results.Ok("Order successfully recorded after confirmed payment.");
         }
@@ -64,7 +68,7 @@ public class MpesaCallbackHandler : IMpesaCallbackHandler
             {
                 Status = "Error",
                 Message = ex.Message
-            }, TimeSpan.FromMinutes(4));
+            }, TimeSpan.FromMinutes(10));
             return Results.BadRequest($"Persistence error: {ex.Message}");
         }
     }

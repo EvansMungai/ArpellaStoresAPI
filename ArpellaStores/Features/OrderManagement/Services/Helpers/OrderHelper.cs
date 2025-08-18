@@ -27,4 +27,25 @@ public class OrderHelper : IOrderHelper
             Orderitems = orderDetails.Orderitems
         };
     }
+    public Order RebuildOrder(Order cachedOrder)
+    {
+        return new Order
+        {
+            Orderid = cachedOrder.Orderid,
+            UserId = cachedOrder.UserId,
+            PhoneNumber = cachedOrder.PhoneNumber,
+            Status = "Completed",
+            Total = cachedOrder.Total,
+            Latitude = cachedOrder.Latitude,
+            Longitude = cachedOrder.Longitude,
+            BuyerPin = cachedOrder.BuyerPin,
+            Orderitems = cachedOrder.Orderitems.Select(item => new Orderitem
+            {
+                OrderId = cachedOrder.Orderid,
+                ProductId = item.ProductId,
+                Quantity = item.Quantity
+            }).ToList()
+        };
+    }
+
 }
