@@ -367,7 +367,7 @@ public partial class ArpellaContext : IdentityDbContext<User>
 
             entity.HasOne(d => d.Order).WithMany(p => p.Orderitems)
                 .HasForeignKey(d => d.OrderId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
+                .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("orderitems_ibfk_2");
 
             entity.HasOne(d => d.Product).WithMany(p => p.Orderitems)

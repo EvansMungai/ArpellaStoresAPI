@@ -87,12 +87,12 @@ public class OrderRepository : IOrderRepository
                 throw new InvalidOperationException($"Insufficient stock for product {item.ProductId}");
 
             inventory.StockQuantity -= item.Quantity;
-            _context.Orderitems.Add(new Orderitem
-            {
-                OrderId = order.Orderid,
-                ProductId = item.ProductId,
-                Quantity = item.Quantity
-            });
+            //_context.Orderitems.Add(new Orderitem
+            //{
+            //    OrderId = order.Orderid,
+            //    ProductId = item.ProductId,
+            //    Quantity = item.Quantity
+            //});
 
             _context.Inventories.Update(inventory);
         }
