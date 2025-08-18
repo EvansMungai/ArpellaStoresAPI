@@ -37,7 +37,7 @@ jobs:
 
         scp -i id_rsa -o StrictHostKeyChecking=no \
           docker-compose.yml .env  \
-          ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/arpella-stores/
+          ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:~/arpella-stores/
 
     - name: SSH into VPS and deploy
       uses: appleboy/ssh-action@v1.0.0
