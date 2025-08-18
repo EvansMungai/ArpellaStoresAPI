@@ -36,7 +36,7 @@ public class MpesaCallbackHandler : IMpesaCallbackHandler
             {
                 Status = "Failed",
                 Description = stk.ResultDesc
-            }, TimeSpan.FromMinutes(4));
+            }, TimeSpan.FromMinutes(10));
 
             return Results.BadRequest($"Payment failed: {stk.ResultDesc}");
         }

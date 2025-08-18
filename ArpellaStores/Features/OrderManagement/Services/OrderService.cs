@@ -33,9 +33,7 @@ public class OrderService : IOrderService
 
         var responseData = new
         {
-            Message = "STK push sent. Awaiting payment.",
-            CheckoutRequestID = stk.CheckoutRequestID,
-            MerchantRequestID = stk.MerchantRequestID,
+            StkPush = stk,
             Amount = order.Total,
             Phonenumber = order.PhoneNumber
         };
