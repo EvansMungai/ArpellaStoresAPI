@@ -46,6 +46,9 @@ public class MpesaCallbackHandler : IMpesaCallbackHandler
             return Results.BadRequest("No pending order found.");
 
         string transactionId = _mpesaApi.GetValue(metadata, "MpesaReceiptNumber");
+        if (string.IsNullOrEmpty(transactionId))
+            return Results.BadRequest("Missing MpesaReceiptNumber in callback.");
+
 
         try
         {
@@ -60,7 +63,14 @@ public class MpesaCallbackHandler : IMpesaCallbackHandler
                 OrderId = cachedOrder.Orderid
             }, TimeSpan.FromMinutes(10));
 
-            return Results.Ok("Order successfully recorded after confirmed payment.");
+            return Results.Ok(new
+            {
+                Message = "Order successfully recorded after confirmed payment.",
+                OrderId = cachedOrder.Orderid,
+                TransactionId = transactionId,
+                Amount = cachedOrder.Total,
+                PhoneNumber = cachedOrder.PhoneNumber
+            });
         }
         catch (Exception ex)
         {
