@@ -5,6 +5,7 @@ namespace ArpellaStores.Features.InventoryManagement.Services;
 public interface IInventoryService
 {
     Task<IResult> GetInventories();
+    Task<IResult> GetPagedInventories(int pageNumber, int pageSize);
     Task<IResult> GetInventory(string id);
     Task<IResult> CreateInventory(Inventory inventory);
     Task<IResult> CreateInventories(IFormFile file);

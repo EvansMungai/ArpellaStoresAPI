@@ -1,103 +1,59 @@
-﻿using ArpellaStores.Data.Infrastructure;
-using ArpellaStores.Features.InventoryManagement.Models;
+﻿using ArpellaStores.Features.InventoryManagement.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace ArpellaStores.Features.InventoryManagement.Services;
 
 public class SubcategoriesService : ISubcategoriesServices
 {
-    private readonly ArpellaContext _context;
-    public SubcategoriesService(ArpellaContext context)
+    private readonly ISubcategoryRepository _repo;
+    public SubcategoriesService(ISubcategoryRepository repo)
     {
-        _context = context;
+        _repo = repo;
     }
     public async Task<IResult> GetSubcategories()
     {
-        var subcategories = await _context.Subcategories.Select(s => new { s.Id, s.SubcategoryName, s.CategoryId }).AsNoTracking().ToListAsync();
+        var subcategories = await _repo.GetAllSubcategoriesAsync();
         return subcategories == null || subcategories.Count == 0 ? Results.NotFound("No Subcategories Found") : Results.Ok(subcategories);
     }
     public async Task<IResult> GetSubcategory(int id)
     {
-        var retrievedSubcategory = await _context.Subcategories.Select(s => new { s.Id, s.SubcategoryName, s.CategoryId }).AsNoTracking().SingleOrDefaultAsync(s => s.Id == id);
+        var retrievedSubcategory = await _repo.GetSubcategoryByIdAsync(id);
         return retrievedSubcategory == null ? Results.NotFound($"Subcategory of ID = {id} was not found") : Results.Ok(retrievedSubcategory);
     }
     public async Task<IResult> CreateSubcategory(Subcategory subcategory)
     {
-        var local = _context.Subcategories.Local.FirstOrDefault(s => s.Id == subcategory.Id);
-
-        if (local != null)
-        {
-            _context.Entry(local).State = EntityState.Detached;
-        }
-        var existing = await _context.Subcategories.AsNoTracking().SingleOrDefaultAsync(s => s.Id == subcategory.Id);
+        var existing = await _repo.GetSubcategoryByIdAsync(subcategory.Id);
         if (existing != null)
             return Results.Conflict($"An Subcategory with ID = {subcategory.Id} already exists.");
 
-        var newSubcategory = new Subcategory
-        {
-            SubcategoryName = subcategory.SubcategoryName,
-            CategoryId = subcategory.CategoryId
-        };
         try
         {
-            _context.Subcategories.Add(newSubcategory);
-            await _context.SaveChangesAsync();
+            await _repo.AddSubcategoryAsync(subcategory);
+            return Results.Ok(subcategory);
         }
         catch (Exception ex) { return Results.BadRequest(ex.InnerException?.Message ?? ex.Message); }
-
-        return Results.Ok(newSubcategory);
     }
     public async Task<IResult> UpdateSubcategoryDetails(Subcategory update, int id)
     {
-        var local = _context.Subcategories.Local.FirstOrDefault(s => s.Id == id);
-
-        if (local != null)
+        try
         {
-            _context.Entry(local).State = EntityState.Detached;
+            await _repo.UpdateSubcategoryDetailsAsync(update, id);
+            Subcategory? subcategory = await _repo.GetSubcategoryByIdAsync(id);
+            return Results.Ok(subcategory);
         }
-
-        var retrievedCategory = await _context.Subcategories.SingleOrDefaultAsync(s => s.Id == id);
-        if (retrievedCategory != null)
-        {
-            retrievedCategory.SubcategoryName = update.SubcategoryName;
-            retrievedCategory.CategoryId = update.CategoryId;
-            try
-            {
-                _context.Subcategories.Update(retrievedCategory);
-                await _context.SaveChangesAsync();
-                return Results.Ok(retrievedCategory);
-            }
-            catch (Exception ex)
-            {
-                return Results.BadRequest(ex.InnerException?.Message ?? ex.Message);
-            }
-        }
-        else
-        {
-            return Results.NotFound($"Subcategory with ID = {id} was not found");
-        }
-
+        catch (Exception ex) { return Results.BadRequest(ex.InnerException?.Message ?? ex.Message); }
     }
     public async Task<IResult> RemoveSubcategory(int id)
     {
-        var local = _context.Subcategories.Local.FirstOrDefault(s => s.Id == id);
+        var subcategory = await _repo.GetSubcategoryByIdAsync(id);
 
-        if (local != null)
+        if (subcategory == null)
+            return Results.NotFound($"Subcategory with SubcategoryId ={id} was not found");
+
+        try
         {
-            _context.Entry(local).State = EntityState.Detached;
-        }
-
-        var subcategory = await _context.Subcategories.SingleOrDefaultAsync(s => s.Id == id);
-
-        if (subcategory != null)
-        {
-            _context.Subcategories.Remove(subcategory);
-            await _context.SaveChangesAsync();
+            await _repo.RemoveSubcategoryAsync(id);
             return Results.Ok(subcategory);
-        }
-        else
-        {
-            return Results.NotFound($"Category with CategoryID = {id} was not found");
-        }
+        } catch (Exception ex) { return Results.BadRequest(ex.InnerException?.Message ?? ex.Message); }
     }
 }

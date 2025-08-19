@@ -20,6 +20,6 @@ public partial class Goodsinfo
     public int Id { get; set; }
 
     [Required(ErrorMessage = "Product Id is required.")]
-    [StringLength(30, ErrorMessage = "Product Id must be at most 30 characters.")]
+    [StringLength(150, ErrorMessage = "Product Id must be at most 150 characters.")]
     public string? ProductId { get; set; }
 }

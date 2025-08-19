@@ -22,6 +22,7 @@ public class UserManagementHandler : IHandler
     public Task<IResult> UpdateUserDetails(string user, User update) => _userManagementService.UpdateUserDetails(user, update);
     public Task<IResult> GetUser(string number) => _userManagementService.GetUser(number);
     public Task<IResult> RemoveUser(string number) => _userManagementService.RemoveUser(number);
+    public Task<IResult> ChangeUserPassword(ChangePasswordModel model, HttpContext context) => _userManagementService.ChangeUserPassword(model, context);
     #endregion
 
     #region Role Handlers

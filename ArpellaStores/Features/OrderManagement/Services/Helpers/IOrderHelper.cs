@@ -6,4 +6,5 @@ public interface IOrderHelper
 {
     string GenerateOrderId();
     Order BuildNewOrder(Order orderDetails, decimal totalCost);
+    Order RebuildOrder(Order cachedOrder);
 }

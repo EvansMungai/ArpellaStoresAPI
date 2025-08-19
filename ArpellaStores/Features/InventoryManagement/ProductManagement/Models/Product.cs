@@ -9,11 +9,11 @@ public partial class Product
     public int Id { get; set; }
 
     [Required(ErrorMessage = "Inventory Id is required.")]
-    [StringLength(30, ErrorMessage = "Inventory Id must be at most 30 characters.")]
+    [StringLength(150, ErrorMessage = "Inventory Id must be at most 150 characters.")]
     public string InventoryId { get; set; } = null!;
 
     [Required(ErrorMessage = "Product name is required.")]
-    [StringLength(50, ErrorMessage = "Product name must be at most 50 characters.")]
+    [StringLength(255, ErrorMessage = "Product name must be at most 255 characters.")]
     public string? Name { get; set; }
 
     [Required(ErrorMessage = "Product price is required.")]
@@ -22,10 +22,9 @@ public partial class Product
     [Required(ErrorMessage = "Category Id is required.")]
     public int? Category { get; set; }
 
-    [Required(ErrorMessage = "Purchase cap is required.")]
     public int? PurchaseCap { get; set; }
 
-    [Required(ErrorMessage ="Product price after discount is required.")]
+    [Required(ErrorMessage = "Product price after discount is required.")]
     public decimal? PriceAfterDiscount { get; set; }
 
     public DateTime? CreatedAt { get; set; }

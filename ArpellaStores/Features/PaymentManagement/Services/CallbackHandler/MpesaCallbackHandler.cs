@@ -12,12 +12,14 @@ public class MpesaCallbackHandler : IMpesaCallbackHandler
     private readonly ArpellaContext _context;
     private readonly IMpesaApiService _mpesaApi;
     private readonly IOrderRepository _repo;
-    public MpesaCallbackHandler(IMemoryCache cache, ArpellaContext context, IMpesaApiService mpesaApi, IOrderRepository repo)
+    private readonly IOrderHelper _helper;
+    public MpesaCallbackHandler(IMemoryCache cache, ArpellaContext context, IMpesaApiService mpesaApi, IOrderRepository repo, IOrderHelper helper)
     {
         _cache = cache;
         _context = context;
         _mpesaApi = mpesaApi;
         _repo = repo;
+        _helper = helper;
     }
 
     public async Task<IResult> HandleAsync(MpesaCallbackModel callback)
@@ -34,7 +36,7 @@ public class MpesaCallbackHandler : IMpesaCallbackHandler
             {
                 Status = "Failed",
                 Description = stk.ResultDesc
-            }, TimeSpan.FromMinutes(4));
+            }, TimeSpan.FromMinutes(10));
 
             return Results.BadRequest($"Payment failed: {stk.ResultDesc}");
         }
@@ -44,19 +46,31 @@ public class MpesaCallbackHandler : IMpesaCallbackHandler
             return Results.BadRequest("No pending order found.");
 
         string transactionId = _mpesaApi.GetValue(metadata, "MpesaReceiptNumber");
+        //if (string.IsNullOrEmpty(transactionId))
+        //    return Results.BadRequest("Missing MpesaReceiptNumber in callback.");
+
 
         try
         {
-            await _repo.FinalizeOrderAsync(cachedOrder, transactionId);
+            var rebuiltOrder = _helper.RebuildOrder(cachedOrder);
+            await _repo.FinalizeOrderAsync(rebuiltOrder, transactionId);
+
             _cache.Remove(cacheKey);
             _cache.Set($"payment-result-{stk.CheckoutRequestID}", new
             {
                 Status = "Success",
                 Description = stk.ResultDesc,
                 OrderId = cachedOrder.Orderid
-            }, TimeSpan.FromMinutes(4));
+            }, TimeSpan.FromMinutes(10));
 
-            return Results.Ok("Order successfully recorded after confirmed payment.");
+            return Results.Ok(new
+            {
+                Message = "Order successfully recorded after confirmed payment.",
+                OrderId = cachedOrder.Orderid,
+                TransactionId = transactionId,
+                Amount = cachedOrder.Total,
+                PhoneNumber = cachedOrder.PhoneNumber
+            });
         }
         catch (Exception ex)
         {
@@ -64,7 +78,7 @@ public class MpesaCallbackHandler : IMpesaCallbackHandler
             {
                 Status = "Error",
                 Message = ex.Message
-            }, TimeSpan.FromMinutes(4));
+            }, TimeSpan.FromMinutes(10));
             return Results.BadRequest($"Persistence error: {ex.Message}");
         }
     }

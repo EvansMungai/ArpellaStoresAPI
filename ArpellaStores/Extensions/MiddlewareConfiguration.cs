@@ -1,5 +1,4 @@
-﻿using ArpellaStores.Extensions.RouteHandlers;
-using RouteBuilder = ArpellaStores.Extensions.RouteHandlers.RouteBuilder;
+﻿using RouteBuilder = ArpellaStores.Extensions.RouteHandlers.RouteBuilder;
 namespace ArpellaStores.Extensions;
 
 public static class MiddlewareConfiguration

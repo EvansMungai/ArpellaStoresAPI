@@ -229,7 +229,7 @@ public partial class ArpellaContext : IdentityDbContext<User>
                 .HasMaxLength(30)
                 .HasColumnName("itemDescription");
             entity.Property(e => e.ProductId)
-                .HasMaxLength(30)
+                .HasMaxLength(150)
                 .HasColumnName("productId");
             entity.Property(e => e.TaxRate)
                 .HasPrecision(10, 2)
@@ -247,7 +247,9 @@ public partial class ArpellaContext : IdentityDbContext<User>
 
             entity.HasIndex(e => e.InvoiceNumber, "invoiceNumber");
 
-            entity.HasIndex(e => e.ProductId, "product_id");
+            entity.HasIndex(e => e.ProductId)
+                .IsUnique()
+                .HasDatabaseName("unique_product_id");
 
             entity.HasIndex(e => e.SupplierId, "supplierId");
 
@@ -365,7 +367,7 @@ public partial class ArpellaContext : IdentityDbContext<User>
 
             entity.HasOne(d => d.Order).WithMany(p => p.Orderitems)
                 .HasForeignKey(d => d.OrderId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
+                .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("orderitems_ibfk_2");
 
             entity.HasOne(d => d.Product).WithMany(p => p.Orderitems)
@@ -421,10 +423,10 @@ public partial class ArpellaContext : IdentityDbContext<User>
                 .HasColumnName("createdAt");
             entity.Property(e => e.DiscountQuantity).HasColumnName("discount_quantity");
             entity.Property(e => e.InventoryId)
-                .HasMaxLength(30)
+                .HasMaxLength(150)
                 .HasColumnName("inventoryId");
             entity.Property(e => e.Name)
-                .HasMaxLength(50)
+                .HasMaxLength(255)
                 .HasColumnName("name");
             entity.Property(e => e.Price)
                 .HasPrecision(10, 2)
@@ -472,9 +474,7 @@ public partial class ArpellaContext : IdentityDbContext<User>
             entity.Property(e => e.IsPrimary)
                 .HasDefaultValueSql("'0'")
                 .HasColumnName("is_primary");
-            entity.Property(e => e.ProductId)
-                .HasMaxLength(30)
-                .HasColumnName("product_id");
+            entity.Property(e => e.ProductId).HasColumnName("product_id");
             entity.Property(e => e.UpdatedAt)
                 .ValueGeneratedOnAddOrUpdate()
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")
@@ -483,10 +483,8 @@ public partial class ArpellaContext : IdentityDbContext<User>
             entity.HasOne(d => d.Product)
                 .WithMany(p => p.Productimages)
                 .HasForeignKey(d => d.ProductId)
-                .HasPrincipalKey(p => p.InventoryId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
+                .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("productimages_ibfk_1");
-
         });
 
         modelBuilder.Entity<Restocklog>(entity =>
@@ -506,6 +504,9 @@ public partial class ArpellaContext : IdentityDbContext<User>
             entity.Property(e => e.ProductId)
                 .HasMaxLength(30)
                 .HasColumnName("productId");
+            entity.Property(e => e.PurchasePrice)
+                .HasPrecision(10, 2)
+                .HasColumnName("purchasePrice");
             entity.Property(e => e.RestockDate)
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")
                 .HasColumnType("timestamp")

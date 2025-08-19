@@ -1,25 +1,16 @@
-﻿using ArpellaStores.Data.Infrastructure;
-using ArpellaStores.Extensions.RouteHandlers;
+﻿using ArpellaStores.Extensions.RouteHandlers;
 using ArpellaStores.Features.PaymentManagement.Models;
 using ArpellaStores.Features.PaymentManagement.Services;
-using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 
 namespace ArpellaStores.Features.PaymentManagement.Endpoints;
 
 public class PaymentRoutes : IRouteRegistrar
 {
-    private readonly IMpesaApiService _mpesaApiService;
     private readonly MpesaConfig _mpesaConfig;
-    private readonly ArpellaContext _context;
-    private readonly IMemoryCache _cache;
-
-    public PaymentRoutes(IMpesaApiService mpesaApiService, IOptions<MpesaConfig> mpesaConfig, ArpellaContext context, IMemoryCache cache)
+    public PaymentRoutes(IOptions<MpesaConfig> mpesaConfig)
     {
-        _mpesaApiService = mpesaApiService;
         _mpesaConfig = mpesaConfig.Value;
-        _context = context;
-        _cache = cache;
     }
 
     public void RegisterRoutes(WebApplication app)
@@ -36,7 +27,7 @@ public class PaymentRoutes : IRouteRegistrar
             string registerUri = "https://api.safaricom.co.ke/mpesa/c2b/v1/registerurl";
             var requestModel = new RegisterUrlRequestModel
             {
-                ShortCode = 5142142,
+                ShortCode = int.Parse(_mpesaConfig.BusinessShortCode),
                 ResponseType = "Completed",
                 ConfirmationUrl = _mpesaConfig.ConfirmationUri,
                 ValidationUrl = _mpesaConfig.ValidationUri

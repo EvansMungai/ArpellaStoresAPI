@@ -1,40 +1,34 @@
-﻿using ArpellaStores.Data.Infrastructure;
-using ArpellaStores.Features.InventoryManagement.Models;
-using CsvHelper;
-using CsvHelper.Configuration;
-using Microsoft.EntityFrameworkCore;
-using OfficeOpenXml;
-using System.Globalization;
+﻿using ArpellaStores.Features.InventoryManagement.Models;
 
 namespace ArpellaStores.Features.InventoryManagement.Services;
 
 public class InventoryService : IInventoryService
 {
-    private readonly ArpellaContext _context;
-    public InventoryService(ArpellaContext context)
+    private readonly IInventoryRepository _repo;
+    private readonly IInventoryHelper _helper;
+    public InventoryService(IInventoryRepository repo, IInventoryHelper helper)
     {
-        _context = context;
+        _repo = repo;
+        _helper = helper;
     }
     public async Task<IResult> GetInventories()
     {
-        var inventories = await _context.Inventories.Select(i => new { i.InventoryId, i.ProductId, i.StockQuantity, i.StockThreshold, i.StockPrice, i.SupplierId, i.CreatedAt, i.UpdatedAt }).AsNoTracking().ToListAsync();
+        var inventories = await _repo.GetAllInventoriesAsync();
+        return inventories == null || inventories.Count == 0 ? Results.NotFound("No inventories found") : Results.Ok(inventories);
+    }
+    public async Task<IResult> GetPagedInventories(int pageNumber, int pageSize)
+    {
+        var inventories = await _repo.GetPagedInventoriesAsync(pageNumber, pageSize);
         return inventories == null || inventories.Count == 0 ? Results.NotFound("No inventories found") : Results.Ok(inventories);
     }
     public async Task<IResult> GetInventory(string id)
     {
-        var inventory = await _context.Inventories.Where(i => i.ProductId == id).Select(i => new { i.InventoryId, i.ProductId, i.StockQuantity, i.StockThreshold, i.StockPrice, i.SupplierId, i.CreatedAt, i.UpdatedAt }).AsNoTracking().SingleOrDefaultAsync();
+        var inventory = await _repo.GetInventoryByIdAsync(id);
         return inventory == null ? Results.NotFound($"Inventory with ProductId = {id} was not found") : Results.Ok(inventory);
     }
     public async Task<IResult> CreateInventory(Inventory inventory)
     {
-        var local = _context.Inventories.Local.FirstOrDefault(i => i.ProductId == inventory.ProductId);
-
-        if (local != null)
-        {
-            _context.Entry(local).State = EntityState.Detached;
-        }
-
-        var existing = await _context.Inventories.AsNoTracking().SingleOrDefaultAsync(i => i.ProductId == inventory.ProductId);
+        var existing = await _repo.GetInventoryByIdAsync(inventory.ProductId);
         if (existing != null)
             return Results.Conflict($"An inventory with ProductID = {inventory.ProductId} already exists.");
 
@@ -49,8 +43,7 @@ public class InventoryService : IInventoryService
         };
         try
         {
-            _context.Inventories.Add(newInventory);
-            await _context.SaveChangesAsync();
+            await _repo.AddInventoryAsync(newInventory);
             return Results.Ok(newInventory);
         }
         catch (Exception ex)
@@ -62,83 +55,58 @@ public class InventoryService : IInventoryService
     {
         try
         {
-            if (file == null || file.Length == 0) return Results.BadRequest("File is empty");
-            var inventory = file.FileName.EndsWith("csv") ? ParseCsv(file.OpenReadStream()) : ParseExcel(file.OpenReadStream());
-            if (inventory == null || inventory.Count == 0)
+            if (file == null || file.Length == 0)
+                return Results.BadRequest("File is empty.");
+
+            using var stream = file.OpenReadStream();
+            // Parse and validate
+            var (inventories, errors) = _helper.ParseExcel(stream);
+
+            // Insert only valid records
+            int insertedCount = 0;
+            if (inventories.Any())
+                insertedCount = await _repo.AddInventoriesAsync(inventories);
+
+            // Return response
+            return Results.Ok(new
             {
-                return Results.NotFound("No valid data found in the file");
-            }
-
-            _context.Inventories.AddRangeAsync(inventory);
-            await _context.SaveChangesAsync();
-            return Results.Ok(inventory);
-
+                message = insertedCount > 0
+                    ? errors.Any()
+                        ? "Upload completed with some validation errors."
+                        : "Upload completed successfully."
+                    : "Upload failed. No valid records were inserted.",
+                insertedRecords = insertedCount,
+                errors = errors
+            });
         }
-        catch (Exception ex)
-        {
-            return Results.BadRequest(ex.InnerException?.Message ?? ex.Message);
-        }
+        catch (Exception ex) { return Results.BadRequest(ex.InnerException?.Message ?? ex.Message); }
     }
     public async Task<IResult> UpdateInventory(Inventory update, string id)
     {
-        var local =  _context.Inventories.Local.FirstOrDefault(i => i.ProductId == id);
-
-        if (local != null)
-            _context.Entry(local).State = EntityState.Detached;
-
-        Inventory? retrievedInventory = await _context.Inventories.AsNoTracking().SingleOrDefaultAsync(i => i.ProductId == id);
-        if (retrievedInventory != null)
+        try
         {
-            retrievedInventory.StockQuantity = update.StockQuantity;
-            retrievedInventory.StockThreshold = update.StockThreshold;
-            retrievedInventory.UpdatedAt = DateTime.Now;
-            retrievedInventory.SupplierId = update.SupplierId;
-            try
-            {
-                _context.Inventories.Update(retrievedInventory);
-                await _context.SaveChangesAsync();
-                return Results.Ok(retrievedInventory);
-            }
-            catch (Exception ex)
-            {
-                return Results.NotFound(ex.InnerException?.Message ?? ex.Message);
-            }
+            await _repo.UpdateInventoryDetails(update, id);
+            Inventory? inventory = await _repo.GetInventoryByIdAsync(id);
+            return Results.Ok(inventory);
         }
-        else
-        {
-            return Results.NotFound($"Inventory with ProductID = {id} was not found");
-        }
+        catch (Exception ex) { return Results.NotFound(ex.InnerException?.Message ?? ex.Message); }
     }
     public async Task<IResult> RemoveInventory(string id)
     {
-        var local = _context.Inventories.Local.FirstOrDefault(i => i.ProductId == id);
+        var retrievedInventory = await _repo.GetInventoryByIdAsync(id);
+        if (retrievedInventory == null) return Results.NotFound($"Inventory with ID = {id} was not found");
 
-        if (local != null)
+        try
         {
-            _context.Entry(local).State = EntityState.Detached;
+            await _repo.RemoveInventoryAsync(id);
+            return Results.Ok(retrievedInventory);
         }
-
-        Inventory? retrievedInventory = await _context.Inventories.AsNoTracking().SingleOrDefaultAsync(i => i.ProductId == id);
-        if (retrievedInventory != null)
-        {
-            try
-            {
-                _context.Inventories.Remove(retrievedInventory);
-                await _context.SaveChangesAsync();
-                return Results.Ok(retrievedInventory);
-            }
-            catch (Exception ex)
-            {
-                return Results.Problem("Exception: " + ex.InnerException?.Message ?? ex.Message);
-            }
-
-        }
-        else { return Results.NotFound($"Inventory with id = {id} was not found"); }
+        catch (Exception ex) { return Results.BadRequest(ex.InnerException?.Message ?? ex.Message); }
     }
     #region Utilities
     public async Task<IResult> CheckInventoryLevels()
     {
-        var lowStockItems = await _context.Inventories.Where(i => i.StockQuantity <= i.StockThreshold).ToListAsync();
+        List<Inventory> lowStockItems = await _repo.CheckInventoryLevelsAsync();
         if (lowStockItems.Count != 0)
         {
             return Results.Ok(new
@@ -153,34 +121,6 @@ public class InventoryService : IInventoryService
             });
         }
         return Results.Ok("All inventory levels are above the stock threshold");
-    }
-    public List<Inventory> ParseCsv(Stream fileStream)
-    {
-        using var reader = new StreamReader(fileStream);
-        var config = new CsvConfiguration(CultureInfo.InvariantCulture);
-        using var csv = new CsvReader(reader, config);
-        return csv.GetRecords<Inventory>().ToList();
-    }
-    public List<Inventory> ParseExcel(Stream fileStream)
-    {
-        using var package = new ExcelPackage(fileStream);
-        ExcelWorksheet worksheet = package.Workbook.Worksheets.First();
-        var rowcount = worksheet.Dimension.Rows;
-        var inventories = new List<Inventory>();
-        for (var row = 2; row <= rowcount; row++)
-        {
-            var inventory = new Inventory
-            {
-                ProductId = worksheet.Cells[row, 1].Text,
-                StockQuantity = int.Parse(worksheet.Cells[row, 2].Text),
-                StockThreshold = int.Parse(worksheet.Cells[row, 3].Text),
-                StockPrice = decimal.Parse(worksheet.Cells[row, 4].Text),
-                SupplierId = int.Parse(worksheet.Cells[row, 5].Text),
-                InvoiceNumber = worksheet.Cells[row, 6].Text
-            };
-            inventories.Add(inventory);
-        }
-        return inventories;
     }
     #endregion
 
@@ -197,21 +137,14 @@ public class InventoryService : IInventoryService
         };
         try
         {
-            Inventory? inventory = await _context.Inventories.SingleOrDefaultAsync(i => i.ProductId == restocklog.ProductId);
-            if (inventory == null)
-            {
-                return Results.BadRequest($"Inventory with productid ={restocklog.ProductId} was not found");
-            }
-            inventory.StockQuantity += restocklog.RestockQuantity;
-            _context.Restocklogs.Add(newRestockLog);
-            _context.SaveChangesAsync();
+            await _repo.RestockInventoryAsync(restocklog);
             return Results.Ok(newRestockLog);
         }
         catch (Exception ex) { return Results.BadRequest(ex.InnerException?.Message ?? ex.Message); }
     }
     public async Task<IResult> GetRestockLogs()
     {
-        var restockLogs = await _context.Restocklogs.Select(l => new { l.LogId, l.ProductId, l.RestockQuantity, l.RestockDate, l.SupplierId, l.InvoiceNumber }).ToListAsync();
+        var restockLogs = await _repo.GetAllRestocklogsAsync();
         return restockLogs == null || restockLogs.Count == 0 ? Results.NotFound("No Restock logs were found") : Results.Ok(restockLogs);
     }
     #endregion

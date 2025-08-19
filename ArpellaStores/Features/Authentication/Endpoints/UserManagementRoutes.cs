@@ -1,4 +1,5 @@
-﻿using ArpellaStores.Extensions.RouteHandlers;
+﻿using ArpellaStores.Extensions;
+using ArpellaStores.Extensions.RouteHandlers;
 using ArpellaStores.Features.Authentication.Models;
 
 namespace ArpellaStores.Features.Authentication.Endpoints;
@@ -21,7 +22,7 @@ public class UserManagementRoutes : IRouteRegistrar
         app.MapDelete("/user/{id}", (UserManagementHandler handler, string id) => handler.RemoveUser(id));
         app.MapPut("/user-role/{id}", (UserManagementHandler handler, string id, string role) => handler.AssignRoleToUserAsync(id, role));
         app.MapPut("/user-details/{id}", (UserManagementHandler handler, string id, User update) => handler.UpdateUserDetails(id, update));
-
+        app.MapPut("/change-password", (UserManagementHandler handler, ChangePasswordModel model, HttpContext context) => handler.ChangeUserPassword(model, context)).AddEndpointFilter<ValidationEndpointFilter<ChangePasswordModel>>();
     }
     public void MapRoleManagmentRoutes(WebApplication webApplication)
     {

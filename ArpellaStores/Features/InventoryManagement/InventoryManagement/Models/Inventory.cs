@@ -7,7 +7,7 @@ public partial class Inventory
     public int InventoryId { get; set; }
 
     [Required(ErrorMessage = "Product Id is required.")]
-    [StringLength(30, ErrorMessage =" Proudct id must be at most 30 characters.")]
+    [StringLength(150, ErrorMessage =" Product id must be at most 150 characters.")]
     public string ProductId { get; set; }
 
     [Required(ErrorMessage = "Stock quantity is required.")]
