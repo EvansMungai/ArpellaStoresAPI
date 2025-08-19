@@ -46,10 +46,15 @@ public class PaymentRoutes : IRouteRegistrar
 
             // Append to file with timestamp
             var logEntry = $"[{DateTime.UtcNow:yyyy-MM-dd HH:mm:ss}] {rawBody}\n\n";
-            await File.AppendAllTextAsync(logPath, logEntry);
-
+            try
+            {
+                await File.AppendAllTextAsync(logPath, logEntry);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Log write failed: {ex.Message}");
+            }
             return Results.Ok();
-
         });
         app.MapGet("/confirm-payment/{id}", async (IPaymentResultHelper helper, string id) => await helper.GetPaymentStatusAsync(id));
     }
