@@ -46,8 +46,8 @@ public class MpesaCallbackHandler : IMpesaCallbackHandler
             return Results.BadRequest("No pending order found.");
 
         string transactionId = _mpesaApi.GetValue(metadata, "MpesaReceiptNumber");
-        if (string.IsNullOrEmpty(transactionId))
-            return Results.BadRequest("Missing MpesaReceiptNumber in callback.");
+        //if (string.IsNullOrEmpty(transactionId))
+        //    return Results.BadRequest("Missing MpesaReceiptNumber in callback.");
 
 
         try
