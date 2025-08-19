@@ -43,7 +43,28 @@ public class PaymentRoutes : IRouteRegistrar
             };
             return await handler.RegisterUrl(registerUri, requestModel);
         });
-        app.MapPost("/mpesa/callback", async (MpesaCallbackModel callback, IMpesaCallbackHandler handler) => { return await handler.HandleAsync(callback); });
+        app.MapPost("/mpesa/callback", async (HttpRequest request) =>
+        {
+            using var reader = new StreamReader(request.Body);
+            var rawBody = await reader.ReadToEndAsync();
+
+            var logPath = "/tmp/mpesa_callback_log.txt";
+
+            // Ensure directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(logPath)!);
+
+            // Append to file with timestamp
+            var logEntry = $"[{DateTime.UtcNow:yyyy-MM-dd HH:mm:ss}] {rawBody}\n\n";
+            try
+            {
+                await File.AppendAllTextAsync(logPath, logEntry);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Log write failed: {ex.Message}");
+            }
+            return Results.Ok();
+        });
         app.MapGet("/confirm-payment/{id}", async (IPaymentResultHelper helper, string id) => await helper.GetPaymentStatusAsync(id));
     }
 }
