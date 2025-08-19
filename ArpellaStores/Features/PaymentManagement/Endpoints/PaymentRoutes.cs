@@ -34,18 +34,21 @@ public class PaymentRoutes : IRouteRegistrar
             };
             return await handler.RegisterUrl(registerUri, requestModel);
         });
-        app.MapPost("/mpesa/callback", async (MpesaCallbackModel callback, IMpesaCallbackHandler handler, HttpRequest request) =>
+        app.MapPost("/mpesa/callback", async (HttpRequest request) =>
         {
             using var reader = new StreamReader(request.Body);
             var rawBody = await reader.ReadToEndAsync();
 
-            Console.WriteLine("Raw M-Pesa callback received: {Body}", rawBody);
+            var logPath = "/home/arpella/mpesa_logs/mpesa_callback_log.txt";
 
-            // Optionally: save to file for inspection
-            await File.WriteAllTextAsync("mpesa_callback_log.json", rawBody);
+            // Ensure directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(logPath)!);
+
+            // Append to file with timestamp
+            var logEntry = $"[{DateTime.UtcNow:yyyy-MM-dd HH:mm:ss}] {rawBody}\n\n";
+            await File.AppendAllTextAsync(logPath, logEntry);
 
             return Results.Ok();
-            //return await handler.HandleAsync(callback);
 
         });
         app.MapGet("/confirm-payment/{id}", async (IPaymentResultHelper helper, string id) => await helper.GetPaymentStatusAsync(id));
