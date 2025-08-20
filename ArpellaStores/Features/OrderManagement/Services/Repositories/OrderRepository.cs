@@ -84,24 +84,28 @@ public class OrderRepository : IOrderRepository
         _logger.LogInformation("Beginning to read inventories to be bought");
         foreach (var item in order.Orderitems)
         {
+            _logger.LogInformation($"Processing item for ProductId: {item.ProductId}, Quantity: {item.Quantity}");
+
             var inventory = await _context.Inventories
                 .FirstOrDefaultAsync(i => i.InventoryId == item.ProductId);
-            
-            if (inventory == null || inventory.StockQuantity < item.Quantity) {
-                _logger.LogInformation($"Inventory for {inventory} is null or stock quantity is lower that order quantity.");
+
+            if (inventory == null)
+            {
+                _logger.LogWarning("Inventory not found for ProductId: {ProductId}", item.ProductId);
+                throw new InvalidOperationException($"Insufficient stock for product {item.ProductId}");
+            }
+
+            if (inventory.StockQuantity < item.Quantity)
+            {
+                _logger.LogWarning("Insufficient stock for ProductId: {ProductId}. Available: {Available}, Required: {Required}",
+                    item.ProductId, inventory.StockQuantity, item.Quantity);
                 throw new InvalidOperationException($"Insufficient stock for product {item.ProductId}");
             }
 
             inventory.StockQuantity -= item.Quantity;
-            //_context.Orderitems.Add(new Orderitem
-            //{
-            //    OrderId = order.Orderid,
-            //    ProductId = item.ProductId,
-            //    Quantity = item.Quantity
-            //});
-
             _context.Inventories.Update(inventory);
         }
+
 
         var payment = new Payment
         {
