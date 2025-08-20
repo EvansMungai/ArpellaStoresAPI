@@ -1,5 +1,4 @@
-﻿using ArpellaStores.Data.Infrastructure;
-using ArpellaStores.Features.OrderManagement.Models;
+﻿using ArpellaStores.Features.OrderManagement.Models;
 using ArpellaStores.Features.OrderManagement.Services;
 using ArpellaStores.Features.PaymentManagement.Models;
 using Microsoft.Extensions.Caching.Memory;
@@ -10,14 +9,14 @@ namespace ArpellaStores.Features.PaymentManagement.Services;
 public class MpesaCallbackHandler : IMpesaCallbackHandler
 {
     private readonly IMemoryCache _cache;
-    private readonly ArpellaContext _context;
+    private readonly ILogger<MpesaCallbackHandler> _logger;
     private readonly IMpesaApiService _mpesaApi;
     private readonly IOrderRepository _repo;
     private readonly IOrderHelper _helper;
-    public MpesaCallbackHandler(IMemoryCache cache, ArpellaContext context, IMpesaApiService mpesaApi, IOrderRepository repo, IOrderHelper helper)
+    public MpesaCallbackHandler(IMemoryCache cache, ILogger<MpesaCallbackHandler> logger, IMpesaApiService mpesaApi, IOrderRepository repo, IOrderHelper helper)
     {
         _cache = cache;
-        _context = context;
+        _logger = logger;
         _mpesaApi = mpesaApi;
         _repo = repo;
         _helper = helper;
@@ -27,6 +26,7 @@ public class MpesaCallbackHandler : IMpesaCallbackHandler
     {
         try
         {
+            _logger.LogInformation($"Received callback: {request.Body}");
             using var reader = new StreamReader(request.Body);
             var rawBody = await reader.ReadToEndAsync();
 
@@ -47,29 +47,41 @@ public class MpesaCallbackHandler : IMpesaCallbackHandler
 
             if (stk.ResultCode != 0)
             {
+                _logger.LogInformation("Payment Transaction failed.");
                 _cache.Remove($"pending-order-{stk.CheckoutRequestID}");
+                _logger.LogInformation("Cached Order removed");
                 _cache.Set($"payment-result-{stk.CheckoutRequestID}", new
                 {
                     Status = "Failed",
                     Description = stk.ResultDesc
                 }, TimeSpan.FromMinutes(10));
-
+                _logger.LogInformation("Cached failed payment transaction");
                 return Results.BadRequest($"Payment failed: {stk.ResultDesc}");
             }
 
+            _logger.LogInformation("Payment Transaction successful");
             string cacheKey = $"pending-order-{stk.CheckoutRequestID}";
             if (!_cache.TryGetValue<Order>(cacheKey, out var cachedOrder))
+            {
+                _logger.LogInformation("Cached order was not found after successful transaction");
                 return Results.BadRequest("No pending order found.");
+            }
+
 
             string transactionId = _mpesaApi.GetValue(metadata, "MpesaReceiptNumber");
-            //if (string.IsNullOrEmpty(transactionId))
-            //    return Results.BadRequest("Missing MpesaReceiptNumber in callback.");
+            if (string.IsNullOrEmpty(transactionId))
+            {
+                _logger.LogInformation("Missing receipt number after successful payment");
+                return Results.BadRequest("Missing MpesaReceiptNumber in callback.");
+            }
 
 
             try
             {
+                _logger.LogInformation("Building cached order for storing it.");
                 var rebuiltOrder = _helper.RebuildOrder(cachedOrder);
                 await _repo.FinalizeOrderAsync(rebuiltOrder, transactionId);
+                _logger.LogInformation("Finished storing order details");
 
                 _cache.Remove(cacheKey);
                 _cache.Set($"payment-result-{stk.CheckoutRequestID}", new
