@@ -3,6 +3,7 @@ using ArpellaStores.Features.OrderManagement.Models;
 using ArpellaStores.Features.OrderManagement.Services;
 using ArpellaStores.Features.PaymentManagement.Models;
 using Microsoft.Extensions.Caching.Memory;
+using System.Text.Json;
 
 namespace ArpellaStores.Features.PaymentManagement.Services;
 
@@ -22,8 +23,20 @@ public class MpesaCallbackHandler : IMpesaCallbackHandler
         _helper = helper;
     }
 
-    public async Task<IResult> HandleAsync(MpesaCallbackModel callback)
+    public async Task<IResult> HandleAsync(HttpRequest request)
     {
+        using var reader = new StreamReader(request.Body);
+        var rawBody = await reader.ReadToEndAsync();
+
+        MpesaCallbackModel? callback;
+        try
+        {
+            callback = JsonSerializer.Deserialize<MpesaCallbackModel>(rawBody);
+        } catch (Exception ex)
+        {
+            return Results.BadRequest("Malformed JSON payload");
+        }
+
         var stk = callback.Body?.stkCallback;
         var metadata = stk?.CallbackMetadata?.Item;
         if (stk == null || metadata == null)
