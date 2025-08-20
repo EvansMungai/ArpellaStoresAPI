@@ -22,7 +22,7 @@ public class PaymentRoutes : IRouteRegistrar
     {
         var app = webApplication.MapGroup("").WithTags("Mpesa");
         app.MapGet("/access-token", (PaymentHandler handler) => handler.GenerateAccessToken());
-        app.MapPost("register-url", async (PaymentHandler handler) =>
+        app.MapPost("/register-url", async (PaymentHandler handler) =>
         {
             string registerUri = "https://api.safaricom.co.ke/mpesa/c2b/v1/registerurl";
             var requestModel = new RegisterUrlRequestModel
@@ -37,6 +37,11 @@ public class PaymentRoutes : IRouteRegistrar
         app.MapPost("/mpesa/callback", async (HttpRequest request) =>
         {
             await File.AppendAllTextAsync("/tmp/mpesa_debug.txt", $"[{DateTime.UtcNow}] Callback hit\n");
+            return Results.Ok();
+        });
+        app.MapPost("/{*path}", async (HttpRequest request) =>
+        {
+            await File.AppendAllTextAsync("/tmp/catch_all.txt", $"[{DateTime.UtcNow}] Hit: {request.Path}\n");
             return Results.Ok();
         });
         app.MapGet("/confirm-payment/{id}", async (IPaymentResultHelper helper, string id) => await helper.GetPaymentStatusAsync(id));
