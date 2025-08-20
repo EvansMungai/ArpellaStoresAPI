@@ -26,9 +26,9 @@ public class MpesaCallbackHandler : IMpesaCallbackHandler
     {
         try
         {
-            _logger.LogInformation($"Received callback: {request.Body}");
             using var reader = new StreamReader(request.Body);
             var rawBody = await reader.ReadToEndAsync();
+            _logger.LogInformation($"Received callback: {rawBody}");
 
             MpesaCallbackModel? callback;
             try
@@ -91,7 +91,7 @@ public class MpesaCallbackHandler : IMpesaCallbackHandler
                     OrderId = cachedOrder.Orderid
                 }, TimeSpan.FromMinutes(10));
 
-                return Results.Ok(new
+                return Results.Ok(new MpesaCallbackResponse
                 {
                     Message = "Order successfully recorded after confirmed payment.",
                     OrderId = cachedOrder.Orderid,
