@@ -28,7 +28,6 @@ public class MpesaCallbackHandler : IMpesaCallbackHandler
         {
             using var reader = new StreamReader(request.Body);
             var rawBody = await reader.ReadToEndAsync();
-            _logger.LogInformation($"Received callback: {rawBody}");
 
             MpesaCallbackModel? callback;
             try
@@ -37,7 +36,6 @@ public class MpesaCallbackHandler : IMpesaCallbackHandler
             }
             catch (Exception ex)
             {
-                _logger.LogWarning($"Malformed JSON: {ex.Message}");
                 return Results.Json(new { status = "error", message = "Malformed JSON payload" }, statusCode: 400);
             }
 
@@ -50,7 +48,7 @@ public class MpesaCallbackHandler : IMpesaCallbackHandler
             if (stk.ResultCode != 0)
             {
                 _logger.LogInformation($"Payment failed: {stk.ResultDesc}");
-                _cache.Remove($"pending-order-{stk.CheckoutRequestID}");
+                //_cache.Remove($"pending-order-{stk.CheckoutRequestID}");
                 _cache.Set($"payment-result-{stk.CheckoutRequestID}", new
                 {
                     Status = "Failed",
