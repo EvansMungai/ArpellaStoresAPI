@@ -23,6 +23,7 @@ public class OrderPaymentService : IOrderPaymentService
         string timestamp = DateTime.Now.ToString("yyyyMMddHHmmss");
         string password = Convert.ToBase64String(
             Encoding.UTF8.GetBytes(_mpesaConfig.BusinessShortCode + _mpesaConfig.Passkey + timestamp));
+        var callbackUri = Environment.GetEnvironmentVariable("MpesaConfig__CallbackUri");
 
         var payload = new LipaNaMpesaRequestModel
         {
@@ -35,7 +36,7 @@ public class OrderPaymentService : IOrderPaymentService
             PartyA = order.PhoneNumber,
             PartyB = _mpesaConfig.TillNumber,
             PhoneNumber = order.PhoneNumber,
-            CallBackUrl = _mpesaConfig.CallbackUri,
+            CallBackUrl = callbackUri,
             AccountReference = "ArpellaStores",
             TransactionDescription = order.Orderid
         };

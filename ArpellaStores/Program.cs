@@ -10,6 +10,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Add environment variables
 builder.Configuration.AddEnvironmentVariables();
 builder.Logging.AddConsole();
+DotNetEnv.Env.Load();
 
 
 var env = builder.Environment;
