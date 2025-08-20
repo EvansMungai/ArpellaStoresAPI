@@ -37,51 +37,56 @@ public class MpesaCallbackHandler : IMpesaCallbackHandler
             }
             catch (Exception ex)
             {
-                return Results.BadRequest("Malformed JSON payload");
+                _logger.LogWarning($"Malformed JSON: {ex.Message}");
+                return Results.Json(new { status = "error", message = "Malformed JSON payload" }, statusCode: 400);
             }
 
-            var stk = callback.Body?.stkCallback;
+            var stk = callback?.Body?.stkCallback;
             var metadata = stk?.CallbackMetadata?.Item;
-            if (stk == null || metadata == null)
-                return Results.BadRequest("Invalid callback structure.");
+
+            if (stk == null)
+                return Results.Json(new { status = "error", message = "Missing stkCallback" }, statusCode: 400);
 
             if (stk.ResultCode != 0)
             {
-                _logger.LogInformation("Payment Transaction failed.");
+                _logger.LogInformation($"Payment failed: {stk.ResultDesc}");
                 _cache.Remove($"pending-order-{stk.CheckoutRequestID}");
-                _logger.LogInformation("Cached Order removed");
                 _cache.Set($"payment-result-{stk.CheckoutRequestID}", new
                 {
                     Status = "Failed",
                     Description = stk.ResultDesc
                 }, TimeSpan.FromMinutes(10));
-                _logger.LogInformation("Cached failed payment transaction");
-                return Results.BadRequest($"Payment failed: {stk.ResultDesc}");
+
+                return Results.Json(new
+                {
+                    status = "failed",
+                    reason = stk.ResultDesc,
+                    code = stk.ResultCode
+                }, statusCode: 400);
             }
 
-            _logger.LogInformation("Payment Transaction successful");
+            if (metadata == null)
+                return Results.Json(new { status = "error", message = "Missing CallbackMetadata" }, statusCode: 400);
+
             string cacheKey = $"pending-order-{stk.CheckoutRequestID}";
             if (!_cache.TryGetValue<Order>(cacheKey, out var cachedOrder))
             {
-                _logger.LogInformation("Cached order was not found after successful transaction");
-                return Results.BadRequest("No pending order found.");
+                _logger.LogWarning("No pending order found.");
+                return Results.Json(new { status = "error", message = "No pending order found." }, statusCode: 400);
             }
-
 
             string transactionId = _mpesaApi.GetValue(metadata, "MpesaReceiptNumber");
             if (string.IsNullOrEmpty(transactionId))
             {
-                _logger.LogInformation("Missing receipt number after successful payment");
-                return Results.BadRequest("Missing MpesaReceiptNumber in callback.");
+                _logger.LogWarning("Missing MpesaReceiptNumber.");
+                return Results.Json(new { status = "error", message = "Missing MpesaReceiptNumber in callback." }, statusCode: 400);
             }
-
 
             try
             {
-                _logger.LogInformation("Building cached order for storing it.");
+                _logger.LogInformation("Finalizing order...");
                 var rebuiltOrder = _helper.RebuildOrder(cachedOrder);
                 await _repo.FinalizeOrderAsync(rebuiltOrder, transactionId);
-                _logger.LogInformation("Finished storing order details");
 
                 _cache.Remove(cacheKey);
                 _cache.Set($"payment-result-{stk.CheckoutRequestID}", new
@@ -91,25 +96,31 @@ public class MpesaCallbackHandler : IMpesaCallbackHandler
                     OrderId = cachedOrder.Orderid
                 }, TimeSpan.FromMinutes(10));
 
-                return Results.Ok(new MpesaCallbackResponse
+                return Results.Json(new MpesaCallbackResponse
                 {
                     Message = "Order successfully recorded after confirmed payment.",
                     OrderId = cachedOrder.Orderid,
                     TransactionId = transactionId,
                     Amount = cachedOrder.Total,
                     PhoneNumber = cachedOrder.PhoneNumber
-                });
+                }, statusCode: 200);
             }
             catch (Exception ex)
             {
+                _logger.LogError($"Persistence error: {ex.Message}");
                 _cache.Set($"payment-result-{stk.CheckoutRequestID}", new
                 {
                     Status = "Error",
                     Message = ex.Message
                 }, TimeSpan.FromMinutes(10));
-                return Results.BadRequest($"Persistence error: {ex.Message}");
+
+                return Results.Json(new { status = "error", message = $"Persistence error: {ex.Message}" }, statusCode: 500);
             }
         }
-        catch (Exception ex) { return Results.Problem($"Internal Server Error: {ex.Message}"); }
+        catch (Exception ex)
+        {
+            _logger.LogError($"Unhandled exception: {ex.Message}");
+            return Results.Json(new { status = "error", message = $"Internal Server Error: {ex.Message}" }, statusCode: 500);
+        }
     }
 }
