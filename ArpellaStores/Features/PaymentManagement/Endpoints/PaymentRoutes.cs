@@ -36,11 +36,7 @@ public class PaymentRoutes : IRouteRegistrar
         });
         app.MapPost("/mpesa/callback", async (HttpRequest request) =>
         {
-            var timestamp = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss");
-            var logPath = "/tmp/mpesa_callback_debug.txt";
-
-            await File.AppendAllTextAsync(logPath, $"[{timestamp}] Callback received\n");
-
+            await File.AppendAllTextAsync("/tmp/mpesa_debug.txt", $"[{DateTime.UtcNow}] Callback hit\n");
             return Results.Ok();
         });
         app.MapGet("/confirm-payment/{id}", async (IPaymentResultHelper helper, string id) => await helper.GetPaymentStatusAsync(id));
