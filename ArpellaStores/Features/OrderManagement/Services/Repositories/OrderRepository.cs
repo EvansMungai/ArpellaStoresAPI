@@ -7,9 +7,11 @@ namespace ArpellaStores.Features.OrderManagement.Services;
 public class OrderRepository : IOrderRepository
 {
     private readonly ArpellaContext _context;
-    public OrderRepository(ArpellaContext context)
+    private readonly ILogger<OrderRepository> _logger;
+    public OrderRepository(ArpellaContext context, ILogger<OrderRepository> logger)
     {
         _context = context;
+        _logger = logger;
     }
 
     public async Task<List<Order>> GetAllOrdersAsync()
@@ -75,16 +77,20 @@ public class OrderRepository : IOrderRepository
     }
     public async Task FinalizeOrderAsync(Order order, string transactionId)
     {
+        _logger.LogInformation("Beginning Finalize Order Async function");
         order.Status = "Paid";
         _context.Orders.Add(order);
 
+        _logger.LogInformation("Beginning to read inventories to be bought");
         foreach (var item in order.Orderitems)
         {
             var inventory = await _context.Inventories
                 .FirstOrDefaultAsync(i => i.InventoryId == item.ProductId);
-
-            if (inventory == null || inventory.StockQuantity < item.Quantity)
+            
+            if (inventory == null || inventory.StockQuantity < item.Quantity) {
+                _logger.LogInformation($"Inventory for {inventory} is null or stock quantity is lower that order quantity.");
                 throw new InvalidOperationException($"Insufficient stock for product {item.ProductId}");
+            }
 
             inventory.StockQuantity -= item.Quantity;
             //_context.Orderitems.Add(new Orderitem
@@ -103,8 +109,10 @@ public class OrderRepository : IOrderRepository
             TransactionId = transactionId,
             Status = "Completed"
         };
+        _logger.LogInformation("Add payment record to table");
         _context.Payments.Add(payment);
 
         await _context.SaveChangesAsync();
+        _logger.LogInformation("Finish saving orders, orderitems and payment records to table");
     }
 }

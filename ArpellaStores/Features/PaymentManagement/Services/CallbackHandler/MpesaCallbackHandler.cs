@@ -95,7 +95,7 @@ public class MpesaCallbackHandler : IMpesaCallbackHandler
                     Description = stk.ResultDesc,
                     OrderId = cachedOrder.Orderid
                 }, TimeSpan.FromMinutes(10));
-
+                _logger.LogInformation("Payment and saving items was successful.");
                 return Results.Json(new MpesaCallbackResponse
                 {
                     Message = "Order successfully recorded after confirmed payment.",

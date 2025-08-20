@@ -4,6 +4,8 @@ namespace ArpellaStores.Features.OrderManagement.Services;
 
 public class OrderHelper : IOrderHelper
 {
+    private readonly ILogger<OrderHelper> _logger;
+    public OrderHelper(ILogger<OrderHelper> logger) {  _logger = logger; }
     public string GenerateOrderId()
     {
         const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -29,6 +31,7 @@ public class OrderHelper : IOrderHelper
     }
     public Order RebuildOrder(Order cachedOrder)
     {
+        _logger.LogInformation("Rebuilding Order from Cache............");
         return new Order
         {
             Orderid = cachedOrder.Orderid,
