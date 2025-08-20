@@ -10,10 +10,12 @@ public class OrderPaymentService : IOrderPaymentService
 {
     private readonly IMpesaApiService _mpesaApiService;
     private readonly MpesaConfig _mpesaConfig;
-    public OrderPaymentService(IMpesaApiService api, IOptions<MpesaConfig> config)
+    private readonly ILogger<OrderPaymentService> _logger;
+    public OrderPaymentService(IMpesaApiService api, IOptions<MpesaConfig> config, ILogger<OrderPaymentService> logger)
     {
         _mpesaApiService = api;
         _mpesaConfig = config.Value;
+        _logger = logger;
     }
 
     public async Task<LipaNaMpesaResponseModel> InitiateStkPushAsync(Order order)
@@ -38,6 +40,7 @@ public class OrderPaymentService : IOrderPaymentService
             TransactionDescription = order.Orderid
         };
 
+        _logger.LogInformation($"This is the callback url used: {payload.CallBackUrl}");
         string uri = "https://api.safaricom.co.ke/mpesa/stkpush/v1/processrequest";
         return await _mpesaApiService.LipaNaMpesa(uri, payload);
     }

@@ -8,7 +8,6 @@ public class OrderService : IOrderService
     private readonly IOrderPaymentService _payment;
     private readonly IOrderHelper _helper;
     private readonly IOrderCacheService _cache;
-
     public OrderService(IOrderRepository repo, IOrderPaymentService payment, IOrderHelper helper, IOrderCacheService cache)
     {
         _repo = repo;
@@ -37,7 +36,6 @@ public class OrderService : IOrderService
             Amount = order.Total,
             Phonenumber = order.PhoneNumber
         };
-
         return Results.Accepted($"/confirm-payment/{stk.CheckoutRequestID}", responseData);
     }
 
