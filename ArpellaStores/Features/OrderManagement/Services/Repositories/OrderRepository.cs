@@ -102,11 +102,13 @@ public class OrderRepository : IOrderRepository
                 throw new InvalidOperationException($"Insufficient stock for product {item.ProductId}");
             }
 
+            _logger.LogInformation("Updating Inventory Quantity.");
             inventory.StockQuantity -= item.Quantity;
             _context.Inventories.Update(inventory);
+            _logger.LogInformation("Finished updating Inventory Quantity.");
         }
 
-
+        _logger.LogInformation("Creating Payment record object to be able to store it to the db");
         var payment = new Payment
         {
             Orderid = order.Orderid,
@@ -115,7 +117,9 @@ public class OrderRepository : IOrderRepository
         };
         _logger.LogInformation("Add payment record to table");
         _context.Payments.Add(payment);
+        _logger.LogInformation("Finished adding payment record to the db.");
 
+        _logger.LogInformation("Save changes made to the DB.");
         await _context.SaveChangesAsync();
         _logger.LogInformation("Finish saving orders, orderitems and payment records to table");
     }
