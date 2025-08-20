@@ -13,5 +13,5 @@ services:
         - ASPNETCORE_ENVIRONMENT=Production
         - HTTPS_PFX_PATH=/etc/ssl/private/arpella1.pfx
         - HTTPS_PFX_PASSWORD=${CERT_PASSWORD}
-        - MpesaConfig__CallbackUri=${MpesaConfig__CallbackUri}   
+        - MpesaConfig__CallbackUri=${MpesaConfig__CallbackUri}
     restart: always
