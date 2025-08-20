@@ -4,5 +4,5 @@ namespace ArpellaStores.Features.PaymentManagement.Services;
 
 public interface IMpesaCallbackHandler
 {
-    Task<IResult> HandleAsync(MpesaCallbackModel callback);
+    Task<IResult> HandleAsync(HttpRequest request);
 }
