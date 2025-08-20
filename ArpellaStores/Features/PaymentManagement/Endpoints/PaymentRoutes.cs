@@ -36,8 +36,7 @@ public class PaymentRoutes : IRouteRegistrar
         });
         app.MapPost("/mpesa/callback", async (HttpRequest request) =>
         {
-            await File.AppendAllTextAsync("/var/tmp/mpesa_debug.txt", $"[{DateTime.UtcNow}] Callback hit\n");
-            return Results.Ok();
+            return Results.Ok("Callback POST hit");
         });
         app.MapGet("/mpesa/callback", () => "Callback GET hit");
         app.MapGet("/confirm-payment/{id}", async (IPaymentResultHelper helper, string id) => await helper.GetPaymentStatusAsync(id));
