@@ -32,6 +32,13 @@ public class OrderHelper : IOrderHelper
     public Order RebuildOrder(Order cachedOrder)
     {
         _logger.LogInformation("Rebuilding Order from Cache............");
+
+        var rebuiltItems = cachedOrder.Orderitems.Select(item => new Orderitem
+        {
+            ProductId = item.ProductId,
+            Quantity = item.Quantity
+        }).ToList();
+
         return new Order
         {
             Orderid = cachedOrder.Orderid,
@@ -42,13 +49,7 @@ public class OrderHelper : IOrderHelper
             Latitude = cachedOrder.Latitude,
             Longitude = cachedOrder.Longitude,
             BuyerPin = cachedOrder.BuyerPin,
-            Orderitems = cachedOrder.Orderitems.Select(item => new Orderitem
-            {
-                OrderId = cachedOrder.Orderid,
-                ProductId = item.ProductId,
-                Quantity = item.Quantity
-            }).ToList()
+            Orderitems = rebuiltItems
         };
     }
-
 }

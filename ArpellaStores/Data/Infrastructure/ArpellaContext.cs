@@ -23,6 +23,7 @@ public partial class ArpellaContext : IdentityDbContext<User>
     {
         //_connectionString = configuration.GetConnectionString("arpellaDB");
         _connectionString = Environment.GetEnvironmentVariable("ConnectionStrings__arpellaDB");
+        ChangeTracker.LazyLoadingEnabled = false;
     }
 
     public virtual DbSet<Category> Categories { get; set; }
