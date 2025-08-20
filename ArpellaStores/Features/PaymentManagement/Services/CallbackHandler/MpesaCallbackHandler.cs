@@ -25,74 +25,79 @@ public class MpesaCallbackHandler : IMpesaCallbackHandler
 
     public async Task<IResult> HandleAsync(HttpRequest request)
     {
-        using var reader = new StreamReader(request.Body);
-        var rawBody = await reader.ReadToEndAsync();
-
-        MpesaCallbackModel? callback;
         try
         {
-            callback = JsonSerializer.Deserialize<MpesaCallbackModel>(rawBody);
-        } catch (Exception ex)
-        {
-            return Results.BadRequest("Malformed JSON payload");
-        }
+            using var reader = new StreamReader(request.Body);
+            var rawBody = await reader.ReadToEndAsync();
 
-        var stk = callback.Body?.stkCallback;
-        var metadata = stk?.CallbackMetadata?.Item;
-        if (stk == null || metadata == null)
-            return Results.BadRequest("Invalid callback structure.");
-
-        if (stk.ResultCode != 0)
-        {
-            _cache.Remove($"pending-order-{stk.CheckoutRequestID}");
-            _cache.Set($"payment-result-{stk.CheckoutRequestID}", new
+            MpesaCallbackModel? callback;
+            try
             {
-                Status = "Failed",
-                Description = stk.ResultDesc
-            }, TimeSpan.FromMinutes(10));
-
-            return Results.BadRequest($"Payment failed: {stk.ResultDesc}");
-        }
-
-        string cacheKey = $"pending-order-{stk.CheckoutRequestID}";
-        if (!_cache.TryGetValue<Order>(cacheKey, out var cachedOrder))
-            return Results.BadRequest("No pending order found.");
-
-        string transactionId = _mpesaApi.GetValue(metadata, "MpesaReceiptNumber");
-        //if (string.IsNullOrEmpty(transactionId))
-        //    return Results.BadRequest("Missing MpesaReceiptNumber in callback.");
-
-
-        try
-        {
-            var rebuiltOrder = _helper.RebuildOrder(cachedOrder);
-            await _repo.FinalizeOrderAsync(rebuiltOrder, transactionId);
-
-            _cache.Remove(cacheKey);
-            _cache.Set($"payment-result-{stk.CheckoutRequestID}", new
+                callback = JsonSerializer.Deserialize<MpesaCallbackModel>(rawBody);
+            }
+            catch (Exception ex)
             {
-                Status = "Success",
-                Description = stk.ResultDesc,
-                OrderId = cachedOrder.Orderid
-            }, TimeSpan.FromMinutes(10));
+                return Results.BadRequest("Malformed JSON payload");
+            }
 
-            return Results.Ok(new
+            var stk = callback.Body?.stkCallback;
+            var metadata = stk?.CallbackMetadata?.Item;
+            if (stk == null || metadata == null)
+                return Results.BadRequest("Invalid callback structure.");
+
+            if (stk.ResultCode != 0)
             {
-                Message = "Order successfully recorded after confirmed payment.",
-                OrderId = cachedOrder.Orderid,
-                TransactionId = transactionId,
-                Amount = cachedOrder.Total,
-                PhoneNumber = cachedOrder.PhoneNumber
-            });
-        }
-        catch (Exception ex)
-        {
-            _cache.Set($"payment-result-{stk.CheckoutRequestID}", new
+                _cache.Remove($"pending-order-{stk.CheckoutRequestID}");
+                _cache.Set($"payment-result-{stk.CheckoutRequestID}", new
+                {
+                    Status = "Failed",
+                    Description = stk.ResultDesc
+                }, TimeSpan.FromMinutes(10));
+
+                return Results.BadRequest($"Payment failed: {stk.ResultDesc}");
+            }
+
+            string cacheKey = $"pending-order-{stk.CheckoutRequestID}";
+            if (!_cache.TryGetValue<Order>(cacheKey, out var cachedOrder))
+                return Results.BadRequest("No pending order found.");
+
+            string transactionId = _mpesaApi.GetValue(metadata, "MpesaReceiptNumber");
+            //if (string.IsNullOrEmpty(transactionId))
+            //    return Results.BadRequest("Missing MpesaReceiptNumber in callback.");
+
+
+            try
             {
-                Status = "Error",
-                Message = ex.Message
-            }, TimeSpan.FromMinutes(10));
-            return Results.BadRequest($"Persistence error: {ex.Message}");
+                var rebuiltOrder = _helper.RebuildOrder(cachedOrder);
+                await _repo.FinalizeOrderAsync(rebuiltOrder, transactionId);
+
+                _cache.Remove(cacheKey);
+                _cache.Set($"payment-result-{stk.CheckoutRequestID}", new
+                {
+                    Status = "Success",
+                    Description = stk.ResultDesc,
+                    OrderId = cachedOrder.Orderid
+                }, TimeSpan.FromMinutes(10));
+
+                return Results.Ok(new
+                {
+                    Message = "Order successfully recorded after confirmed payment.",
+                    OrderId = cachedOrder.Orderid,
+                    TransactionId = transactionId,
+                    Amount = cachedOrder.Total,
+                    PhoneNumber = cachedOrder.PhoneNumber
+                });
+            }
+            catch (Exception ex)
+            {
+                _cache.Set($"payment-result-{stk.CheckoutRequestID}", new
+                {
+                    Status = "Error",
+                    Message = ex.Message
+                }, TimeSpan.FromMinutes(10));
+                return Results.BadRequest($"Persistence error: {ex.Message}");
+            }
         }
+        catch (Exception ex) { return Results.Problem($"Internal Server Error: {ex.Message}"); }
     }
 }
