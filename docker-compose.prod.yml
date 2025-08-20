@@ -1,0 +1,21 @@
+services:
+  arpellastores:
+    image: evansmungai/arpellastores:latest
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_HTTP_PORTS=8080
+      - ASPNETCORE_HTTPS_PORTS=8081
+      - HTTPS_PFX_PATH=/https/cloudflare.pfx
+      - HTTPS_PFX_PASSWORD=${CERT_PASSWORD}
+      - MpesaConfig__CallbackUri=${MpesaConfig__CallbackUri}  
+    ports:
+      - target: 8080
+        published: 8080
+        protocol: tcp
+      - target: 8081
+        published: 8081
+        protocol: tcp
+    volumes:
+      - /arpella-stores/certificates/cloudflare.pfx:/https/cloudflare.pfx:ro
+      - /arpella-stores/certificates/ca.pem:/certs/ca.pem:ro
+    restart: always
