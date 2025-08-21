@@ -38,7 +38,7 @@ public class MpesaCallbackHandler : IMpesaCallbackHandler
 
             if (stk.ResultCode != 0)
             {
-                //_cache.Remove($"pending-order-{stk.CheckoutRequestID}");
+                _cache.Remove($"pending-order-{stk.CheckoutRequestID}");
                 _cache.Set($"payment-result-{stk.CheckoutRequestID}", new
                 {
                     Status = "Failed",
@@ -90,6 +90,6 @@ public class MpesaCallbackHandler : IMpesaCallbackHandler
                 return Results.BadRequest($"Persistence error: {ex.Message}");
             }
         }
-        catch (Exception ex) { return Results.Problem("Internal Server Error."); }
+        catch (Exception ex) { return Results.Problem($"Internal Server Error: {ex.InnerException?.Message ?? ex.Message}"); }
     }
 }
