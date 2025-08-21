@@ -98,14 +98,7 @@ public class MpesaCallbackHandler : IMpesaCallbackHandler
                     OrderId = cachedOrder.Orderid
                 }, TimeSpan.FromMinutes(10));
                 _logger.LogInformation("Payment and saving items was successful.");
-                return Results.Json(new 
-                {
-                    Message = "Order successfully recorded after confirmed payment.",
-                    OrderId = cachedOrder.Orderid,
-                    TransactionId = transactionId,
-                    Amount = cachedOrder.Total,
-                    PhoneNumber = cachedOrder.PhoneNumber
-                }, statusCode: 200);
+                return Results.Ok(new {status = "success", message = "Payment processed successfully and order has been saved."});
             }
             catch (Exception ex)
             {
@@ -116,7 +109,7 @@ public class MpesaCallbackHandler : IMpesaCallbackHandler
                     Message = ex.Message
                 }, TimeSpan.FromMinutes(10));
 
-                return Results.Json(new { status = "error", message = $"Persistence error: {ex.Message}" }, statusCode: 500);
+                return Results.BadRequest(new { status = "error", message = $"Persistence error: {ex.Message}" });
             }
         }
         catch (Exception ex)
