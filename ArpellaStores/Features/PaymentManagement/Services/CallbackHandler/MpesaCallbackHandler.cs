@@ -86,7 +86,7 @@ public class MpesaCallbackHandler : IMpesaCallbackHandler
                 var rebuiltOrder = _helper.RebuildOrder(cachedOrder);
 
                 using var scope = _serviceProvider.CreateScope();
-                var finalizer = scope.ServiceProvider.GetRequiredService<OrderFinalizerService>();
+                var finalizer = scope.ServiceProvider.GetRequiredService<IOrderFinalizerService>();
                 await finalizer.FinalizeOrderAsync(rebuiltOrder, transactionId);
                 
 
