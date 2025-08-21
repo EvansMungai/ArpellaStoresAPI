@@ -31,7 +31,17 @@ public class OrderHelper : IOrderHelper
     //}
     public CachedOrderDto BuildNewOrder(Order orderDetails, decimal totalCost)
     {
-        return new CachedOrderDto
+        _logger.LogInformation("Building CachedOrderDto from Order entity...");
+
+        var dtoItems = orderDetails.Orderitems
+            .Select(item => new CachedOrderItemDto
+            {
+                ProductId = item.ProductId,
+                Quantity = item.Quantity
+            })
+            .ToList();
+
+        var dto = new CachedOrderDto
         {
             Orderid = GenerateOrderId(),
             UserId = orderDetails.UserId,
@@ -41,14 +51,11 @@ public class OrderHelper : IOrderHelper
             Latitude = orderDetails.Latitude,
             Longitude = orderDetails.Longitude,
             BuyerPin = orderDetails.BuyerPin,
-            Orderitems = orderDetails.Orderitems.Select(item => new CachedOrderItemDto
-            {
-                ProductId = item.ProductId,
-                Quantity = item.Quantity
-            }).ToList()
+            Orderitems = dtoItems
         };
 
-
+        _logger.LogInformation("CachedOrderDto built with {ItemCount} items", dtoItems.Count);
+        return dto;
     }
     public Order RebuildOrder(CachedOrderDto cachedOrder)
     {
