@@ -36,14 +36,14 @@ public class MpesaCallbackHandler : IMpesaCallbackHandler
             }
             catch (Exception ex)
             {
-                return Results.BadRequest(new { status = "error", message = "Malformed JSON payload" });
+                return Results.BadRequest("Malformed JSON payload");
             }
 
             var stk = callback?.Body?.stkCallback;
             var metadata = stk?.CallbackMetadata?.Item;
 
             if (stk == null)
-                return Results.BadRequest(new { status = "error", message = "Missing stkCallback" });
+                return Results.BadRequest("Missing stkCallback");
 
             if (stk.ResultCode != 0)
             {
@@ -55,16 +55,11 @@ public class MpesaCallbackHandler : IMpesaCallbackHandler
                     Description = stk.ResultDesc
                 }, TimeSpan.FromMinutes(10));
 
-                return Results.BadRequest(new
-                {
-                    status = "failed",
-                    reason = stk.ResultDesc,
-                    code = stk.ResultCode
-                });
+                return Results.BadRequest($"STK Failed:  {stk.ResultCode} =  {stk.ResultDesc}");
             }
 
             if (metadata == null)
-                return Results.BadRequest(new { status = "error", message = "Missing CallbackMetadata" });
+                return Results.BadRequest("Missing CallbackMetadata");
 
             string cacheKey = $"pending-order-{stk.CheckoutRequestID}";
             if (!_cache.TryGetValue<CachedOrderDto>(cacheKey, out var cachedOrder))
@@ -77,7 +72,7 @@ public class MpesaCallbackHandler : IMpesaCallbackHandler
             if (string.IsNullOrEmpty(transactionId))
             {
                 _logger.LogWarning("Missing MpesaReceiptNumber.");
-                return Results.BadRequest(new { status = "error", message = "Missing MpesaReceiptNumber in callback." });
+                return Results.BadRequest("Missing MpesaReceiptNumber in callback.");
             }
 
             try
@@ -97,8 +92,9 @@ public class MpesaCallbackHandler : IMpesaCallbackHandler
                     Description = stk.ResultDesc,
                     OrderId = cachedOrder.Orderid
                 }, TimeSpan.FromMinutes(10));
+
                 _logger.LogInformation("Payment and saving items was successful.");
-                return Results.Ok(new {status = "success", message = "Payment processed successfully and order has been saved."});
+                return Results.Ok("Payment processed successfully and order has been saved.");
             }
             catch (Exception ex)
             {
@@ -109,7 +105,7 @@ public class MpesaCallbackHandler : IMpesaCallbackHandler
                     Message = ex.Message
                 }, TimeSpan.FromMinutes(10));
 
-                return Results.BadRequest(new { status = "error", message = $"Persistence error: {ex.Message}" });
+                return Results.BadRequest($"Persistence error: {ex.Message}");
             }
         }
         catch (Exception ex)
