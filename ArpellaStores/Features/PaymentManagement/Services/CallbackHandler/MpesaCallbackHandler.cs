@@ -12,14 +12,14 @@ public class MpesaCallbackHandler : IMpesaCallbackHandler
     private readonly ILogger<MpesaCallbackHandler> _logger;
     private readonly IMpesaApiService _mpesaApi;
     private readonly IOrderHelper _helper;
-    private readonly IOrderFinalizerService _orderFinalizerService;
-    public MpesaCallbackHandler(IMemoryCache cache, ILogger<MpesaCallbackHandler> logger, IMpesaApiService mpesaApi, IOrderHelper helper, IOrderFinalizerService orderFinalizerService)
+    private readonly IServiceProvider _serviceProvider;
+    public MpesaCallbackHandler(IMemoryCache cache, ILogger<MpesaCallbackHandler> logger, IMpesaApiService mpesaApi, IOrderHelper helper, IServiceProvider serviceProvider)
     {
         _cache = cache;
         _logger = logger;
         _mpesaApi = mpesaApi;
         _helper = helper;
-        _orderFinalizerService = orderFinalizerService;
+        _serviceProvider = serviceProvider;
     }
 
     public async Task<IResult> HandleAsync(HttpRequest request)
@@ -84,7 +84,11 @@ public class MpesaCallbackHandler : IMpesaCallbackHandler
             {
                 _logger.LogInformation("Finalizing order...");
                 var rebuiltOrder = _helper.RebuildOrder(cachedOrder);
-                await _orderFinalizerService.FinalizeOrderAsync(rebuiltOrder, transactionId);
+
+                using var scope = _serviceProvider.CreateScope();
+                var finalizer = scope.ServiceProvider.GetRequiredService<OrderFinalizerService>();
+                await finalizer.FinalizeOrderAsync(rebuiltOrder, transactionId);
+                
 
                 _cache.Remove(cacheKey);
                 _cache.Set($"payment-result-{stk.CheckoutRequestID}", new
