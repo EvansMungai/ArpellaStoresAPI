@@ -118,7 +118,7 @@ public class MpesaCallbackHandler : IMpesaCallbackHandler
         catch (Exception ex)
         {
             _logger.LogError($"Unhandled exception: {ex.Message}");
-            return Results.Json(new { status = "error", message = $"Internal Server Error: {ex.Message}" }, statusCode: 500);
+            return Results.Problem("Internal Server Error.");
         }
     }
 }

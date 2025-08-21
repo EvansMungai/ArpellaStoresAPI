@@ -79,13 +79,17 @@ public class OrderRepository : IOrderRepository
     {
         _logger.LogInformation("Beginning Finalize Order Async function");
         order.Status = "Paid";
+
+        _logger.LogInformation("Sanity check: Order type is {Type}", order.GetType().Name);
+        _logger.LogInformation("Sanity check: First Orderitem type is {Type}", order.Orderitems.FirstOrDefault()?.GetType().Name);
+
         _context.Orders.Add(order);
 
         _logger.LogInformation("Beginning to read inventories to be bought");
         foreach (var item in order.Orderitems)
         {
             _logger.LogInformation($"Processing item for ProductId: {item.ProductId}, Quantity: {item.Quantity}");
-            _logger.LogInformation($"DB Connection State: {_context.Database.GetDbConnection().State}");
+            _logger.LogInformation($"DB Connection Type: {_context.Database.GetDbConnection().GetType()} and the state is {_context.Database.GetDbConnection().State}");
             var inventory = await _context.Inventories
                 .FirstOrDefaultAsync(i => i.InventoryId == item.ProductId);
 
