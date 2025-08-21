@@ -1,5 +1,4 @@
-﻿using ArpellaStores.Features.OrderManagement.Models;
-using ArpellaStores.Features.PaymentManagement.Models;
+﻿using ArpellaStores.Features.PaymentManagement.Models;
 using ArpellaStores.Features.PaymentManagement.Services;
 using Microsoft.Extensions.Options;
 using System.Text;
@@ -10,12 +9,10 @@ public class OrderPaymentService : IOrderPaymentService
 {
     private readonly IMpesaApiService _mpesaApiService;
     private readonly MpesaConfig _mpesaConfig;
-    private readonly ILogger<OrderPaymentService> _logger;
-    public OrderPaymentService(IMpesaApiService api, IOptions<MpesaConfig> config, ILogger<OrderPaymentService> logger)
+    public OrderPaymentService(IMpesaApiService api, IOptions<MpesaConfig> config)
     {
         _mpesaApiService = api;
         _mpesaConfig = config.Value;
-        _logger = logger;
     }
 
     public async Task<LipaNaMpesaResponseModel> InitiateStkPushAsync(CachedOrderDto order)
@@ -41,7 +38,6 @@ public class OrderPaymentService : IOrderPaymentService
             TransactionDescription = order.Orderid
         };
 
-        _logger.LogInformation($"This is the callback url used: {payload.CallBackUrl}");
         string uri = "https://api.safaricom.co.ke/mpesa/stkpush/v1/processrequest";
         return await _mpesaApiService.LipaNaMpesa(uri, payload);
     }

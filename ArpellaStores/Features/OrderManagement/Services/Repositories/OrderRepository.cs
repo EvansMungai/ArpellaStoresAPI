@@ -7,11 +7,9 @@ namespace ArpellaStores.Features.OrderManagement.Services;
 public class OrderRepository : IOrderRepository
 {
     private readonly ArpellaContext _context;
-    private readonly ILogger<OrderRepository> _logger;
-    public OrderRepository(ArpellaContext context, ILogger<OrderRepository> logger)
+    public OrderRepository(ArpellaContext context)
     {
         _context = context;
-        _logger = logger;
     }
 
     public async Task<List<Order>> GetAllOrdersAsync()
