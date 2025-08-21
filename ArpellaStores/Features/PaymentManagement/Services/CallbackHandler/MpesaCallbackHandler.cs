@@ -67,7 +67,7 @@ public class MpesaCallbackHandler : IMpesaCallbackHandler
                 return Results.Json(new { status = "error", message = "Missing CallbackMetadata" }, statusCode: 400);
 
             string cacheKey = $"pending-order-{stk.CheckoutRequestID}";
-            if (!_cache.TryGetValue<Order>(cacheKey, out var cachedOrder))
+            if (!_cache.TryGetValue<CachedOrderDto>(cacheKey, out var cachedOrder))
             {
                 _logger.LogWarning("No pending order found.");
                 return Results.Json(new { status = "error", message = "No pending order found." }, statusCode: 400);
@@ -94,7 +94,7 @@ public class MpesaCallbackHandler : IMpesaCallbackHandler
                     OrderId = cachedOrder.Orderid
                 }, TimeSpan.FromMinutes(10));
                 _logger.LogInformation("Payment and saving items was successful.");
-                return Results.Json(new MpesaCallbackResponse
+                return Results.Json(new 
                 {
                     Message = "Order successfully recorded after confirmed payment.",
                     OrderId = cachedOrder.Orderid,

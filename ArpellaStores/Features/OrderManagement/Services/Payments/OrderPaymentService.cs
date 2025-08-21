@@ -18,7 +18,7 @@ public class OrderPaymentService : IOrderPaymentService
         _logger = logger;
     }
 
-    public async Task<LipaNaMpesaResponseModel> InitiateStkPushAsync(Order order)
+    public async Task<LipaNaMpesaResponseModel> InitiateStkPushAsync(CachedOrderDto order)
     {
         string timestamp = DateTime.Now.ToString("yyyyMMddHHmmss");
         string password = Convert.ToBase64String(

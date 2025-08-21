@@ -5,7 +5,7 @@ namespace ArpellaStores.Features.OrderManagement.Services;
 public class OrderHelper : IOrderHelper
 {
     private readonly ILogger<OrderHelper> _logger;
-    public OrderHelper(ILogger<OrderHelper> logger) {  _logger = logger; }
+    public OrderHelper(ILogger<OrderHelper> logger) { _logger = logger; }
     public string GenerateOrderId()
     {
         const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -14,9 +14,24 @@ public class OrderHelper : IOrderHelper
             .Select(s => s[random.Next(s.Length)]).ToArray());
     }
 
-    public Order BuildNewOrder(Order orderDetails, decimal totalCost)
+    //public Order BuildNewOrder(Order orderDetails, decimal totalCost)
+    //{
+    //    return new Order
+    //    {
+    //        Orderid = GenerateOrderId(),
+    //        UserId = orderDetails.UserId,
+    //        PhoneNumber = orderDetails.PhoneNumber,
+    //        Status = "Pending",
+    //        Total = totalCost,
+    //        Latitude = orderDetails.Latitude,
+    //        Longitude = orderDetails.Longitude,
+    //        BuyerPin = orderDetails.BuyerPin,
+    //        Orderitems = orderDetails.Orderitems
+    //    };
+    //}
+    public CachedOrderDto BuildNewOrder(Order orderDetails, decimal totalCost)
     {
-        return new Order
+        return new CachedOrderDto
         {
             Orderid = GenerateOrderId(),
             UserId = orderDetails.UserId,
@@ -26,10 +41,16 @@ public class OrderHelper : IOrderHelper
             Latitude = orderDetails.Latitude,
             Longitude = orderDetails.Longitude,
             BuyerPin = orderDetails.BuyerPin,
-            Orderitems = orderDetails.Orderitems
+            Orderitems = orderDetails.Orderitems.Select(item => new CachedOrderItemDto
+            {
+                ProductId = item.ProductId,
+                Quantity = item.Quantity
+            }).ToList()
         };
+
+
     }
-    public Order RebuildOrder(Order cachedOrder)
+    public Order RebuildOrder(CachedOrderDto cachedOrder)
     {
         _logger.LogInformation("Rebuilding Order from Cache............");
 

@@ -85,7 +85,7 @@ public class OrderRepository : IOrderRepository
         foreach (var item in order.Orderitems)
         {
             _logger.LogInformation($"Processing item for ProductId: {item.ProductId}, Quantity: {item.Quantity}");
-
+            _logger.LogInformation($"DB Connection State: {_context.Database.GetDbConnection().State}");
             var inventory = await _context.Inventories
                 .FirstOrDefaultAsync(i => i.InventoryId == item.ProductId);
 

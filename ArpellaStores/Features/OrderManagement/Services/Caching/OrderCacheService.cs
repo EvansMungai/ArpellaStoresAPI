@@ -11,7 +11,7 @@ public class OrderCacheService : IOrderCacheService
         _cache = cache;
     }
 
-    public void CacheOrder(string key, Order order, TimeSpan expiration)
+    public void CacheOrder(string key, CachedOrderDto order, TimeSpan expiration)
     {
         _cache.Set(key, order, expiration);
     }

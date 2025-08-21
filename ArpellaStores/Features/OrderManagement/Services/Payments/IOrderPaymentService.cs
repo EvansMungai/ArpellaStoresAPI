@@ -5,5 +5,5 @@ namespace ArpellaStores.Features.OrderManagement.Services;
 
 public interface IOrderPaymentService
 {
-    Task<LipaNaMpesaResponseModel> InitiateStkPushAsync(Order order);
+    Task<LipaNaMpesaResponseModel> InitiateStkPushAsync(CachedOrderDto order);
 }

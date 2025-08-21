@@ -4,5 +4,5 @@ namespace ArpellaStores.Features.OrderManagement.Services;
 
 public interface IOrderCacheService
 {
-    void CacheOrder(string key, Order order, TimeSpan expiration);
+    void CacheOrder(string key, CachedOrderDto order, TimeSpan expiration);
 }
