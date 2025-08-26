@@ -7,13 +7,15 @@ public class OrderService : IOrderService
     private readonly IOrderRepository _repo;
     private readonly IOrderPaymentService _payment;
     private readonly IOrderHelper _helper;
-    private readonly IOrderCacheService _cache;
-    public OrderService(IOrderRepository repo, IOrderPaymentService payment, IOrderHelper helper, IOrderCacheService cache)
+    private readonly IOrderCacheService _cache; 
+    private readonly IServiceProvider _serviceProvider;
+    public OrderService(IOrderRepository repo, IOrderPaymentService payment, IOrderHelper helper, IOrderCacheService cache, IServiceProvider serviceProvider)
     {
         _repo = repo;
         _payment = payment;
         _helper = helper;
         _cache = cache;
+        _serviceProvider = serviceProvider;
     }
 
     public async Task<IResult> CreateOrder(Order orderDetails)
@@ -24,19 +26,33 @@ public class OrderService : IOrderService
         var total = await _repo.CalculateTotalOrderCost(orderDetails);
         var order = _helper.BuildNewOrder(orderDetails, total);
 
-        var stk = await _payment.InitiateStkPushAsync(order);
-        if (stk == null || string.IsNullOrEmpty(stk.CheckoutRequestID))
-            return Results.BadRequest("STK Push failed");
-
-        _cache.CacheOrder($"pending-order-{stk.CheckoutRequestID}", order, TimeSpan.FromMinutes(15));
-
-        var responseData = new
+        if (order.OrderPaymentType == "Mpesa")
         {
-            StkPush = stk,
-            Amount = order.Total,
-            Phonenumber = order.PhoneNumber
-        };
-        return Results.Accepted($"/confirm-payment/{stk.CheckoutRequestID}", responseData);
+            var stk = await _payment.InitiateStkPushAsync(order);
+            if (stk == null || string.IsNullOrEmpty(stk.CheckoutRequestID))
+                return Results.BadRequest("STK Push failed");
+
+            _cache.CacheOrder($"pending-order-{stk.CheckoutRequestID}", order, TimeSpan.FromMinutes(15));
+
+            var responseData = new
+            {
+                StkPush = stk,
+                Amount = order.Total,
+                Phonenumber = order.PhoneNumber
+            };
+            return Results.Accepted($"/confirm-payment/{stk.CheckoutRequestID}", responseData);
+        }
+        else
+        {
+            var rebuiltOrder = _helper.RebuildOrder(order);
+            var transactionId = "Cash";
+
+            using var scope = _serviceProvider.CreateScope();
+            var finalizer = scope.ServiceProvider.GetRequiredService<IOrderFinalizerService>();
+            await finalizer.FinalizeOrderAsync(rebuiltOrder, transactionId);
+            
+            return Results.Ok("Payment processed successfully and order has been saved.");
+        }
     }
 
     public async Task<IResult> GetOrders()

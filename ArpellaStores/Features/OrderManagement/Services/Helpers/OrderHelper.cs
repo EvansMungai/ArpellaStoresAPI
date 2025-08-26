@@ -31,6 +31,7 @@ public class OrderHelper : IOrderHelper
             Total = totalCost,
             Latitude = orderDetails.Latitude,
             Longitude = orderDetails.Longitude,
+            OrderPaymentType = orderDetails.OrderPaymentType,
             BuyerPin = orderDetails.BuyerPin,
             Orderitems = dtoItems
         };
@@ -55,6 +56,7 @@ public class OrderHelper : IOrderHelper
             Total = cachedOrder.Total,
             Latitude = cachedOrder.Latitude,
             Longitude = cachedOrder.Longitude,
+            OrderPaymentType = cachedOrder.OrderPaymentType,
             BuyerPin = cachedOrder.BuyerPin,
             Orderitems = rebuiltItems
         };

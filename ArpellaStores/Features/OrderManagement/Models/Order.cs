@@ -27,6 +27,7 @@ public partial class Order
 
     [Required(ErrorMessage = "Longitude is required.")]
     public decimal? Longitude { get; set; }
+    public string? OrderPaymentType { get; set; }
 
     public virtual ICollection<Deliverytracking> Deliverytrackings { get; set; } = new List<Deliverytracking>();
 

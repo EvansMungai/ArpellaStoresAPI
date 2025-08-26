@@ -343,6 +343,9 @@ public partial class ArpellaContext : IdentityDbContext<User>
             entity.Property(e => e.UserId)
                 .HasMaxLength(30)
                 .HasColumnName("userId");
+            entity.Property(e => e.OrderPaymentType)
+                .HasColumnType("enum('Cash','Mpesa')")
+                .HasColumnName("orderPaymentType");
 
             entity.HasOne(d => d.User).WithMany(p => p.Orders)
                 .HasPrincipalKey(p => p.UserName)
