@@ -12,7 +12,6 @@ public partial class Order
     [StringLength(30, ErrorMessage = "Username must be at most 30 characters.")]
     public string? UserId { get; set; }
 
-    [Required(ErrorMessage = "Phone number is required.")]
     [StringLength(30, ErrorMessage = "Phone number must be at most 30 characters.")]
     public string PhoneNumber { get; set; }
 
