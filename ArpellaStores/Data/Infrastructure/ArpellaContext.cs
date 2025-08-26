@@ -346,7 +346,15 @@ public partial class ArpellaContext : IdentityDbContext<User>
             entity.Property(e => e.OrderPaymentType)
                 .HasColumnType("enum('Cash','Mpesa')")
                 .HasColumnName("orderPaymentType");
-
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                .HasColumnType("timestamp")
+                .HasColumnName("createdAt");
+            entity.Property(e => e.UpdatedAt)
+                .ValueGeneratedOnAddOrUpdate()
+                .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                .HasColumnType("timestamp")
+                .HasColumnName("updatedAt");
             entity.HasOne(d => d.User).WithMany(p => p.Orders)
                 .HasPrincipalKey(p => p.UserName)
                 .HasForeignKey(d => d.UserId)
