@@ -18,7 +18,7 @@ public class OrderRepository : IOrderRepository
     }
     public async Task<Order?> GetOrderByIdAsync(string id)
     {
-        return await _context.Orders.Include(o => o.Orderitems).ThenInclude(oi => oi.Product).AsNoTracking().SingleOrDefaultAsync();
+        return await _context.Orders.Include(o => o.Orderitems).ThenInclude(oi => oi.Product).AsNoTracking().SingleOrDefaultAsync(o => o.Orderid == id);
     }
     public async Task<bool> ExistsAsync(string orderId)
     {

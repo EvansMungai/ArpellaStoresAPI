@@ -67,6 +67,8 @@ public class OrderService : IOrderService
             o.UserId,
             o.Status,
             o.Total,
+            o.Latitude,
+            o.Longitude,
             Orderitem = o.Orderitems.Select(
                 oi => new
                 {
@@ -94,6 +96,8 @@ public class OrderService : IOrderService
             order.UserId,
             order.Status,
             order.Total,
+            order.Latitude,
+            order.Longitude,
             OrderItems = order.Orderitems.Select(oi => new
             {
                 oi.OrderId,
