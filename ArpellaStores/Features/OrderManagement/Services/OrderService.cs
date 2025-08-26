@@ -7,7 +7,7 @@ public class OrderService : IOrderService
     private readonly IOrderRepository _repo;
     private readonly IOrderPaymentService _payment;
     private readonly IOrderHelper _helper;
-    private readonly IOrderCacheService _cache; 
+    private readonly IOrderCacheService _cache;
     private readonly IServiceProvider _serviceProvider;
     public OrderService(IOrderRepository repo, IOrderPaymentService payment, IOrderHelper helper, IOrderCacheService cache, IServiceProvider serviceProvider)
     {
@@ -50,7 +50,7 @@ public class OrderService : IOrderService
             using var scope = _serviceProvider.CreateScope();
             var finalizer = scope.ServiceProvider.GetRequiredService<IOrderFinalizerService>();
             await finalizer.FinalizeOrderAsync(rebuiltOrder, transactionId);
-            
+
             return Results.Ok("Payment processed successfully and order has been saved.");
         }
     }
@@ -113,7 +113,34 @@ public class OrderService : IOrderService
         };
         return Results.Ok(formatted);
     }
+    public async Task<IResult> GetPagedOrders(int pageNumber, int pageSize)
+    {
+        var orders = await _repo.GetPagedOrdersAsync(pageNumber, pageSize);
+        if (orders == null || orders.Count == 0)
+            return Results.NotFound("No Orders found");
 
+        var formatted = orders.Select(o => new
+        {
+            o.Orderid,
+            o.UserId,
+            o.Status,
+            o.Total,
+            o.Latitude,
+            o.Longitude,
+            Orderitem = o.Orderitems.Select(
+                oi => new
+                {
+                    oi.ProductId,
+                    oi.Quantity,
+                    Product = new
+                    {
+                        oi.Product.Name,
+                        oi.Product.Price
+                    }
+                })
+        });
+        return Results.Ok(formatted);
+    }
     public async Task<IResult> RemoveOrder(string id)
     {
         var existing = await _repo.GetOrderByIdAsync(id);

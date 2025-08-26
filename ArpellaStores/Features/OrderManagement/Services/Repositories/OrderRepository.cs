@@ -20,6 +20,12 @@ public class OrderRepository : IOrderRepository
     {
         return await _context.Orders.Include(o => o.Orderitems).ThenInclude(oi => oi.Product).AsNoTracking().SingleOrDefaultAsync(o => o.Orderid == id);
     }
+    public async Task<List<Order>> GetPagedOrdersAsync(int pageNumber, int pageSize)
+    {
+        return await _context.Orders.Include(o => o.Orderitems).ThenInclude(oi => oi.Product)
+            .Skip((pageNumber - 1) * pageSize).Take(pageSize)
+            .AsNoTracking().ToListAsync();
+    }
     public async Task<bool> ExistsAsync(string orderId)
     {
         return await _context.Orders.AsNoTracking().AnyAsync(o => o.Orderid == orderId);
