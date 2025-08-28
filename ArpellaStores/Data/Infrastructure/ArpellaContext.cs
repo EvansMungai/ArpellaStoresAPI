@@ -355,6 +355,10 @@ public partial class ArpellaContext : IdentityDbContext<User>
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")
                 .HasColumnType("timestamp")
                 .HasColumnName("updatedAt");
+            entity.Property(e => e.OrderSource)
+                .HasColumnType("enum('Ecommerce','POS')")
+                .HasColumnName("orderSource");
+
             entity.HasOne(d => d.User).WithMany(p => p.Orders)
                 .HasPrincipalKey(p => p.UserName)
                 .HasForeignKey(d => d.UserId)

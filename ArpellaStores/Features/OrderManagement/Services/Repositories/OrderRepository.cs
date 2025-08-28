@@ -48,17 +48,31 @@ public class OrderRepository : IOrderRepository
     public async Task<decimal> CalculateTotalOrderCost(Order order)
     {
         decimal totalCost = 0;
-
-        // Retrieve and parse delivery fee
-        var deliverySetting = await _context.Settings
-            .SingleOrDefaultAsync(s => s.SettingName == "Delivery Fee");
-
         decimal deliveryfee = 0;
-        if (deliverySetting != null && decimal.TryParse(deliverySetting.SettingValue, out var fee))
-        {
-            deliveryfee = fee;
-        }
 
+        if (order.OrderSource == "Ecommerce")
+        {
+            // Retrieve and parse delivery fee
+            var deliverySetting = await _context.Settings
+                .SingleOrDefaultAsync(s => s.SettingName == "Delivery Fee");
+
+            if (deliverySetting != null && decimal.TryParse(deliverySetting.SettingValue, out var fee))
+            {
+                deliveryfee = fee;
+            }
+            totalCost = CalculateOrderPrice(order, deliveryfee);
+            return totalCost;
+        }
+        else
+        {
+            totalCost = CalculateOrderPrice(order, deliveryfee);
+            return totalCost;
+        }
+    }
+    #region Helpers
+    private decimal CalculateOrderPrice(Order order, decimal deliveryfee)
+    {
+        decimal totalPrice = 0;
         foreach (var item in order.Orderitems)
         {
             var product = _context.Products.SingleOrDefault(p => p.Id == item.ProductId);
@@ -67,16 +81,17 @@ public class OrderRepository : IOrderRepository
                 if (item.Quantity > product.DiscountQuantity)
                 {
                     decimal price = (decimal)product.PriceAfterDiscount;
-                    totalCost += (decimal)item.Quantity * price;
+                    totalPrice += (decimal)item.Quantity * price;
                 }
                 else
                 {
                     decimal price = product.Price;
-                    totalCost += (decimal)item.Quantity * price;
+                    totalPrice += (decimal)item.Quantity * price;
                 }
-                totalCost += (decimal)deliveryfee;
+                totalPrice += (decimal)deliveryfee;
             }
         }
-        return totalCost;
+        return totalPrice;
     }
+    #endregion
 }
