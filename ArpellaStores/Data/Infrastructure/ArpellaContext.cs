@@ -5,6 +5,7 @@ using ArpellaStores.Features.GoodsInformationManagement.Models;
 using ArpellaStores.Features.InventoryManagement.Models;
 using ArpellaStores.Features.OrderManagement.Models;
 using ArpellaStores.Features.SettingManagement.Models;
+using ArpellaStores.Features.SmsManagement.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -44,6 +45,7 @@ public partial class ArpellaContext : IdentityDbContext<User>
     public virtual DbSet<Productimage> Productimages { get; set; }
     public virtual DbSet<Restocklog> Restocklogs { get; set; }
     public virtual DbSet<Setting> Settings { get; set; }
+    public virtual DbSet<SmsTemplate> SmsTemplates{ get; set; }
     public virtual DbSet<Subcategory> Subcategories { get; set; }
     public virtual DbSet<Supplier> Suppliers { get; set; }
 
@@ -552,6 +554,30 @@ public partial class ArpellaContext : IdentityDbContext<User>
             entity.Property(e => e.SettingValue)
                 .HasMaxLength(50)
                 .HasColumnName("settingValue");
+        });
+
+        modelBuilder.Entity<SmsTemplate>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PRIMARY");
+
+            entity.ToTable("smstemplates");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.Content)
+                .HasMaxLength(255)
+                .HasColumnName("content");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                .HasColumnType("timestamp")
+                .HasColumnName("createdAt");
+            entity.Property(e => e.TemplateType)
+                .HasMaxLength(100)
+                .HasColumnName("templateType");
+            entity.Property(e => e.UpdatedAt)
+                .ValueGeneratedOnAddOrUpdate()
+                .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                .HasColumnType("timestamp")
+                .HasColumnName("updatedAt");
         });
 
         modelBuilder.Entity<Subcategory>(entity =>
