@@ -67,7 +67,10 @@ public class MpesaCallbackHandler : IMpesaCallbackHandler
                 using var scope = _serviceProvider.CreateScope();
                 var finalizer = scope.ServiceProvider.GetRequiredService<IOrderFinalizerService>();
                 await finalizer.FinalizeOrderAsync(rebuiltOrder, transactionId);
-
+                var notificationService = scope.ServiceProvider.GetRequiredService<IOrderNotificationService>();
+                await notificationService.NofityCustomerAsync(rebuiltOrder);
+                await notificationService.NotifyOrderManagerAsync(rebuiltOrder, "254768212567");
+    
 
                 _cache.Remove(cacheKey);
                 _cache.Set($"payment-result-{stk.CheckoutRequestID}", new
