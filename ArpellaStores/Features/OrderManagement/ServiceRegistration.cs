@@ -8,6 +8,7 @@ public static class ServiceRegistration
         serviceCollection.AddScoped<IOrderPaymentService, OrderPaymentService>();
         serviceCollection.AddScoped<IOrderHelper, OrderHelper>();
         serviceCollection.AddScoped<IOrderCacheService, OrderCacheService>();
+        serviceCollection.AddScoped<IOrderNotificationService, OrderNotificationService>();
         serviceCollection.AddScoped<IOrderFinalizerService, OrderFinalizerService>();
         serviceCollection.AddScoped<IOrderService, OrderService>();
     }
