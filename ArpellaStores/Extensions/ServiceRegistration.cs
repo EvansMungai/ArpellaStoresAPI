@@ -2,6 +2,7 @@
 using ArpellaStores.Extensions.RouteHandlers;
 using ArpellaStores.Extensions.ServiceHandlers;
 using ArpellaStores.Features.PaymentManagement.Models;
+using ArpellaStores.Features.SmsManagement.Models;
 using RouteBuilder = ArpellaStores.Extensions.RouteHandlers.RouteBuilder;
 
 namespace ArpellaStores.Extensions;
@@ -29,6 +30,9 @@ public static class ServiceRegistration
 
         // Bind and configure MpesaConfig
         serviceCollection.Configure<MpesaConfig>(configuration.GetSection("MpesaConfig"));
+
+        // Bind and configure SmsConfig
+        serviceCollection.Configure<HostPinnacleOptions>(configuration.GetSection("HOSTPINNACLE"));
 
         // Register application services
         serviceCollection.RegisterFeatureServices();
