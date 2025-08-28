@@ -1,6 +1,5 @@
 ﻿using ArpellaStores.Features.InventoryManagement.Services;
 using ArpellaStores.Features.OrderManagement.Models;
-using ArpellaStores.Features.SmsManagement.Models;
 using ArpellaStores.Features.SmsManagement.Services;
 
 namespace ArpellaStores.Features.OrderManagement.Services;
@@ -10,11 +9,13 @@ public class OrderNotificationService : IOrderNotificationService
     private readonly IProductRepository _repo;
     private readonly ISmsTemplateRepository _smsTemplateRepo;
     private readonly ISmsService _smsService;
-    public OrderNotificationService(IProductRepository repo, ISmsTemplateRepository smsTemplateRepo, ISmsService smsService)
+    private readonly ILogger<OrderNotificationService> _logger;
+    public OrderNotificationService(IProductRepository repo, ISmsTemplateRepository smsTemplateRepo, ISmsService smsService, ILogger<OrderNotificationService> logger)
     {
         _repo = repo;
         _smsTemplateRepo = smsTemplateRepo;
         _smsService = smsService;
+        _logger = logger;
     }
     public async Task NofityCustomerAsync(Order order)
     {
@@ -26,11 +27,15 @@ public class OrderNotificationService : IOrderNotificationService
 
         var formattedItems = await FormatOrderItemsAsync(rebuildItems);
 
+        _logger.LogInformation($"Retrieving message template.............");
+
         var template = await _smsTemplateRepo.GetSmsTemplateAsync("CustomerOrderCreationMessage");
+        _logger.LogInformation($"Retrieved Message template.");
 
         var message = template.Content
             .Replace("{orderId}", order.Orderid.ToString())
             .Replace("{orderItems}", formattedItems);
+        _logger.LogInformation($"This is the message content: {message}.");
 
         await _smsService.SendQuickSMSAsync(message, order.PhoneNumber);
     }
@@ -43,12 +48,15 @@ public class OrderNotificationService : IOrderNotificationService
         }).ToList();
 
         var formattedItems = await FormatOrderItemsAsync(rebuildItems);
+        _logger.LogInformation($"Retrieving message template.............");
 
         var template = await _smsTemplateRepo.GetSmsTemplateAsync("OrderManagerOrderCreationMessage");
+        _logger.LogInformation($"Retrieved Message template.");
 
         var message = template.Content
             .Replace("{orderId}", order.Orderid.ToString())
             .Replace("{orderItems}", formattedItems);
+        _logger.LogInformation($"This is the message content: {message}.");
 
         await _smsService.SendQuickSMSAsync(message, phoneNumber);
     }

@@ -8,10 +8,12 @@ public class SmsService : ISmsService
 {
     private readonly HttpClient _httpClient;
     private readonly HostPinnacleOptions _options;
-    public SmsService(HttpClient httpClient, IOptions<HostPinnacleOptions> options)
+    private readonly ILogger<SmsService> _logger;
+    public SmsService(HttpClient httpClient, IOptions<HostPinnacleOptions> options, ILogger<SmsService> logger)
     {
         _httpClient = httpClient;
         _options = options.Value;
+        _logger = logger;
     }
     public async Task<string> SendQuickSMSAsync(string message, string mobile)
     {
@@ -44,6 +46,7 @@ public class SmsService : ISmsService
         response.EnsureSuccessStatusCode();
 
         var responseBody = await response.Content.ReadAsStringAsync();
+        _logger.LogInformation($"This is the hostpinnacle sms api response: {responseBody}.");
         return responseBody;
     }
 }
