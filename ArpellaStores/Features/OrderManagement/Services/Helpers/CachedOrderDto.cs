@@ -10,6 +10,7 @@ public class CachedOrderDto
     public decimal? Latitude { get; set; }
     public decimal? Longitude { get; set; }
     public string? OrderPaymentType { get; set; }
+    public string? OrderSource { get; set; }
     public string BuyerPin { get; set; }
     public List<CachedOrderItemDto> Orderitems { get; set; }
 

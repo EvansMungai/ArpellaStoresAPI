@@ -45,6 +45,7 @@ public class OrderService : IOrderService
         else
         {
             order.OrderPaymentType = "Cash";
+            order.OrderSource = "POS";
             var rebuiltOrder = _helper.RebuildOrder(order);
             var transactionId = "Cash";
 
