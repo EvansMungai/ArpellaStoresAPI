@@ -564,7 +564,7 @@ public partial class ArpellaContext : IdentityDbContext<User>
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Content)
-                .HasMaxLength(255)
+                .HasMaxLength(300)
                 .HasColumnName("content");
             entity.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")
