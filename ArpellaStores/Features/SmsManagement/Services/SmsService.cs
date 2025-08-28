@@ -32,8 +32,8 @@ public class SmsService : ISmsService
             {"duplicatecheck", "true"},
             {"output", "json"}
         };
-
-        var request = new HttpRequestMessage(HttpMethod.Post, $"{_options.BaseUrl}/send")
+        string uri = "https://smsportal.hostpinnacle.co.ke/SMSApi/send";
+        var request = new HttpRequestMessage(HttpMethod.Post, uri)
         {
             Content = new FormUrlEncodedContent(payload)
         };
