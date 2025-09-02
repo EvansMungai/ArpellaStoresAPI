@@ -1,4 +1,5 @@
 ﻿using ArpellaStores.Features.OrderManagement.Models;
+using OfficeOpenXml.Style;
 
 namespace ArpellaStores.Features.OrderManagement.Services;
 
@@ -113,6 +114,34 @@ public class OrderService : IOrderService
                 }
             })
         };
+        return Results.Ok(formatted);
+    }
+    public async Task<IResult> GetOrderByUsername(string username)
+    {
+        var orders = await _repo.GetOrdersByUsernameAsync(username);
+        if (orders == null)
+            return Results.NotFound($"No order with username = {username} was found");
+
+        var formatted = orders.Select(o => new
+        {
+            o.Orderid,
+            o.UserId,
+            o.Status,
+            o.Total,
+            o.Latitude,
+            o.Longitude,
+            Orderitem = o.Orderitems.Select(
+                oi => new
+                {
+                    oi.ProductId,
+                    oi.Quantity,
+                    Product = new
+                    {
+                        oi.Product.Name,
+                        oi.Product.Price
+                    }
+                })
+        });
         return Results.Ok(formatted);
     }
     public async Task<IResult> GetPagedOrders(int pageNumber, int pageSize)

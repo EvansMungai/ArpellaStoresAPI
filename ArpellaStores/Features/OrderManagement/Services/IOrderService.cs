@@ -6,6 +6,7 @@ public interface IOrderService
 {
     Task<IResult> GetOrders();
     Task<IResult> GetOrder(string orderId);
+    Task<IResult> GetOrderByUsername(string username);
     Task<IResult> GetPagedOrders(int pageNumber, int pageSize);
     Task<IResult> CreateOrder(Order orderDetails);
     //Task<IResult> UpdateOrderDetails(Order update, string id);

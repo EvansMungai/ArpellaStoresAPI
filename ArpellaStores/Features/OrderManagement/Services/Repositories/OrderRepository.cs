@@ -20,6 +20,10 @@ public class OrderRepository : IOrderRepository
     {
         return await _context.Orders.Include(o => o.Orderitems).ThenInclude(oi => oi.Product).AsNoTracking().SingleOrDefaultAsync(o => o.Orderid == id);
     }
+    public async Task<List<Order?>> GetOrdersByUsernameAsync(string username)
+    {
+        return await _context.Orders.Include(o => o.Orderitems).ThenInclude(oi => oi.Product).AsNoTracking().Where(o => o.UserId == username).ToListAsync();
+    }
     public async Task<List<Order>> GetPagedOrdersAsync(int pageNumber, int pageSize)
     {
         return await _context.Orders.Include(o => o.Orderitems).ThenInclude(oi => oi.Product)

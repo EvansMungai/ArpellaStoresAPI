@@ -15,6 +15,7 @@ public class OrderHandler : IHandler
 
     public Task<IResult> GetOrders() => _orderService.GetOrders();
     public Task<IResult> GetOrder(string orderId) => _orderService.GetOrder(orderId);
+    public Task<IResult> GetOrdersByUsername(string username) => _orderService.GetOrderByUsername(username);
     public Task<IResult> GetPagedOrders(int pageNumber, int pageSize) => _orderService.GetPagedOrders(pageNumber, pageSize);
     public Task<IResult> CreateOrder(Order order) => _orderService.CreateOrder(order);
     public Task<IResult> RemoveOrder(string orderId) => _orderService.RemoveOrder(orderId);
