@@ -8,7 +8,6 @@ public partial class Order
 {
     public string Orderid { get; set; } = null!;
 
-    [Required(ErrorMessage = "Username is required.")]
     [StringLength(30, ErrorMessage = "Username must be at most 30 characters.")]
     public string? UserId { get; set; }
 
