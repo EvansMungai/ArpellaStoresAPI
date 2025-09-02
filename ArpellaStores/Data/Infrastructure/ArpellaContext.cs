@@ -140,7 +140,7 @@ public partial class ArpellaContext : IdentityDbContext<User>
                 .HasMaxLength(30)
                 .HasColumnName("orderId");
             entity.Property(e => e.Status)
-                .HasColumnType("enum('Pending','In Transit','Delivered','Cancelled')")
+                .HasColumnType("enum('Pending','Processing','Delivering','Delivered')")
                 .HasColumnName("status");
             entity.Property(e => e.Username)
                 .HasMaxLength(30)
