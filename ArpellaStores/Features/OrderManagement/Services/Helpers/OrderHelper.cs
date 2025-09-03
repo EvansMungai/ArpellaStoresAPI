@@ -33,7 +33,8 @@ public class OrderHelper : IOrderHelper
             Longitude = orderDetails.Longitude,
             OrderPaymentType = orderDetails.OrderPaymentType,
             BuyerPin = orderDetails.BuyerPin,
-            Orderitems = dtoItems
+            Orderitems = dtoItems,
+            OrderSource = orderDetails.OrderSource
         };
 
         return dto;
@@ -58,7 +59,8 @@ public class OrderHelper : IOrderHelper
             Longitude = cachedOrder.Longitude,
             OrderPaymentType = cachedOrder.OrderPaymentType,
             BuyerPin = cachedOrder.BuyerPin,
-            Orderitems = rebuiltItems
+            Orderitems = rebuiltItems,
+            OrderSource = cachedOrder.OrderSource
         };
     }
 }

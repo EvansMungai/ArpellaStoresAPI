@@ -41,6 +41,7 @@ public class OrderService : IOrderService
                 Amount = order.Total,
                 Phonenumber = order.PhoneNumber
             };
+            order.OrderSource = "Ecommerce";
             return Results.Accepted($"/confirm-payment/{stk.CheckoutRequestID}", responseData);
         }
         else
