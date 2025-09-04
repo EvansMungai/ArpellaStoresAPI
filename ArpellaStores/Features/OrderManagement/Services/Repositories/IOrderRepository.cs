@@ -10,6 +10,7 @@ public interface IOrderRepository
     Task<List<Order>> GetPagedOrdersAsync(int pageNumber, int pageSize);
     Task<bool> ExistsAsync(string orderId);
     Task AddOrderAsync(Order order);
+    Task UpdateOrderStatusAsync(string status, string id);
     Task RemoveOrderAsync(string id);
     Task<decimal> CalculateTotalOrderCost(Order order);
 }

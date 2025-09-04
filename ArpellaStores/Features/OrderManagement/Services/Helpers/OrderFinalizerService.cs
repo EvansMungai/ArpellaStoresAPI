@@ -13,7 +13,7 @@ public class OrderFinalizerService : IOrderFinalizerService
     }
     public async Task FinalizeOrderAsync(Order order, string transactionId)
     {
-        order.Status = "Paid";
+        order.Status = "Pending";
 
         _context.Orders.Add(order);
 

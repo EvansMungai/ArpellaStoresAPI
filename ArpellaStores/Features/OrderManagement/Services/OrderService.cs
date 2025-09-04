@@ -173,6 +173,14 @@ public class OrderService : IOrderService
         });
         return Results.Ok(formatted);
     }
+    public async Task<IResult> UpdateOrderStatus(string status, string id)
+    {
+        try
+        {
+            await _repo.UpdateOrderStatusAsync(status, id);
+            return Results.Ok($"Updated Order status for order {id} to {status}");
+        } catch (Exception ex) { return Results.BadRequest(ex.InnerException?.Message ?? ex.Message); }
+    }
     public async Task<IResult> RemoveOrder(string id)
     {
         var existing = await _repo.GetOrderByIdAsync(id);

@@ -39,6 +39,15 @@ public class OrderRepository : IOrderRepository
         _context.Orders.Add(order);
         await _context.SaveChangesAsync();
     }
+    public async Task UpdateOrderStatusAsync(string status, string id)
+    {
+        var order = await _context.Orders.Include(o => o.Orderitems).SingleOrDefaultAsync(o => o.Orderid == id);
+        if (order == null) return;
+
+        order.Status = status;
+        _context.Orders.Update(order);
+        await _context.SaveChangesAsync();
+    }
     public async Task RemoveOrderAsync(string id)
     {
         var order = await _context.Orders.Include(o => o.Orderitems).SingleOrDefaultAsync(o => o.Orderid == id);

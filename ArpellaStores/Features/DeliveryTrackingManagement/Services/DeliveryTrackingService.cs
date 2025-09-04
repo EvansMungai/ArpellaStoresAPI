@@ -1,5 +1,7 @@
 ﻿using ArpellaStores.Data.Infrastructure;
 using ArpellaStores.Features.DeliveryTrackingManagement.Models;
+using ArpellaStores.Features.OrderManagement.Models;
+using ArpellaStores.Features.OrderManagement.Services;
 using Microsoft.EntityFrameworkCore;
 
 namespace ArpellaStores.Features.DeliveryTrackingManagement.Services;
@@ -7,9 +9,11 @@ namespace ArpellaStores.Features.DeliveryTrackingManagement.Services;
 public class DeliveryTrackingService : IDeliveryTrackingService
 {
     private readonly ArpellaContext _context;
-    public DeliveryTrackingService(ArpellaContext context)
+    private readonly IOrderService _orderService;
+    public DeliveryTrackingService(ArpellaContext context, IOrderService orderService)
     {
         _context = context;
+        _orderService = orderService;
     }
     public async Task<IResult> CreateDelivery(Deliverytracking delivery)
     {
@@ -29,10 +33,11 @@ public class DeliveryTrackingService : IDeliveryTrackingService
             OrderId = delivery.OrderId,
             Username = delivery.Username,
             DeliveryAgent = delivery.DeliveryAgent,
-            Status = "Pending"
+            Status = "Processing"
         };
         try
         {
+            await _orderService.UpdateOrderStatus(newDelivery.Status, newDelivery.OrderId);
             _context.Deliverytrackings.Add(newDelivery);
             await _context.SaveChangesAsync();
             return Results.Ok($"Order {newDelivery.OrderId} has been scheduled for delivery");
@@ -58,6 +63,7 @@ public class DeliveryTrackingService : IDeliveryTrackingService
             retrievedDelivery.Status = status;
             try
             {
+                await _orderService.UpdateOrderStatus(status, orderid);
                 _context.Deliverytrackings.Update(retrievedDelivery);
                 await _context.SaveChangesAsync();
                 return Results.Ok(retrievedDelivery);
