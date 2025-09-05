@@ -18,6 +18,7 @@ public partial class Order
 
     public decimal Total { get; set; }
 
+    [Required(ErrorMessage = "Buyer's Pin is required.")]
     public string? BuyerPin { get; set; }
 
     [Required(ErrorMessage = "Latitude is required.")]
@@ -25,6 +26,8 @@ public partial class Order
 
     [Required(ErrorMessage = "Longitude is required.")]
     public decimal? Longitude { get; set; }
+
+    [Required(ErrorMessage = "Order Payment Type is required.")]
     public string? OrderPaymentType { get; set; }
     public string? OrderSource { get; set; }
     public DateTime? CreatedAt { get; set; }
