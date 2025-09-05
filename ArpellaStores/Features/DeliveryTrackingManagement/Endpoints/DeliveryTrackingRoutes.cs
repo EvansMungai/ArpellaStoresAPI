@@ -15,5 +15,6 @@ public class DeliveryTrackingRoutes : IRouteRegistrar
         app.MapPost("/deliverytracking", (DeliveryTrackingHandler handler, Deliverytracking delivery) => handler.CreateDelivery(delivery)).Produces(200).Produces(404).Produces<Deliverytracking>();
         app.MapPut("deliverytracking/{orderid}/status", (DeliveryTrackingHandler handler, string status, string orderid) => handler.UpdateDeliveryStatus(status, orderid)).Produces(200).Produces(404).Produces<Deliverytracking>();
         app.MapGet("/deliverytracking/{orderid}", (DeliveryTrackingHandler handler, string orderid) => handler.GetDeliveryStatus(orderid)).Produces(200).Produces(404).Produces<Deliverytracking>();
+        app.MapGet("/delivery-orders/{deliveryAgent}", (DeliveryTrackingHandler handler, string deliveryAgent) => handler.GetAgentOrders(deliveryAgent)).Produces(200).Produces(404).Produces<Deliverytracking>();
     }
 }

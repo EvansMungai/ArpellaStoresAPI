@@ -1,6 +1,5 @@
 ﻿using ArpellaStores.Data.Infrastructure;
 using ArpellaStores.Features.DeliveryTrackingManagement.Models;
-using ArpellaStores.Features.OrderManagement.Models;
 using ArpellaStores.Features.OrderManagement.Services;
 using Microsoft.EntityFrameworkCore;
 
@@ -48,6 +47,11 @@ public class DeliveryTrackingService : IDeliveryTrackingService
     {
         var deliveryStatus = await _context.Deliverytrackings.Where(d => d.OrderId == orderid).Select(o => new { o.DeliveryId, o.OrderId, o.Username, o.DeliveryAgent, o.Status, o.LastUpdated }).AsNoTracking().SingleOrDefaultAsync();
         return deliveryStatus == null ? Results.NotFound($"Delivery with order id = {orderid} was not found") : Results.Ok(deliveryStatus);
+    }
+    public async Task<IResult> GetAgentOrders(string deliveryAgent)
+    {
+        var deliveries = await _context.Deliverytrackings.Where(d => d.DeliveryAgent == deliveryAgent).Select(o => new { o.DeliveryId, o.OrderId, o.DeliveryAgent, o.Status }).ToListAsync();
+        return deliveries == null || deliveries.Count == 0 ? Results.NotFound("No categories found") : Results.Ok(deliveries);
     }
     public async Task<IResult> UpdateDeliveryStatus(string status, string orderid)
     {
