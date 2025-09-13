@@ -5,9 +5,11 @@ namespace ArpellaStores.Features.SmsManagement.Services;
 public class SmsTemplateService : ISmsTemplateService
 {
     private readonly ISmsTemplateRepository _repo;
-    public SmsTemplateService(ISmsTemplateRepository repo)
+    private readonly ISmsHelpers _smsHelpers;
+    public SmsTemplateService(ISmsTemplateRepository repo, ISmsHelpers smsHelpers)
     {
         _repo = repo;
+        _smsHelpers = smsHelpers;
     }
 
     public async Task<IResult> CreateTemplateAsync(SmsTemplate smsTemplate)

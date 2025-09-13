@@ -33,7 +33,7 @@ public class OrderNotificationService : IOrderNotificationService
 
         await _smsService.SendQuickSMSAsync(message, order.PhoneNumber);
     }
-    public async Task NotifyOrderManagerAsync(Order order, string phoneNumber)
+    public async Task NotifyOrderManagerAsync(Order order, List<string> phoneNumber)
     {
         var rebuildItems = order.Orderitems.Select(item => new Orderitem
         {
@@ -49,7 +49,7 @@ public class OrderNotificationService : IOrderNotificationService
             .Replace("{orderId}", order.Orderid.ToString())
             .Replace("{orderItems}", formattedItems);
 
-        await _smsService.SendQuickSMSAsync(message, phoneNumber);
+        await _smsService.SendBatchSMSAsync(message, phoneNumber);
     }
     #region Helpers
     public async Task<string> FormatOrderItemsAsync(List<Orderitem> items)

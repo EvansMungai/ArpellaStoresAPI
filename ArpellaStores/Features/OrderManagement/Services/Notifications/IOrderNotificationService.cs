@@ -6,5 +6,5 @@ namespace ArpellaStores.Features.OrderManagement.Services;
 public interface IOrderNotificationService
 {
     Task NofityCustomerAsync(Order order);
-    Task NotifyOrderManagerAsync(Order order, string phoneNumber);
+    Task NotifyOrderManagerAsync(Order order, List<string> phoneNumber);
 }
