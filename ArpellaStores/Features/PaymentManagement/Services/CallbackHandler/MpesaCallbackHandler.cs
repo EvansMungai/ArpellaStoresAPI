@@ -72,7 +72,7 @@ public class MpesaCallbackHandler : IMpesaCallbackHandler
                 var finalizer = scope.ServiceProvider.GetRequiredService<IOrderFinalizerService>();
                 await finalizer.FinalizeOrderAsync(rebuiltOrder, transactionId);
                 var notificationService = scope.ServiceProvider.GetRequiredService<IOrderNotificationService>();
-                //await notificationService.NofityCustomerAsync(rebuiltOrder);
+                await notificationService.NofityCustomerAsync(rebuiltOrder);
                 await notificationService.NotifyOrderManagerAsync(rebuiltOrder, orderManagerNumbers);
 
 
