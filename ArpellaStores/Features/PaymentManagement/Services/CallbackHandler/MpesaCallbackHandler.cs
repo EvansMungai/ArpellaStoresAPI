@@ -41,7 +41,7 @@ public class MpesaCallbackHandler : IMpesaCallbackHandler
 
             if (stk.ResultCode != 0)
             {
-                _cache.Remove($"pending-order-{stk.CheckoutRequestID}");
+                //_cache.Remove($"pending-order-{stk.CheckoutRequestID}");
                 _cache.Set($"payment-result-{stk.CheckoutRequestID}", new
                 {
                     Status = "Failed",
