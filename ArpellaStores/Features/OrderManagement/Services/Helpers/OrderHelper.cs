@@ -89,7 +89,7 @@ public class OrderHelper : IOrderHelper
             Phonenumber = order.PhoneNumber
         };
         order.OrderSource = "Ecommerce";
-        return Results.Ok(order);
+        return Results.Ok(responseData);
     }
     public async Task<IResult> HandleCashOrders(CachedOrderDto order, decimal total)
     {
