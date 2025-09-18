@@ -22,8 +22,8 @@ public class SmsService : ISmsService
             throw new ArgumentException("Message must not be empty.", nameof(message));
         if (phoneNumbers == null || !phoneNumbers.Any())
             throw new ArgumentException("Phone number list must not be empty", nameof(phoneNumbers));
-        Console.WriteLine(phoneNumbers.Select(p => p.Trim().Replace("+", "").Replace(" ", "").Replace("-", "")));
-        _logger.LogInformation($"This are the phone numbers to be sent the order creation message. {phoneNumbers.Select(p => p.Trim().Replace("+", "").Replace(" ", "").Replace("-", ""))}");
+        _logger.LogInformation($"These are the phone numbers to be sent the order creation message: {string.Join(", ", phoneNumbers.Select(p => p.Trim().Replace("+", "").Replace(" ", "").Replace("-", "")))}");
+
 
         var payload = new Dictionary<string, string>
         {

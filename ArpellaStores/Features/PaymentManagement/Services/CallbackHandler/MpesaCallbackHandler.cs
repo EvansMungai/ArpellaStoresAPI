@@ -69,7 +69,7 @@ public class MpesaCallbackHandler : IMpesaCallbackHandler
             {
                 var rebuiltOrder = _helper.RebuildOrder(cachedOrder);
                 var orderManagerNumbers = await _smsHelpers.GetUsersInRoleAsync("Order Manager");
-                _logger.LogInformation($"This are the retrieved order manager phone numbers. {orderManagerNumbers}");
+                _logger.LogInformation($"Retrieved order manager phone numbers: {string.Join(", ", orderManagerNumbers)}");
 
                 using var scope = _serviceProvider.CreateScope();
                 var finalizer = scope.ServiceProvider.GetRequiredService<IOrderFinalizerService>();
