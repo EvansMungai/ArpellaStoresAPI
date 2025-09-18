@@ -9,13 +9,11 @@ public class OrderNotificationService : IOrderNotificationService
     private readonly IProductRepository _repo;
     private readonly ISmsTemplateRepository _smsTemplateRepo;
     private readonly ISmsService _smsService;
-    private readonly ILogger<OrderNotificationService> _logger;
-    public OrderNotificationService(IProductRepository repo, ISmsTemplateRepository smsTemplateRepo, ISmsService smsService, ILogger<OrderNotificationService> logger)
+    public OrderNotificationService(IProductRepository repo, ISmsTemplateRepository smsTemplateRepo, ISmsService smsService)
     {
         _repo = repo;
         _smsTemplateRepo = smsTemplateRepo;
         _smsService = smsService;
-        _logger = logger;
     }
     public async Task NofityCustomerAsync(Order order)
     {
@@ -45,14 +43,12 @@ public class OrderNotificationService : IOrderNotificationService
 
         var formattedItems = await FormatOrderItemsAsync(rebuildItems);
 
-        _logger.LogInformation("Retrieving the sms template message.");
         var template = await _smsTemplateRepo.GetSmsTemplateAsync("OrderManagerOrderCreationMessage");
-        _logger.LogInformation($"This is the order manager order creation template {template}");
 
         var message = template.Content
             .Replace("{orderId}", order.Orderid.ToString())
             .Replace("{orderItems}", formattedItems);
-        _logger.LogInformation($"This is the message to be sent to the order managers: {message}");
+
         await _smsService.SendBatchSMSAsync(message, phoneNumber);
     }
     #region Helpers

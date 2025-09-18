@@ -8,10 +8,12 @@ public class SmsService : ISmsService
 {
     private readonly HttpClient _httpClient;
     private readonly HostPinnacleOptions _options;
-    public SmsService(HttpClient httpClient, IOptions<HostPinnacleOptions> options)
+    private readonly ILogger<SmsService> _logger;
+    public SmsService(HttpClient httpClient, IOptions<HostPinnacleOptions> options, ILogger<SmsService> logger)
     {
         _httpClient = httpClient;
         _options = options.Value;
+        _logger = logger;
     }
     public async Task<string> SendBatchSMSAsync(string message, List<string> phoneNumbers)
     {
@@ -32,6 +34,11 @@ public class SmsService : ISmsService
             {"duplicatecheck", "true"},
             {"output", "json"}
         };
+        // Extract the "mobile" property
+        string mobileValue = string.Join(",", phoneNumbers.Select(p => p.Trim().Replace("+", "").Replace(" ", "").Replace("-", "")));
+
+        // Log the "mobile" value
+        _logger.LogInformation("Mobile numbers being sent: {Mobile}", mobileValue);
         string uri = "https://smsportal.hostpinnacle.co.ke/SMSApi/send";
         var request = new HttpRequestMessage(HttpMethod.Post, uri)
         {
