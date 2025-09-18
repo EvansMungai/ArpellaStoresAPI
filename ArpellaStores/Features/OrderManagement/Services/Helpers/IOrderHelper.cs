@@ -10,5 +10,5 @@ public interface IOrderHelper
     Order RebuildOrder(CachedOrderDto cachedOrder);
     Task<IResult> HandleMpesaOrders(CachedOrderDto order);
     Task<IResult> HandleCashOrders(CachedOrderDto order);
-    Task<IResult> HandleHybridOrders(CachedOrderDto order);
+    Task<IResult> HandleHybridOrders(CachedOrderDto order, decimal total);
 }

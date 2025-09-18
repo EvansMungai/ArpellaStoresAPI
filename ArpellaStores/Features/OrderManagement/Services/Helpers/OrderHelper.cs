@@ -104,11 +104,12 @@ public class OrderHelper : IOrderHelper
 
         return Results.Ok("Payment processed successfully and order has been saved.");
     }
-    public async Task<IResult> HandleHybridOrders(CachedOrderDto order)
+    public async Task<IResult> HandleHybridOrders(CachedOrderDto order, decimal total)
     {
         order.OrderPaymentType = "Hybrid";
         order.OrderSource = "Hybrid";
         var rebuiltOrder = RebuildOrder(order);
+        rebuiltOrder.Total = total;
         var transactionId = "Cash";
 
         var stk = await _payment.InitiateStkPushAsync(order);
