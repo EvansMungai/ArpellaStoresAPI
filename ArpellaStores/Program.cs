@@ -22,6 +22,7 @@ if (!env.IsDevelopment())
         options.ConfigureCustomHttps();
     });
 }
+builder.Logging.AddConsole();
 
 // Register application services
 builder.Services.RegisterServices(builder.Configuration);

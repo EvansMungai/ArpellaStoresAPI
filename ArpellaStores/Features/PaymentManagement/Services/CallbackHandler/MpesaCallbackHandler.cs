@@ -13,13 +13,15 @@ public class MpesaCallbackHandler : IMpesaCallbackHandler
     private readonly IOrderHelper _helper;
     private readonly IServiceProvider _serviceProvider;
     private readonly ISmsHelpers _smsHelpers;
-    public MpesaCallbackHandler(IMemoryCache cache, IMpesaApiService mpesaApi, IOrderHelper helper, IServiceProvider serviceProvider, ISmsHelpers smsHelpers)
+    private readonly ILogger<MpesaCallbackHandler> _logger;
+    public MpesaCallbackHandler(IMemoryCache cache, IMpesaApiService mpesaApi, IOrderHelper helper, IServiceProvider serviceProvider, ISmsHelpers smsHelpers, ILogger<MpesaCallbackHandler> logger)
     {
         _cache = cache;
         _mpesaApi = mpesaApi;
         _helper = helper;
         _serviceProvider = serviceProvider;
         _smsHelpers = smsHelpers;
+        _logger = logger;
     }
 
     public async Task<IResult> HandleAsync(HttpRequest request)
@@ -67,14 +69,15 @@ public class MpesaCallbackHandler : IMpesaCallbackHandler
             {
                 var rebuiltOrder = _helper.RebuildOrder(cachedOrder);
                 var orderManagerNumbers = await _smsHelpers.GetUsersInRoleAsync("Order Manager");
+                _logger.LogInformation($"This are the retrieved order manager phone numbers. {orderManagerNumbers}");
 
                 using var scope = _serviceProvider.CreateScope();
                 var finalizer = scope.ServiceProvider.GetRequiredService<IOrderFinalizerService>();
                 await finalizer.FinalizeOrderAsync(rebuiltOrder, transactionId);
                 var notificationService = scope.ServiceProvider.GetRequiredService<IOrderNotificationService>();
-                await notificationService.NofityCustomerAsync(rebuiltOrder);
+                //await notificationService.NofityCustomerAsync(rebuiltOrder);
                 await notificationService.NotifyOrderManagerAsync(rebuiltOrder, orderManagerNumbers);
-    
+
 
                 _cache.Remove(cacheKey);
                 _cache.Set($"payment-result-{stk.CheckoutRequestID}", new

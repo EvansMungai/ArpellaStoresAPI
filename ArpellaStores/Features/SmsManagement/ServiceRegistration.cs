@@ -7,5 +7,6 @@ public static class ServiceRegistration
         services.AddHttpClient<ISmsService, SmsService>();
         services.AddScoped<ISmsTemplateRepository, SmsTemplateRepository>();
         services.AddScoped<ISmsTemplateService, SmsTemplateService>();
+        services.AddScoped<ISmsHelpers, SmsHelpers>();
     }
 }
