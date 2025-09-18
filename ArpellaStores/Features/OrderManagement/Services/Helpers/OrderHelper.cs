@@ -108,13 +108,12 @@ public class OrderHelper : IOrderHelper
     {
         order.OrderPaymentType = "Hybrid";
         order.OrderSource = "Hybrid";
-        var rebuiltOrder = RebuildOrder(order);
-        rebuiltOrder.Total = total;
-        var transactionId = "Cash";
+       
 
         var stk = await _payment.InitiateStkPushAsync(order);
         if (stk == null || string.IsNullOrEmpty(stk.CheckoutRequestID))
             return Results.BadRequest("STK Push failed");
+        order.Total = total;
 
         _cache.CacheOrder($"pending-order-{stk.CheckoutRequestID}", order, TimeSpan.FromMinutes(15));
 
@@ -124,7 +123,6 @@ public class OrderHelper : IOrderHelper
             Amount = order.Total,
             Phonenumber = order.PhoneNumber
         };
-        order.OrderSource = "Ecommerce";
         return Results.Accepted($"/confirm-payment/{stk.CheckoutRequestID}", responseData);
     }
 }
