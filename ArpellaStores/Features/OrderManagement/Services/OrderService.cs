@@ -31,7 +31,7 @@ public class OrderService : IOrderService
             case "Hybrid":
                 {
                     var order = _helper.BuildNewOrder(orderDetails, orderDetails.Total);
-                    return await _helper.HandleHybridOrders(order);
+                    return await _helper.HandleHybridOrders(order, order.Total);
                     break;
                 }
             default:
