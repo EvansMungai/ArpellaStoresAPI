@@ -89,7 +89,7 @@ public class OrderHelper : IOrderHelper
             Phonenumber = order.PhoneNumber
         };
         order.OrderSource = "Ecommerce";
-        return Results.Accepted($"/confirm-payment/{stk.CheckoutRequestID}", responseData);
+        return Results.Ok(order);
     }
     public async Task<IResult> HandleCashOrders(CachedOrderDto order)
     {
@@ -102,7 +102,7 @@ public class OrderHelper : IOrderHelper
         var finalizer = scope.ServiceProvider.GetRequiredService<IOrderFinalizerService>();
         await finalizer.FinalizeOrderAsync(rebuiltOrder, transactionId);
 
-        return Results.Ok("Payment processed successfully and order has been saved.");
+        return Results.Ok(order);
     }
     public async Task<IResult> HandleHybridOrders(CachedOrderDto order, decimal total)
     {
@@ -123,6 +123,6 @@ public class OrderHelper : IOrderHelper
             Amount = order.Total,
             Phonenumber = order.PhoneNumber
         };
-        return Results.Accepted($"/confirm-payment/{stk.CheckoutRequestID}", responseData);
+        return Results.Ok(order);
     }
 }
