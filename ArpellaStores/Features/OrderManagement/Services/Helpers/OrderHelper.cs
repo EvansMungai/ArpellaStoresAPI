@@ -91,10 +91,11 @@ public class OrderHelper : IOrderHelper
         order.OrderSource = "Ecommerce";
         return Results.Ok(order);
     }
-    public async Task<IResult> HandleCashOrders(CachedOrderDto order)
+    public async Task<IResult> HandleCashOrders(CachedOrderDto order, decimal total)
     {
         order.OrderPaymentType = "Cash";
         order.OrderSource = "POS";
+        order.Total = total;
         var rebuiltOrder = RebuildOrder(order);
         var transactionId = "Cash";
 

@@ -38,7 +38,8 @@ public class OrderService : IOrderService
             default:
                 {
                     var order = _helper.BuildNewOrder(orderDetails, orderDetails.Total);
-                    return await _helper.HandleCashOrders(order);
+                    var total = await _repo.CalculateTotalOrderCost(orderDetails);
+                    return await _helper.HandleCashOrders(order, total);
                     break;
                 }
         }
