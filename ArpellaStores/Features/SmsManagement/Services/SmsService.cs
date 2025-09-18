@@ -8,22 +8,17 @@ public class SmsService : ISmsService
 {
     private readonly HttpClient _httpClient;
     private readonly HostPinnacleOptions _options;
-    private readonly ILogger<SmsService> _logger;
-    public SmsService(HttpClient httpClient, IOptions<HostPinnacleOptions> options, ILogger<SmsService> logger)
+    public SmsService(HttpClient httpClient, IOptions<HostPinnacleOptions> options)
     {
         _httpClient = httpClient;
         _options = options.Value;
-        _logger = logger;
     }
     public async Task<string> SendBatchSMSAsync(string message, List<string> phoneNumbers)
     {
-        _logger.LogInformation("Starting Send Batch Sms Function.");
         if (string.IsNullOrWhiteSpace(message))
             throw new ArgumentException("Message must not be empty.", nameof(message));
         if (phoneNumbers == null || !phoneNumbers.Any())
             throw new ArgumentException("Phone number list must not be empty", nameof(phoneNumbers));
-        _logger.LogInformation($"These are the phone numbers to be sent the order creation message: {string.Join(", ", phoneNumbers.Select(p => p.Trim().Replace("+", "").Replace(" ", "").Replace("-", "")))}");
-
 
         var payload = new Dictionary<string, string>
         {
@@ -45,13 +40,10 @@ public class SmsService : ISmsService
         request.Headers.Add("apikey", _options.ApiKey);
         request.Headers.Add("cache-control", "no-cache");
 
-        _logger.LogInformation("Sending request to hostpinnacle.");
         var response = await _httpClient.SendAsync(request);
         response.EnsureSuccessStatusCode();
 
-        _logger.LogInformation("Hostpinnacle has responded with a success status code.");
         var responseBody = await response.Content.ReadAsStringAsync();
-        _logger.LogInformation("Returning Response body.");
         return responseBody;
     }
     public async Task<string> SendQuickSMSAsync(string message, string mobile)

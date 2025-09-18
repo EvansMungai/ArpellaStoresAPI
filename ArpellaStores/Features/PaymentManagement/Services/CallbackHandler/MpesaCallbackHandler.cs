@@ -13,15 +13,13 @@ public class MpesaCallbackHandler : IMpesaCallbackHandler
     private readonly IOrderHelper _helper;
     private readonly IServiceProvider _serviceProvider;
     private readonly ISmsHelpers _smsHelpers;
-    private readonly ILogger<MpesaCallbackHandler> _logger;
-    public MpesaCallbackHandler(IMemoryCache cache, IMpesaApiService mpesaApi, IOrderHelper helper, IServiceProvider serviceProvider, ISmsHelpers smsHelpers, ILogger<MpesaCallbackHandler> logger)
+    public MpesaCallbackHandler(IMemoryCache cache, IMpesaApiService mpesaApi, IOrderHelper helper, IServiceProvider serviceProvider, ISmsHelpers smsHelpers)
     {
         _cache = cache;
         _mpesaApi = mpesaApi;
         _helper = helper;
         _serviceProvider = serviceProvider;
         _smsHelpers = smsHelpers;
-        _logger = logger;
     }
 
     public async Task<IResult> HandleAsync(HttpRequest request)
@@ -69,7 +67,6 @@ public class MpesaCallbackHandler : IMpesaCallbackHandler
             {
                 var rebuiltOrder = _helper.RebuildOrder(cachedOrder);
                 var orderManagerNumbers = await _smsHelpers.GetUsersInRoleAsync("Order Manager");
-                _logger.LogInformation($"Retrieved order manager phone numbers: {string.Join(", ", orderManagerNumbers)}");
 
                 using var scope = _serviceProvider.CreateScope();
                 var finalizer = scope.ServiceProvider.GetRequiredService<IOrderFinalizerService>();
