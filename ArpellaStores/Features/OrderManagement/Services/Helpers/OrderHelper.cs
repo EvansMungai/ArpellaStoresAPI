@@ -4,6 +4,17 @@ namespace ArpellaStores.Features.OrderManagement.Services;
 
 public class OrderHelper : IOrderHelper
 {
+    private readonly IOrderPaymentService _payment;
+    private readonly IOrderCacheService _cache;
+    private readonly IOrderRepository _repo;
+    private readonly IServiceProvider _serviceProvider;
+    public OrderHelper(IOrderPaymentService payment, IOrderCacheService cache, IOrderRepository repo, IServiceProvider serviceProvider)
+    {
+        _payment = payment;
+        _cache = cache;
+        _repo = repo;
+        _serviceProvider = serviceProvider;
+    }
     public string GenerateOrderId()
     {
         const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -62,5 +73,57 @@ public class OrderHelper : IOrderHelper
             Orderitems = rebuiltItems,
             OrderSource = cachedOrder.OrderSource
         };
+    }
+    public async Task<IResult> HandleMpesaOrders(CachedOrderDto order)
+    {
+        var stk = await _payment.InitiateStkPushAsync(order);
+        if (stk == null || string.IsNullOrEmpty(stk.CheckoutRequestID))
+            return Results.BadRequest("STK Push failed");
+
+        _cache.CacheOrder($"pending-order-{stk.CheckoutRequestID}", order, TimeSpan.FromMinutes(15));
+
+        var responseData = new
+        {
+            StkPush = stk,
+            Amount = order.Total,
+            Phonenumber = order.PhoneNumber
+        };
+        order.OrderSource = "Ecommerce";
+        return Results.Accepted($"/confirm-payment/{stk.CheckoutRequestID}", responseData);
+    }
+    public async Task<IResult> HandleCashOrders(CachedOrderDto order)
+    {
+        order.OrderPaymentType = "Cash";
+        order.OrderSource = "POS";
+        var rebuiltOrder = RebuildOrder(order);
+        var transactionId = "Cash";
+
+        using var scope = _serviceProvider.CreateScope();
+        var finalizer = scope.ServiceProvider.GetRequiredService<IOrderFinalizerService>();
+        await finalizer.FinalizeOrderAsync(rebuiltOrder, transactionId);
+
+        return Results.Ok("Payment processed successfully and order has been saved.");
+    }
+    public async Task<IResult> HandleHybridOrders(CachedOrderDto order)
+    {
+        order.OrderPaymentType = "Hybrid";
+        order.OrderSource = "Hybrid";
+        var rebuiltOrder = RebuildOrder(order);
+        var transactionId = "Cash";
+
+        var stk = await _payment.InitiateStkPushAsync(order);
+        if (stk == null || string.IsNullOrEmpty(stk.CheckoutRequestID))
+            return Results.BadRequest("STK Push failed");
+
+        _cache.CacheOrder($"pending-order-{stk.CheckoutRequestID}", order, TimeSpan.FromMinutes(15));
+
+        var responseData = new
+        {
+            StkPush = stk,
+            Amount = order.Total,
+            Phonenumber = order.PhoneNumber
+        };
+        order.OrderSource = "Ecommerce";
+        return Results.Accepted($"/confirm-payment/{stk.CheckoutRequestID}", responseData);
     }
 }

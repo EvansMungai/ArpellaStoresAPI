@@ -41,7 +41,7 @@ public class MpesaCallbackHandler : IMpesaCallbackHandler
 
             if (stk.ResultCode != 0)
             {
-                _cache.Remove($"pending-order-{stk.CheckoutRequestID}");
+                //_cache.Remove($"pending-order-{stk.CheckoutRequestID}");
                 _cache.Set($"payment-result-{stk.CheckoutRequestID}", new
                 {
                     Status = "Failed",
@@ -71,9 +71,9 @@ public class MpesaCallbackHandler : IMpesaCallbackHandler
                 using var scope = _serviceProvider.CreateScope();
                 var finalizer = scope.ServiceProvider.GetRequiredService<IOrderFinalizerService>();
                 await finalizer.FinalizeOrderAsync(rebuiltOrder, transactionId);
-                var notificationService = scope.ServiceProvider.GetRequiredService<IOrderNotificationService>();
-                await notificationService.NofityCustomerAsync(rebuiltOrder);
-                await notificationService.NotifyOrderManagerAsync(rebuiltOrder, orderManagerNumbers);
+                //var notificationService = scope.ServiceProvider.GetRequiredService<IOrderNotificationService>();
+                //await notificationService.NofityCustomerAsync(rebuiltOrder);
+                //await notificationService.NotifyOrderManagerAsync(rebuiltOrder, orderManagerNumbers);
 
 
                 _cache.Remove(cacheKey);

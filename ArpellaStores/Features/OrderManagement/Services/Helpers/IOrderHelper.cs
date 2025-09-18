@@ -8,4 +8,7 @@ public interface IOrderHelper
     //Order BuildNewOrder(Order orderDetails, decimal totalCost);
     CachedOrderDto BuildNewOrder(Order orderDetails, decimal totalCost);
     Order RebuildOrder(CachedOrderDto cachedOrder);
+    Task<IResult> HandleMpesaOrders(CachedOrderDto order);
+    Task<IResult> HandleCashOrders(CachedOrderDto order);
+    Task<IResult> HandleHybridOrders(CachedOrderDto order);
 }

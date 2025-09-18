@@ -1,22 +1,16 @@
 ﻿using ArpellaStores.Features.OrderManagement.Models;
-using OfficeOpenXml.Style;
 
 namespace ArpellaStores.Features.OrderManagement.Services;
 
 public class OrderService : IOrderService
 {
     private readonly IOrderRepository _repo;
-    private readonly IOrderPaymentService _payment;
     private readonly IOrderHelper _helper;
-    private readonly IOrderCacheService _cache;
-    private readonly IServiceProvider _serviceProvider;
-    public OrderService(IOrderRepository repo, IOrderPaymentService payment, IOrderHelper helper, IOrderCacheService cache, IServiceProvider serviceProvider)
+
+    public OrderService(IOrderRepository repo, IOrderHelper helper)
     {
         _repo = repo;
-        _payment = payment;
         _helper = helper;
-        _cache = cache;
-        _serviceProvider = serviceProvider;
     }
 
     public async Task<IResult> CreateOrder(Order orderDetails)
@@ -24,41 +18,30 @@ public class OrderService : IOrderService
         if (await _repo.ExistsAsync(orderDetails.Orderid))
             return Results.Conflict($"OrderID {orderDetails.Orderid} already exists");
 
-        var total = await _repo.CalculateTotalOrderCost(orderDetails);
-        var order = _helper.BuildNewOrder(orderDetails, total);
 
-        if (order.OrderPaymentType == "Mpesa")
+        switch (orderDetails.OrderPaymentType)
         {
-            var stk = await _payment.InitiateStkPushAsync(order);
-            if (stk == null || string.IsNullOrEmpty(stk.CheckoutRequestID))
-                return Results.BadRequest("STK Push failed");
-
-            _cache.CacheOrder($"pending-order-{stk.CheckoutRequestID}", order, TimeSpan.FromMinutes(15));
-
-            var responseData = new
-            {
-                StkPush = stk,
-                Amount = order.Total,
-                Phonenumber = order.PhoneNumber
-            };
-            order.OrderSource = "Ecommerce";
-            return Results.Accepted($"/confirm-payment/{stk.CheckoutRequestID}", responseData);
-        }
-        else
-        {
-            order.OrderPaymentType = "Cash";
-            order.OrderSource = "POS";
-            var rebuiltOrder = _helper.RebuildOrder(order);
-            var transactionId = "Cash";
-
-            using var scope = _serviceProvider.CreateScope();
-            var finalizer = scope.ServiceProvider.GetRequiredService<IOrderFinalizerService>();
-            await finalizer.FinalizeOrderAsync(rebuiltOrder, transactionId);
-
-            return Results.Ok("Payment processed successfully and order has been saved.");
+            case "Mpesa":
+                {
+                    var total = await _repo.CalculateTotalOrderCost(orderDetails);
+                    var order = _helper.BuildNewOrder(orderDetails, total);
+                    return await _helper.HandleMpesaOrders(order);
+                    break;
+                }
+            case "Hybrid":
+                {
+                    var order = _helper.BuildNewOrder(orderDetails, orderDetails.Total);
+                    return await _helper.HandleHybridOrders(order);
+                    break;
+                }
+            default:
+                {
+                    var order = _helper.BuildNewOrder(orderDetails, orderDetails.Total);
+                    return await _helper.HandleCashOrders(order);
+                    break;
+                }
         }
     }
-
     public async Task<IResult> GetOrders()
     {
         var orders = await _repo.GetAllOrdersAsync();
@@ -179,7 +162,8 @@ public class OrderService : IOrderService
         {
             await _repo.UpdateOrderStatusAsync(status, id);
             return Results.Ok($"Updated Order status for order {id} to {status}");
-        } catch (Exception ex) { return Results.BadRequest(ex.InnerException?.Message ?? ex.Message); }
+        }
+        catch (Exception ex) { return Results.BadRequest(ex.InnerException?.Message ?? ex.Message); }
     }
     public async Task<IResult> RemoveOrder(string id)
     {
