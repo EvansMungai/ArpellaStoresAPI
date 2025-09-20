@@ -15,7 +15,7 @@ public class PaymentResultHelper : IPaymentResultHelper
         var payment = await _context.Payments.Select(p => new { p.PaymentId, p.Orderid, p.TransactionId, p.Status }).AsNoTracking().SingleOrDefaultAsync(p => p.Orderid == orderid);
         if (payment == null)
         {
-            return Results.NotFound($"Order with order id = {orderid} does not exists.");
+            return Results.NotFound($"Order with order id = {orderid} does not exist.");
         }
         return Results.Ok(payment);
     }
