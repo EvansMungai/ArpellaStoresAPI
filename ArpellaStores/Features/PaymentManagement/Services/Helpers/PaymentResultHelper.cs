@@ -1,27 +1,18 @@
-﻿using Microsoft.Extensions.Caching.Memory;
+﻿using ArpellaStores.Data.Infrastructure;
+using Microsoft.EntityFrameworkCore;
 
 namespace ArpellaStores.Features.PaymentManagement.Services;
 
 public class PaymentResultHelper : IPaymentResultHelper
 {
-    private readonly IMemoryCache _cache;
-    public PaymentResultHelper(IMemoryCache cache)
+    private readonly ArpellaContext _context;
+    public PaymentResultHelper(ArpellaContext context)
     {
-        _cache = cache;
+        _context = context;
     }
-    public async Task<IResult> GetPaymentStatusAsync(string checkoutRequestId)
+    public async Task<IResult> GetPaymentStatusAsync(string orderid)
     {
-        string cacheKey = $"payment-result-{checkoutRequestId}";
-
-        if (_cache.TryGetValue<object>(cacheKey, out var resultData))
-        {
-            return Results.Ok(resultData);
-        }
-
-        return Results.Ok(new
-        {
-            Status = "Pending",
-            Message = "Payment is still being processed or has expired."
-        });
+        var payment = await _context.Payments.AsNoTracking().SingleOrDefaultAsync(p => p.Orderid == orderid);
+        return Results.Ok(payment);
     }
 }

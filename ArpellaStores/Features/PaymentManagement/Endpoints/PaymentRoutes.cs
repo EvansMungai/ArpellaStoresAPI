@@ -35,6 +35,6 @@ public class PaymentRoutes : IRouteRegistrar
             return await handler.RegisterUrl(registerUri, requestModel);
         });
         app.MapPost("/mpesa/callback", async (IMpesaCallbackHandler handler, HttpRequest request) => await handler.HandleAsync(request) );
-        app.MapGet("/confirm-payment/{id}", async (IPaymentResultHelper helper, string id) => await helper.GetPaymentStatusAsync(id));
+        app.MapGet("/payments/{id}", async (IPaymentResultHelper helper, string id) => await helper.GetPaymentStatusAsync(id));
     }
 }
