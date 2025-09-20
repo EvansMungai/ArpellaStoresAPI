@@ -361,10 +361,10 @@ public partial class ArpellaContext : IdentityDbContext<User>
                 .HasColumnType("enum('Ecommerce','POS')")
                 .HasColumnName("orderSource");
 
-            entity.HasOne(d => d.User).WithMany(p => p.Orders)
-                .HasPrincipalKey(p => p.UserName)
-                .HasForeignKey(d => d.UserId)
-                .HasConstraintName("orders_ibfk_1");
+            //entity.HasOne(d => d.User).WithMany(p => p.Orders)
+            //    .HasPrincipalKey(p => p.UserName)
+            //    .HasForeignKey(d => d.UserId)
+            //    .HasConstraintName("orders_ibfk_1");
         });
 
         modelBuilder.Entity<Orderitem>(entity =>
