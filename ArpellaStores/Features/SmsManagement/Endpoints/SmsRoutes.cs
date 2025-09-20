@@ -14,7 +14,7 @@ public class SmsRoutes : IRouteRegistrar
         var app = webApplication.MapGroup("").WithTags("Sms Templates");
         app.MapGet("/sms-templates", (SmsTemplateHandler handler) => handler.GetAllSmsTemplatesAsync());
         app.MapGet("/sms-template/{templateType}", (SmsTemplateHandler handler, string templateType) => handler.GetSmsTemplateByTypeAsync(templateType));
-        app.MapPost("/sms-template/", (SmsTemplateHandler handler, SmsTemplate template) => handler.CreateSmsTemplateAsync(template));
+        app.MapPost("/sms-template", (SmsTemplateHandler handler, SmsTemplate template) => handler.CreateSmsTemplateAsync(template));
         app.MapDelete("/sms-template/{templateType}", (SmsTemplateHandler handler, string templateType) => handler.RemoveSmsTemplateAsync(templateType));
     }
 }
