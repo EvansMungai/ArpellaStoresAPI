@@ -1,5 +1,4 @@
 ﻿using ArpellaStores.Data.Infrastructure;
-using ArpellaStores.Features.OrderManagement.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace ArpellaStores.Features.PaymentManagement.Services;
@@ -13,7 +12,11 @@ public class PaymentResultHelper : IPaymentResultHelper
     }
     public async Task<IResult> GetPaymentStatusAsync(string orderid)
     {
-        var payment = await _context.Payments.Select(p => new{ p.PaymentId, p.Orderid, p.TransactionId, p.Status }).AsNoTracking().SingleOrDefaultAsync(p => p.Orderid == orderid);
+        var payment = await _context.Payments.Select(p => new { p.PaymentId, p.Orderid, p.TransactionId, p.Status }).AsNoTracking().SingleOrDefaultAsync(p => p.Orderid == orderid);
+        if (payment == null)
+        {
+            return Results.NotFound($"Order with order id = {orderid} does not exists.");
+        }
         return Results.Ok(payment);
     }
 }
