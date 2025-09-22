@@ -16,7 +16,7 @@ public class AuthenticationHandler : IHandler
     public Task<IResult> Login(User model) => _authenticationService.Login(model);
     public Task<IResult> LogOut() => _authenticationService.LogOut();
 
-    public IResult GetOTP(string username) => _authenticationService.GetOTP(username);
+    public Task<IResult> GetOTP(string username) => _authenticationService.GetOTP(username);
 
     public IResult VerifyOtp(string username, string otp)
     {

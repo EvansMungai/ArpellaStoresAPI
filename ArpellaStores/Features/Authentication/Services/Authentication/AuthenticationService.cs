@@ -1,5 +1,7 @@
 ﻿using ArpellaStores.Data.Infrastructure;
 using ArpellaStores.Features.Authentication.Models;
+using ArpellaStores.Features.OrderManagement.Models;
+using ArpellaStores.Features.SmsManagement.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Caching.Memory;
 
@@ -13,7 +15,9 @@ public class AuthenticationService : IAuthenticationService
     private readonly IUserManagementService _userManagementService;
     private readonly ArpellaContext _context;
     private readonly IMemoryCache _cache;
-    public AuthenticationService(UserManager<User> userManager, SignInManager<User> signInManager, RoleManager<IdentityRole> roleManager, IUserManagementService userManagementService, ArpellaContext context, IMemoryCache cache)
+    private readonly ISmsTemplateRepository _smsTemplateRepo;
+    private readonly ISmsService _smsService;
+    public AuthenticationService(UserManager<User> userManager, SignInManager<User> signInManager, RoleManager<IdentityRole> roleManager, IUserManagementService userManagementService, ArpellaContext context, IMemoryCache cache, ISmsTemplateRepository repo, ISmsService smsService)
     {
         _userManager = userManager;
         _signInManager = signInManager;
@@ -21,6 +25,8 @@ public class AuthenticationService : IAuthenticationService
         _userManagementService = userManagementService;
         _context = context;
         _cache = cache;
+        _smsTemplateRepo = repo;
+        _smsService = smsService;
     }
     public async Task<IResult> RegisterUser(User model)
     {
@@ -112,12 +118,13 @@ public class AuthenticationService : IAuthenticationService
         return Results.Ok("Successfully logged out");
     }
     #region Utilities
-    public IResult GetOTP(string username)
+    public async Task<IResult> GetOTP(string username)
     {
         var random = new Random();
         var otp = random.Next(100000, 999999).ToString();
         var expiryTime = DateTime.Now.AddMinutes(5);
-        _cache.Set(username, (Otp: otp, ExpiryTime: expiryTime), TimeSpan.FromMinutes(5));
+        _cache.Set(username, (Otp: otp, ExpiryTime: expiryTime), TimeSpan.FromMinutes(15));
+        await SendAuthenticationOTP(otp, username);
         return Results.Ok($"Stored OTP for Username:{username} is {otp}. The OTP expires in 5 minutes.");
     }
     public bool VerifyOTP(string username, string otp, out string message)
@@ -141,6 +148,13 @@ public class AuthenticationService : IAuthenticationService
             return false;
         }
     }
+    private async Task SendAuthenticationOTP(string Otp, string username)
+    {
+        var template = await _smsTemplateRepo.GetSmsTemplateAsync("OTP");
+        var message = template.Content
+            .Replace("{otp}", Otp);
 
+        await _smsService.SendQuickSMSAsync(message, username);
+    }
     #endregion
 }
