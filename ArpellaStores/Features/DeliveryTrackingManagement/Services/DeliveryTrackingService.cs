@@ -1,7 +1,9 @@
 ﻿using ArpellaStores.Data.Infrastructure;
 using ArpellaStores.Features.DeliveryTrackingManagement.Models;
 using ArpellaStores.Features.OrderManagement.Services;
+using ArpellaStores.Features.SmsManagement.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion.Internal;
 
 namespace ArpellaStores.Features.DeliveryTrackingManagement.Services;
 
@@ -9,10 +11,15 @@ public class DeliveryTrackingService : IDeliveryTrackingService
 {
     private readonly ArpellaContext _context;
     private readonly IOrderService _orderService;
-    public DeliveryTrackingService(ArpellaContext context, IOrderService orderService)
+    private readonly ISmsTemplateRepository _smsTemplateRepo;
+    private readonly ISmsService _smsService;
+
+    public DeliveryTrackingService(ArpellaContext context, IOrderService orderService, ISmsTemplateRepository smsTemplateRepository, ISmsService smsService)
     {
         _context = context;
         _orderService = orderService;
+        _smsTemplateRepo = smsTemplateRepository;
+        _smsService = smsService;
     }
     public async Task<IResult> CreateDelivery(Deliverytracking delivery)
     {
@@ -37,6 +44,7 @@ public class DeliveryTrackingService : IDeliveryTrackingService
         try
         {
             await _orderService.UpdateOrderStatus(newDelivery.Status, newDelivery.OrderId);
+            await SendChangeInOrderStatusMessage(newDelivery.OrderId, newDelivery.Status, newDelivery.Username);
             _context.Deliverytrackings.Add(newDelivery);
             await _context.SaveChangesAsync();
             return Results.Ok($"Order {newDelivery.OrderId} has been scheduled for delivery");
@@ -70,6 +78,7 @@ public class DeliveryTrackingService : IDeliveryTrackingService
                 await _orderService.UpdateOrderStatus(status, orderid);
                 _context.Deliverytrackings.Update(retrievedDelivery);
                 await _context.SaveChangesAsync();
+                await SendChangeInOrderStatusMessage(orderid, status, retrievedDelivery.Username);
                 return Results.Ok(retrievedDelivery);
             }
             catch (Exception ex) { return Results.BadRequest(ex.InnerException?.Message ?? ex.Message); }
@@ -79,4 +88,15 @@ public class DeliveryTrackingService : IDeliveryTrackingService
             return Results.NotFound($"Delivery with order id = {orderid} was not found");
         }
     }
+    #region Utilities
+    private async Task SendChangeInOrderStatusMessage(string orderId, string status, string username)
+    {
+        var template = await _smsTemplateRepo.GetSmsTemplateAsync("ChangeInOrderStatusMessage");
+        var message = template.Content
+            .Replace("{orderId}", orderId)
+            .Replace("{orderStatus}", status);
+
+        await _smsService.SendQuickSMSAsync(message, username);
+    }
+    #endregion
 }
