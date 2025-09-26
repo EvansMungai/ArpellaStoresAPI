@@ -7,11 +7,9 @@ namespace ArpellaStores.Features.OrderManagement.Services;
 public class OrderRepository : IOrderRepository
 {
     private readonly ArpellaContext _context;
-    private readonly ILogger<OrderRepository> _logger;
-    public OrderRepository(ArpellaContext context, ILogger<OrderRepository> logger)
+    public OrderRepository(ArpellaContext context)
     {
         _context = context;
-        _logger = logger;
     }
 
     public async Task<List<Order>> GetAllOrdersAsync()
@@ -93,20 +91,15 @@ public class OrderRepository : IOrderRepository
             var product = _context.Products.SingleOrDefault(p => p.Id == item.ProductId);
             if (product is not null)
             {
-                _logger.LogInformation("Calculating product price");
                 if (item.PriceType == "Discounted")
                 {
-                    _logger.LogInformation("Calculating price of a discounted item.");
                     decimal price = (decimal)product.PriceAfterDiscount;
                     totalPrice += (decimal)item.Quantity * price;
-                    _logger.LogInformation($"This is the total price: {totalPrice}");
                 }
                 else
-                {
-                    _logger.LogInformation("Calculating price of an item.");
+                { 
                     decimal price = product.Price;
                     totalPrice += (decimal)item.Quantity * price;
-                    _logger.LogInformation($"This is the total price: {totalPrice}");
                 }
                 totalPrice += (decimal)deliveryfee;
             }
