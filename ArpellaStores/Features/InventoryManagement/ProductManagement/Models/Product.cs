@@ -36,7 +36,7 @@ public partial class Product
     public int? Subcategory { get; set; }
 
     public string? Barcodes { get; set; }
-
+    public bool? ShowOnline { get; set; }
     public virtual Category? CategoryNavigation { get; set; }
 
     public virtual ICollection<Flashsale> Flashsales { get; set; } = new List<Flashsale>();

@@ -456,6 +456,9 @@ public partial class ArpellaContext : IdentityDbContext<User>
                 .HasPrecision(10, 2)
                 .HasColumnName("price_after_discount");
             entity.Property(e => e.PurchaseCap).HasColumnName("purchaseCap");
+            entity.Property(e => e.ShowOnline)
+                .HasDefaultValueSql("'1'")
+                .HasColumnName("showOnline");
             entity.Property(e => e.Subcategory).HasColumnName("subcategory");
             entity.Property(e => e.UpdatedAt)
                 .ValueGeneratedOnAddOrUpdate()

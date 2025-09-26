@@ -34,7 +34,7 @@ public class ProductRepository : IProductRepository
 
     public async Task<List<Product>> GetPagedProductsAsync(int pageNumber, int pageSize)
     {
-        return await _context.Products.Select(p => new Product { Id = p.Id, InventoryId = p.InventoryId, Name = p.Name, Price = p.Price, PriceAfterDiscount = p.PriceAfterDiscount, Category = p.Category, PurchaseCap = p.PurchaseCap, Subcategory = p.Subcategory, Barcodes = p.Barcodes, DiscountQuantity = p.DiscountQuantity, CreatedAt = p.CreatedAt, UpdatedAt = p.UpdatedAt })
+        return await _context.Products.Where(p => p.ShowOnline == true).Select(p => new Product { Id = p.Id, InventoryId = p.InventoryId, Name = p.Name, Price = p.Price, PriceAfterDiscount = p.PriceAfterDiscount, Category = p.Category, PurchaseCap = p.PurchaseCap, Subcategory = p.Subcategory, Barcodes = p.Barcodes, DiscountQuantity = p.DiscountQuantity, CreatedAt = p.CreatedAt, UpdatedAt = p.UpdatedAt })
             .Skip((pageNumber - 1) * pageSize).Take(pageSize)
             .AsNoTracking().ToListAsync();
     }
