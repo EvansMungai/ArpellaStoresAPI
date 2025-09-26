@@ -16,6 +16,7 @@ public class ProductRoutes : IRouteRegistrar
         var app = webApplication.MapGroup("").WithTags("Products");
         app.MapGet("/products", (ProductHandler handler) => handler.GetProducts()).Produces(200).Produces(404).Produces<List<Product>>();
         app.MapGet("/paged-products", (ProductHandler handler, int pageNumber, int pageSize) => handler.GetPagedProducts(pageNumber, pageSize)).Produces(200).Produces(404).Produces<List<Product>>();
+        app.MapGet("/pos-paged-products", (ProductHandler handler, int pageNumber, int pageSize) => handler.GetPagedPOSProducts(pageNumber, pageSize)).Produces(200).Produces(404).Produces<List<Product>>();
         app.MapGet("/product/{id}", (ProductHandler handler,int id) => handler.GetProduct(id)).Produces(200).Produces(404).Produces<Product>();
         app.MapPost("/product", (ProductHandler handler, Product product) => handler.CreateProduct(product)).Produces(200).Produces(404).Produces<Product>().AddEndpointFilter<ValidationEndpointFilter<Product>>();
         app.MapPost("/products", (ProductHandler handler,IFormFile file) => handler.CreateProducts(file)).Produces(200).Produces(404).Produces<Product>().DisableAntiforgery();

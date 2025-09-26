@@ -5,12 +5,10 @@ namespace ArpellaStores.Features.InventoryManagement.Services;
 public class ProductsService : IProductsService
 {
     private readonly IProductRepository _repo;
-    private readonly ICloudinaryService _cloudinaryService;
     private readonly IProductHelper _helper;
-    public ProductsService(IProductRepository repo, ICloudinaryService cloudinaryService, IProductHelper helper)
+    public ProductsService(IProductRepository repo, IProductHelper helper)
     {
         _repo = repo;
-        _cloudinaryService = cloudinaryService;
         _helper = helper;
     }
     public async Task<IResult> GetProducts()
@@ -21,6 +19,11 @@ public class ProductsService : IProductsService
     public async Task<IResult> GetPagedProducts(int pageNumber, int pageSize)
     {
         var products = await _repo.GetPagedProductsAsync(pageNumber, pageSize);
+        return products == null || products.Count == 0 ? Results.NotFound("No Products Found") : Results.Ok(products);
+    }
+    public async Task<IResult> GetPagedPOSProducts(int pageNumber, int pageSize)
+    {
+        var products = await _repo.GetPagedPOSProductsAsync(pageNumber, pageSize);
         return products == null || products.Count == 0 ? Results.NotFound("No Products Found") : Results.Ok(products);
     }
     public async Task<IResult> GetProduct(int productId)

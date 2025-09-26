@@ -1,6 +1,7 @@
 ﻿using ArpellaStores.Data.Infrastructure;
 using ArpellaStores.Features.InventoryManagement.Models;
 using Microsoft.EntityFrameworkCore;
+using System.Formats.Asn1;
 
 namespace ArpellaStores.Features.InventoryManagement.Services;
 
@@ -38,7 +39,12 @@ public class ProductRepository : IProductRepository
             .Skip((pageNumber - 1) * pageSize).Take(pageSize)
             .AsNoTracking().ToListAsync();
     }
-
+    public async Task<List<Product>> GetPagedPOSProductsAsync(int pageNumber, int pageSize)
+    {
+        return await _context.Products.Select(p => new Product { Id = p.Id, InventoryId = p.InventoryId, Name = p.Name, Price = p.Price, PriceAfterDiscount = p.PriceAfterDiscount, Category = p.Category, PurchaseCap = p.PurchaseCap, Subcategory = p.Subcategory, Barcodes = p.Barcodes, DiscountQuantity = p.DiscountQuantity, CreatedAt = p.CreatedAt, UpdatedAt = p.UpdatedAt })
+            .Skip((pageNumber - 1) * pageSize).Take(pageSize)
+            .AsNoTracking().ToListAsync();
+    }
     public async Task<Product?> GetProductByIdAsync(int id)
     {
         return await _context.Products.Select(p => new Product { Id = p.Id, InventoryId = p.InventoryId, Name = p.Name, Price = p.Price, PriceAfterDiscount = p.PriceAfterDiscount, Category = p.Category, PurchaseCap = p.PurchaseCap, Subcategory = p.Subcategory, Barcodes = p.Barcodes, DiscountQuantity = p.DiscountQuantity, CreatedAt = p.CreatedAt, UpdatedAt = p.UpdatedAt }).AsNoTracking().SingleOrDefaultAsync(p => p.Id == id);

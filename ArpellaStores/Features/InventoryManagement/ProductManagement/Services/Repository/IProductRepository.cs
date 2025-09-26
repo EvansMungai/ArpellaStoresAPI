@@ -6,6 +6,7 @@ public interface IProductRepository
 {
     Task<List<Product>> GetAllProductsAsync();
     Task<List<Product>> GetPagedProductsAsync(int pageNumber, int pageSize);
+    Task<List<Product>> GetPagedPOSProductsAsync(int pageNumber, int pageSize);
     Task<Product?> GetProductByIdAsync(int id);
     Task AddProductAsync(Product product);
     Task AddProductsAsync(List<Product> products);

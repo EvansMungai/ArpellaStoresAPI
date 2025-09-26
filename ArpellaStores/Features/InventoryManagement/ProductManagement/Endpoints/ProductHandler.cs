@@ -18,6 +18,7 @@ public class ProductHandler : IHandler
     #region Products Handlers
     public Task<IResult> GetProducts() => _productsService.GetProducts();
     public Task<IResult> GetPagedProducts(int pageNumber, int pageSize) => _productsService.GetPagedProducts(pageNumber, pageSize);
+    public Task<IResult> GetPagedPOSProducts(int pageNumber, int pageSize) => _productsService.GetPagedPOSProducts(pageNumber, pageSize);
     public Task<IResult> GetProduct(int productId) => _productsService.GetProduct(productId);
     public Task<IResult> CreateProduct(Product product) => _productsService.CreateProduct(product);
     public Task<IResult> CreateProducts(IFormFile file) => _productsService.CreateProducts(file);
