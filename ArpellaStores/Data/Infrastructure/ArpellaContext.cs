@@ -381,6 +381,9 @@ public partial class ArpellaContext : IdentityDbContext<User>
                 .HasMaxLength(30)
                 .HasColumnName("orderid");
             entity.Property(e => e.ProductId).HasColumnName("productid");
+            entity.Property(e => e.PriceType)
+               .HasColumnType("enum('Discounted','Retail')")
+               .HasColumnName("priceType");
             entity.Property(e => e.Quantity).HasColumnName("quantity");
 
             entity.HasOne(d => d.Order).WithMany(p => p.Orderitems)

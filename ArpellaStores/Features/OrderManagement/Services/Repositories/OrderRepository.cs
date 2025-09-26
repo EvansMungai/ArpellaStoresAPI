@@ -91,7 +91,7 @@ public class OrderRepository : IOrderRepository
             var product = _context.Products.SingleOrDefault(p => p.Id == item.ProductId);
             if (product is not null)
             {
-                if (item.Quantity > product.DiscountQuantity)
+                if (item.PriceType == "Discounted")
                 {
                     decimal price = (decimal)product.PriceAfterDiscount;
                     totalPrice += (decimal)item.Quantity * price;

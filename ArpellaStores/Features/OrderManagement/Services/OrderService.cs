@@ -63,6 +63,7 @@ public class OrderService : IOrderService
                 {
                     oi.ProductId,
                     oi.Quantity,
+                    oi.PriceType,
                     Product = new
                     {
                         oi.Product.Name,
@@ -92,6 +93,7 @@ public class OrderService : IOrderService
                 oi.OrderId,
                 oi.ProductId,
                 oi.Quantity,
+                oi.PriceType,
                 Product = new
                 {
                     oi.Product.Id,

@@ -6,7 +6,7 @@ public partial class Orderitem
 {
     public string? OrderId { get; set; }
     public int ProductId { get; set; }
-
+    public string? PriceType { get; set; }
     public int? Quantity { get; set; }
 
     public virtual Order? Order { get; set; }
