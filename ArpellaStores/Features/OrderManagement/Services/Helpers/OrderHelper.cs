@@ -1,4 +1,5 @@
 ﻿using ArpellaStores.Features.OrderManagement.Models;
+using Newtonsoft.Json;
 
 namespace ArpellaStores.Features.OrderManagement.Services;
 
@@ -6,13 +7,14 @@ public class OrderHelper : IOrderHelper
 {
     private readonly IOrderPaymentService _payment;
     private readonly IOrderCacheService _cache;
-    private readonly IOrderRepository _repo;
+    private readonly ILogger<OrderHelper> _logger;
     private readonly IServiceProvider _serviceProvider;
-    public OrderHelper(IOrderPaymentService payment, IOrderCacheService cache, IOrderRepository repo, IServiceProvider serviceProvider)
+
+    public OrderHelper(IOrderPaymentService payment, IOrderCacheService cache, ILogger<OrderHelper> logger, IServiceProvider serviceProvider)
     {
         _payment = payment;
         _cache = cache;
-        _repo = repo;
+        _logger = logger;
         _serviceProvider = serviceProvider;
     }
     public string GenerateOrderId()
@@ -47,7 +49,8 @@ public class OrderHelper : IOrderHelper
             Orderitems = dtoItems,
             OrderSource = orderDetails.OrderSource
         };
-
+        var payload = JsonConvert.SerializeObject(dto, Formatting.Indented);
+        _logger.LogInformation($"This is the payload: {payload}");
         return dto;
     }
     public Order RebuildOrder(CachedOrderDto cachedOrder)
